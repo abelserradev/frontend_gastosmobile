@@ -1,32 +1,58 @@
-# Frontend (Angular)
+# Frontend
 
-Versión objetivo del framework: **Angular 20** (alineada con el [CLI](https://angular.dev/tools/cli) y la documentación en [angular.dev](https://angular.dev/overview)). Tras cambiar `package.json`, ejecuta `npm install` y, si hace falta migrar el proyecto: `ng update @angular/core @angular/cli`.
+SPA Angular del proyecto `Gastos`.
 
-## Tailwind CSS v4
-
-Se sigue la [guía oficial para Angular](https://tailwindcss.com/docs/installation/framework-guides/angular): `tailwindcss` + `@tailwindcss/postcss` + `postcss` y `.postcssrc.json`. Las utilidades se procesan dentro de `ng serve` / `ng build` (mismo motor Tailwind 4).
-
-Si necesitas el flujo **solo con la CLI** (`npx @tailwindcss/cli`), está documentado en [Tailwind CLI](https://tailwindcss.com/docs/installation/tailwind-cli); en Angular lo habitual es PostCSS integrado para no duplicar procesos.
-
-## Desarrollo
+## Desarrollo local
 
 ```bash
 npm install
 npm start
 ```
 
-## Gráficos (Chart.js)
+Por defecto `ng serve` usa configuración `development`.
 
-El gráfico de torta usa **solo `chart.js`** (`Chart.register` en `src/main.ts` y `ExpensePieChartComponent`). No se usa **ng2-charts** para no arrastrar `@angular/cdk` en versiones distintas a las de tu `@angular/core`.
-
-## Build
+## Build de producción
 
 ```bash
 npm run build
 ```
 
-Si antes instalaste dependencias conflictivas, limpia e instala de nuevo:
+La salida útil para despliegue está en:
+
+```text
+dist/web/browser
+```
+
+## Variables y entorno
+
+El frontend productivo consume:
+
+- `https://api-gastos.buildforge.work/api`
+- `https://mobilegastos.buildforge.work`
+
+La configuración Firebase web se mantiene en:
+
+- `src/environments/firebase-options.ts`
+
+## Docker (producción)
+
+Imagen multi-etapa: Node `22.12.0` para `ng build` y Nginx para servir `dist/web/browser`.
 
 ```bash
-rm -rf node_modules package-lock.json && npm install
+cd frontend
+docker build -t gastos-frontend .
+docker run --rm -p 8080:80 gastos-frontend
 ```
+
+En Coolify elige despliegue por **Dockerfile**, raíz del repo `frontend/`, puerto expuesto **80** (mapea en proxy a `443` si aplica).
+
+## Despliegue con Coolify
+
+La guía completa para desplegar este frontend con Cloudflare y Coolify está en:
+
+- `docs/despliegue-coolify-cloudflare.md`
+
+## Notas operativas
+
+- El build de producción reemplaza `src/environments/environment.ts` por `src/environments/environment.prod.ts`.
+- Si el backend responde pero el navegador muestra `0 Unknown Error`, valida primero `OPTIONS /api/auth/register` y el dominio `api-gastos.buildforge.work`.
