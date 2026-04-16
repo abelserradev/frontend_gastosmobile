@@ -1,0 +1,203 @@
+<div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-6">
+  <div class="max-w-md mx-auto">
+    <div class="bg-white rounded-2xl shadow-xl p-6 mt-8">
+      <div class="flex items-center justify-center mb-4">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="40"
+          height="40"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          class="text-indigo-600"
+          aria-hidden="true"
+        >
+          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+          <circle cx="9" cy="7" r="4" />
+          <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+          <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+        </svg>
+      </div>
+      <h1 class="text-3xl font-bold text-center text-indigo-900 mb-2">
+        Crear Perfiles
+      </h1>
+      <p class="text-center text-gray-600 mb-6">
+        Gestiona gastos familiares o grupales
+      </p>
+
+      <div class="space-y-6">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2"
+            >Tipo de Perfil</label
+          >
+          <div class="grid grid-cols-2 gap-3">
+            <button
+              type="button"
+              (click)="profileType = 'familiar'"
+              [ngClass]="{
+                'bg-indigo-600 text-white shadow-md': profileType === 'familiar',
+                'bg-gray-100 text-gray-700 hover:bg-gray-200':
+                  profileType !== 'familiar',
+              }"
+              class="py-3 px-4 rounded-lg font-medium transition-all flex items-center justify-center gap-2"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                <circle cx="9" cy="7" r="4" />
+                <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+                <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+              </svg>
+              Familiar
+            </button>
+            <button
+              type="button"
+              (click)="profileType = 'grupal'"
+              [ngClass]="{
+                'bg-indigo-600 text-white shadow-md': profileType === 'grupal',
+                'bg-gray-100 text-gray-700 hover:bg-gray-200':
+                  profileType !== 'grupal',
+              }"
+              class="py-3 px-4 rounded-lg font-medium transition-all flex items-center justify-center gap-2"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                <circle cx="9" cy="7" r="4" />
+                <line x1="19" x2="19" y1="8" y2="14" />
+                <line x1="22" x2="16" y1="11" y2="11" />
+              </svg>
+              Grupal
+            </button>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2"
+            >Nombre del Perfil</label
+          >
+          <div class="flex gap-2">
+            <input
+              type="text"
+              name="profileName"
+              [(ngModel)]="profileName"
+              (keydown)="onNameKeydown($event)"
+              placeholder="Ej: Familia García, Amigos del trabajo..."
+              class="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+            />
+            <button
+              type="button"
+              (click)="handleAddProfile()"
+              class="bg-indigo-600 text-white px-4 rounded-lg hover:bg-indigo-700 transition-colors flex items-center gap-2 shrink-0"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                <circle cx="9" cy="7" r="4" />
+                <line x1="19" x2="19" y1="8" y2="14" />
+                <line x1="22" x2="16" y1="11" y2="11" />
+              </svg>
+              Agregar
+            </button>
+          </div>
+        </div>
+
+        @if (profiles.length > 0) {
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2"
+              >Perfiles Creados</label
+            >
+            <div class="space-y-2">
+              @for (profile of profiles; track profile.id) {
+                <div
+                  class="flex items-center justify-between bg-gradient-to-r from-indigo-50 to-purple-50 px-4 py-3 rounded-lg border border-indigo-100"
+                >
+                  <div>
+                    <p class="font-medium text-gray-800">{{ profile.name }}</p>
+                    <p class="text-sm text-gray-500 capitalize">
+                      {{ profile.type }}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    (click)="handleRemoveProfile(profile.id)"
+                    class="text-red-500 hover:text-red-700 transition-colors p-2"
+                    aria-label="Eliminar perfil"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="18"
+                      height="18"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <path d="M3 6h18" />
+                      <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                      <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                      <line x1="10" x2="10" y1="11" y2="17" />
+                      <line x1="14" x2="14" y1="11" y2="17" />
+                    </svg>
+                  </button>
+                </div>
+              }
+            </div>
+          </div>
+        }
+
+        <div class="mt-6 pt-6 border-t border-gray-200">
+          <p class="text-sm text-gray-600 mb-2">Correo (Resend vía API)</p>
+          <button
+            type="button"
+            (click)="handleResendTest()"
+            [disabled]="resendTestLoading"
+            class="w-full border border-indigo-200 text-indigo-700 py-2 rounded-lg text-sm font-medium hover:bg-indigo-50 disabled:opacity-50"
+          >
+            {{ resendTestLoading ? 'Enviando…' : 'Enviar correo de prueba a mi cuenta' }}
+          </button>
+        </div>
+
+        <button
+          type="button"
+          (click)="handleContinue()"
+          class="w-full bg-indigo-600 text-white py-3 rounded-lg font-medium hover:bg-indigo-700 transition-colors shadow-md mt-8"
+        >
+          Continuar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

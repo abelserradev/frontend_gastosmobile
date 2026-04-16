@@ -1,0 +1,281 @@
+<div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 pb-8">
+  <div
+    class="bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-6 rounded-b-3xl shadow-lg"
+  >
+    <div class="max-w-md mx-auto">
+      <p class="text-center text-indigo-100 text-sm mb-2">Ingreso Mensual</p>
+      <p class="text-center text-indigo-200/80 text-xs mb-1">Montos base en USD</p>
+      <div class="text-center">
+        <p class="text-4xl font-bold">
+          $
+          {{ ctx.monthlyIncome().toFixed(2) }}
+        </p>
+      </div>
+      <div class="mt-4 grid grid-cols-2 gap-3 text-sm">
+        <div class="bg-white/20 rounded-lg p-3 backdrop-blur-sm">
+          <p class="text-indigo-100">Total Gastado</p>
+          <p class="text-xl font-bold">
+            $ {{ totalExpenses().toFixed(2) }}
+          </p>
+        </div>
+        <div class="bg-white/20 rounded-lg p-3 backdrop-blur-sm">
+          <p class="text-indigo-100">Disponible</p>
+          <p
+            class="text-xl font-bold"
+            [class.text-red-300]="remaining() < 0"
+          >
+            $ {{ remaining().toFixed(2) }}
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="max-w-md mx-auto px-6 mt-6">
+    <button
+      type="button"
+      (click)="toggleChart()"
+      class="w-full bg-white rounded-lg shadow-md p-4 mb-4 flex items-center justify-between hover:shadow-lg transition-shadow"
+    >
+      <div class="flex items-center gap-2">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          class="text-indigo-600 shrink-0"
+        >
+          <path
+            d="M21.21 15.89A10 10 0 1 1 8 2.83"
+          />
+          <path d="M22 12A10 10 0 0 0 12 2v10z" />
+        </svg>
+        <span class="font-medium text-gray-700">
+          {{ showChart() ? 'Ocultar' : 'Ver' }} Gráfico de Categorías
+        </span>
+      </div>
+      <span class="text-indigo-600 text-xl">{{ showChart() ? '−' : '+' }}</span>
+    </button>
+
+    @if (showChart() && (pieChartData().labels?.length ?? 0) > 0) {
+      <div class="bg-white rounded-xl shadow-md p-4 mb-4">
+        <h3 class="text-lg font-bold text-gray-800 mb-4 text-center">
+          Gastos por Categoría
+        </h3>
+        <div class="h-[300px] w-full relative">
+          <app-expense-pie-chart
+            [chartData]="pieChartData()"
+            [chartOptions]="pieChartOptions()"
+          />
+        </div>
+      </div>
+    }
+
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-xl font-bold text-gray-800">Mis Gastos</h2>
+      @if (selectedExpenses().size > 0) {
+        <span class="text-sm text-indigo-600 font-medium">
+          {{ selectedExpenses().size }} seleccionado(s)
+        </span>
+      }
+    </div>
+
+    <div class="bg-white rounded-xl shadow-md p-4 mb-4">
+      @if (ctx.expenses().length === 0) {
+        <div class="text-center py-8 text-gray-500">
+          <p>No hay gastos registrados</p>
+          <p class="text-sm mt-2">Agrega tu primer gasto usando el botón de abajo</p>
+        </div>
+      } @else {
+        <div class="space-y-2">
+          @for (expense of ctx.expenses(); track expense.id) {
+            <div
+              class="flex items-center gap-3 p-3 rounded-lg border-2 transition-all"
+              [ngClass]="{
+                'border-red-400 bg-red-50': isSelected(expense.id),
+                'border-green-200 bg-green-50':
+                  !isSelected(expense.id) && expense.isPaid,
+                'border-gray-200 hover:border-gray-300':
+                  !isSelected(expense.id) && !expense.isPaid,
+              }"
+            >
+              <button
+                type="button"
+                (click)="toggleExpensePaid(expense.id)"
+                class="flex-shrink-0"
+                [attr.title]="
+                  expense.isPaid ? 'Marcar como pendiente' : 'Marcar como pagado'
+                "
+              >
+                @if (expense.isPaid) {
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    class="text-green-600"
+                  >
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                    <path d="m9 11 3 3L22 4" />
+                  </svg>
+                } @else {
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    class="text-gray-400"
+                  >
+                    <circle cx="12" cy="12" r="10" />
+                  </svg>
+                }
+              </button>
+
+              <div class="flex-1 min-w-0">
+                <div class="flex items-start justify-between gap-2">
+                  <div>
+                    <p
+                      class="font-medium"
+                      [class.text-gray-800]="expense.isPaid"
+                      [class.text-gray-600]="!expense.isPaid"
+                    >
+                      {{ expense.title }}
+                    </p>
+                    @if (expense.description) {
+                      <p class="text-sm text-gray-500 mt-1">
+                        {{ expense.description }}
+                      </p>
+                    }
+                    <p class="text-xs text-gray-400 mt-1">{{ expense.category }}</p>
+                    @if (expense.bcvRateApplied != null) {
+                      <p class="text-xs text-indigo-600 mt-1">
+                        Tasa BCV {{ expense.bcvRateApplied.toFixed(4) }} Bs/USD
+                        @if (expense.bcvRateDate) {
+                          <span class="text-gray-500"
+                            >({{ expense.bcvRateDate }})</span
+                          >
+                        }
+                      </p>
+                    }
+                  </div>
+                  <div class="text-right shrink-0">
+                    <p
+                      class="font-bold"
+                      [class.text-gray-900]="expense.isPaid"
+                      [class.text-gray-500]="!expense.isPaid"
+                    >
+                      $ {{ expense.amount.toFixed(2) }}
+                    </p>
+                    <p
+                      class="text-xs mt-1 font-medium"
+                      [class.text-green-600]="expense.isPaid"
+                      [class.text-orange-600]="!expense.isPaid"
+                    >
+                      {{ expense.isPaid ? 'Pagado' : 'Pendiente' }}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                (click)="toggleExpenseSelection(expense.id)"
+                class="flex-shrink-0 p-2 rounded-lg transition-colors"
+                [ngClass]="{
+                  'bg-red-500 text-white': isSelected(expense.id),
+                  'bg-gray-100 text-gray-400 hover:bg-gray-200': !isSelected(
+                    expense.id
+                  ),
+                }"
+                title="Seleccionar para eliminar"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path d="M3 6h18" />
+                  <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                  <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                  <line x1="10" x2="10" y1="11" y2="17" />
+                  <line x1="14" x2="14" y1="11" y2="17" />
+                </svg>
+              </button>
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+    <div class="grid grid-cols-2 gap-3">
+      <button
+        type="button"
+        (click)="openModal()"
+        class="flex items-center justify-center gap-2 bg-indigo-600 text-white py-3 rounded-lg font-medium hover:bg-indigo-700 transition-colors shadow-md"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <path d="M5 12h14" />
+          <path d="M12 5v14" />
+        </svg>
+        Crear Gasto
+      </button>
+      <button
+        type="button"
+        (click)="handleDeleteExpenses()"
+        [disabled]="selectedExpenses().size === 0"
+        class="flex items-center justify-center gap-2 py-3 rounded-lg font-medium transition-colors shadow-md"
+        [ngClass]="{
+          'bg-gray-300 text-gray-500 cursor-not-allowed':
+            selectedExpenses().size === 0,
+          'bg-red-600 text-white hover:bg-red-700': selectedExpenses().size > 0,
+        }"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <path d="M3 6h18" />
+          <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+          <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+          <line x1="10" x2="10" y1="11" y2="17" />
+          <line x1="14" x2="14" y1="11" y2="17" />
+        </svg>
+        Eliminar
+      </button>
+    </div>
+  </div>
+
+  <app-expense-modal
+    [open]="modalOpen()"
+    (openChange)="onModalOpenChange($event)"
+    [categories]="ctx.categories()"
+    [defaultCurrency]="ctx.currency()"
+    (addExpense)="onAddExpense($event)"
+  />
+</div>

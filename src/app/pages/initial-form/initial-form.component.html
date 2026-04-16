@@ -1,0 +1,185 @@
+<div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-6">
+  <div class="max-w-md mx-auto">
+    <div class="bg-white rounded-2xl shadow-xl p-6 mt-8">
+      <h1 class="text-3xl font-bold text-center text-indigo-900 mb-2">
+        Control de Gastos
+      </h1>
+      <p class="text-center text-gray-600 mb-6">Configura tu perfil financiero</p>
+
+      <form (ngSubmit)="handleSubmit()" class="space-y-6">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2"
+            >Tipo de Moneda</label
+          >
+          <div class="grid grid-cols-2 gap-3">
+            <button
+              type="button"
+              (click)="selectCurrency('USD')"
+              [ngClass]="{
+                'bg-indigo-600 text-white shadow-md': currency === 'USD',
+                'bg-gray-100 text-gray-700 hover:bg-gray-200': currency !== 'USD',
+              }"
+              class="py-3 px-4 rounded-lg font-medium transition-all"
+            >
+              USD ($)
+            </button>
+            <button
+              type="button"
+              (click)="selectCurrency('BS')"
+              [ngClass]="{
+                'bg-indigo-600 text-white shadow-md': currency === 'BS',
+                'bg-gray-100 text-gray-700 hover:bg-gray-200': currency !== 'BS',
+              }"
+              class="py-3 px-4 rounded-lg font-medium transition-all"
+            >
+              BS (Bs.)
+            </button>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2"
+            >Ingreso Mensual</label
+          >
+          <p class="text-xs text-gray-500 mb-2">
+            El resumen de la app usa siempre <strong>USD</strong> como monto base;
+            si eliges Bs., convertimos con la tasa del día y guardamos el equivalente
+            en dólares.
+          </p>
+          @if (currency === 'BS') {
+            @if (bcvLoading) {
+              <p class="text-xs text-gray-500 mb-2">Cargando tasa BCV…</p>
+            } @else if (bcvError) {
+              <p class="text-xs text-amber-700 mb-2 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
+                {{ bcvError }}
+              </p>
+            } @else if (bcvVesPerUsd != null) {
+              <p
+                class="text-sm text-indigo-800 mb-2 bg-indigo-50 border border-indigo-100 rounded-lg px-3 py-2"
+              >
+                <span class="font-medium">Tasa BCV del día</span>
+                ({{ bcvRateDisplayDate }}):
+                <span class="font-semibold tabular-nums"
+                  >{{ bcvVesPerUsd | number: '1.2-4' }} Bs / USD</span
+                >
+              </p>
+            }
+          }
+          <div class="relative">
+            <span
+              class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"
+            >
+              {{ currency === 'USD' ? '$' : 'Bs.' }}
+            </span>
+            <input
+              type="number"
+              step="0.01"
+              name="income"
+              [(ngModel)]="income"
+              placeholder="0.00"
+              class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              required
+            />
+          </div>
+          @if (
+            currency === 'BS' &&
+            bcvVesPerUsd != null &&
+            incomeUsdEquivalent != null &&
+            incomeAmount > 0
+          ) {
+            <div
+              class="mt-3 rounded-xl border border-indigo-200 bg-white px-4 py-3 shadow-sm"
+            >
+              <p class="text-xs text-gray-500 uppercase tracking-wide mb-1">
+                Equivalente referencial
+              </p>
+              <p class="text-lg font-semibold text-indigo-900 tabular-nums">
+                ≈ ${{ incomeUsdEquivalent | number: '1.2-2' }} USD
+              </p>
+              <p class="text-xs text-gray-500 mt-1">
+                A la tasa de {{ bcvVesPerUsd | number: '1.2-4' }} Bs/USD del
+                {{ bcvRateDisplayDate }}.
+              </p>
+            </div>
+          }
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2"
+            >Categorías de Gastos</label
+          >
+
+          <div class="space-y-2 mb-3">
+            @for (cat of categories; track cat) {
+              <div
+                class="flex items-center justify-between bg-indigo-50 px-4 py-2 rounded-lg"
+              >
+                <span class="text-gray-700">{{ cat }}</span>
+                <button
+                  type="button"
+                  (click)="handleRemoveCategory(cat)"
+                  class="text-red-500 hover:text-red-700 transition-colors"
+                  aria-label="Quitar categoría"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path d="M18 6 6 18" />
+                    <path d="m6 6 12 12" />
+                  </svg>
+                </button>
+              </div>
+            }
+          </div>
+
+          <div class="flex gap-2">
+            <input
+              type="text"
+              name="categoryInput"
+              [(ngModel)]="categoryInput"
+              (keydown)="onCategoryKeydown($event)"
+              placeholder="Nueva categoría"
+              class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+            />
+            <button
+              type="button"
+              (click)="handleAddCategory()"
+              class="bg-indigo-600 text-white p-2 rounded-lg hover:bg-indigo-700 transition-colors"
+              aria-label="Añadir categoría"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M5 12h14" />
+                <path d="M12 5v14" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <button
+          type="submit"
+          class="w-full bg-indigo-600 text-white py-3 rounded-lg font-medium hover:bg-indigo-700 transition-colors shadow-md mt-8"
+        >
+          Continuar
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
