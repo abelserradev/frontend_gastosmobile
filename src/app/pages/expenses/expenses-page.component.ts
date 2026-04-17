@@ -3,13 +3,10 @@ import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ChartData, ChartOptions } from 'chart.js';
-import {
-  AppContextService,
-  ExpenseItem,
-} from '../../core/app-context.service';
+import { AppContextService } from '../../core/app-context.service';
 import { AuthService } from '../../core/auth.service';
 import { formatApiHttpError } from '../../core/http-error.util';
-import { MeApiService, type MeExpense } from '../../core/me-api.service';
+import { MeApiService, type MeExpense, type MeProfileMember } from '../../core/me-api.service';
 import { ExpenseModalComponent } from './expense-modal.component';
 import { ExpensePieChartComponent } from './expense-pie-chart.component';
 
@@ -41,8 +38,10 @@ export class ExpensesPageComponent implements OnInit {
   readonly showChart = signal(false);
   readonly selectedExpenses = signal<Set<string>>(new Set());
   readonly paidByModalOpen = signal(false);
-  readonly paidByName = signal('');
   readonly pendingPaidExpenseId = signal<string | null>(null);
+  readonly paidByMembers = signal<MeProfileMember[]>([]);
+  readonly paidByMemberId = signal<string>('');
+  readonly paidByLoading = signal(false);
 
   readonly totalExpenses = computed(() => {
     const ex = this.ctx.userData().expenses;
@@ -92,7 +91,7 @@ export class ExpensesPageComponent implements OnInit {
           callbacks: {
             label: (ctx) => {
               const ds = ctx.dataset;
-              const arr = ds.data as number[];
+              const arr = ds.data;
               const sum = arr.reduce((a, b) => a + b, 0);
               const v = ctx.raw as number;
               const pct = sum > 0 ? ((v / sum) * 100).toFixed(1) : '0';
@@ -122,6 +121,8 @@ export class ExpensesPageComponent implements OnInit {
         this.ctx.setExpenses(
           s.expenses.map((e) => ({
             id: e.id,
+            profileId: e.profileId,
+            profileName: e.profileName,
             title: e.title,
             description: e.description,
             amount: e.amount,
@@ -130,11 +131,14 @@ export class ExpensesPageComponent implements OnInit {
             paymentDate: e.paymentDate,
             bcvRateApplied: e.bcvRateApplied,
             bcvRateDate: e.bcvRateDate,
+            paidByDisplayName: e.paidByDisplayName,
+            paidAt: e.paidAt,
+            paidByMemberId: e.paidByMemberId,
           })),
         );
       },
       error: (err: unknown) => {
-        window.alert(formatApiHttpError(err));
+        globalThis.alert(formatApiHttpError(err));
       },
     });
   }
@@ -155,7 +159,13 @@ export class ExpensesPageComponent implements OnInit {
     this.modalOpen.set(open);
   }
 
-  onAddExpense(payload: Omit<ExpenseItem, 'id' | 'isPaid'>): void {
+  onAddExpense(payload: {
+    title: string;
+    description: string;
+    amount: number;
+    category: string;
+    paymentDate?: string;
+  }): void {
     this.meApi
       .createExpense({
         title: payload.title,
@@ -169,6 +179,8 @@ export class ExpensesPageComponent implements OnInit {
           this.ctx.setExpenses([
             {
               id: row.id,
+              profileId: row.profileId,
+              profileName: row.profileName,
               title: row.title,
               description: row.description,
               amount: row.amount,
@@ -177,12 +189,15 @@ export class ExpensesPageComponent implements OnInit {
               paymentDate: row.paymentDate,
               bcvRateApplied: row.bcvRateApplied,
               bcvRateDate: row.bcvRateDate,
+              paidByDisplayName: row.paidByDisplayName,
+              paidAt: row.paidAt,
+              paidByMemberId: row.paidByMemberId,
             },
             ...this.ctx.expenses(),
           ]);
         },
         error: (err: unknown) => {
-          window.alert(formatApiHttpError(err));
+          globalThis.alert(formatApiHttpError(err));
         },
       });
   }
@@ -199,21 +214,47 @@ export class ExpensesPageComponent implements OnInit {
     this.meApi.patchExpensePaid(id, false).subscribe({
       next: (row) => this.applyPatchedExpense(id, row),
       error: (err: unknown) => {
-        window.alert(formatApiHttpError(err));
+        globalThis.alert(formatApiHttpError(err));
       },
     });
   }
 
   openPaidByModal(expenseId: string): void {
+    const ex = this.ctx.expenses().find((e) => e.id === expenseId);
+    if (!ex?.profileId) {
+      globalThis.alert('No se pudo determinar el perfil del gasto');
+      return;
+    }
     this.pendingPaidExpenseId.set(expenseId);
-    this.paidByName.set('');
-    this.paidByModalOpen.set(true);
+    this.paidByMembers.set([]);
+    this.paidByMemberId.set('');
+    this.paidByLoading.set(true);
+    this.meApi.listProfileMembers(ex.profileId).subscribe({
+      next: (list) => {
+        this.paidByLoading.set(false);
+        if (list.length === 0) {
+          globalThis.alert(
+            'Este perfil no tiene integrantes. Ve a Perfiles y agrega integrantes antes de marcar pagos.',
+          );
+          this.pendingPaidExpenseId.set(null);
+          return;
+        }
+        this.paidByMembers.set(list);
+        this.paidByModalOpen.set(true);
+      },
+      error: (err: unknown) => {
+        this.paidByLoading.set(false);
+        globalThis.alert(formatApiHttpError(err));
+        this.pendingPaidExpenseId.set(null);
+      },
+    });
   }
 
   closePaidByModal(): void {
     this.paidByModalOpen.set(false);
     this.pendingPaidExpenseId.set(null);
-    this.paidByName.set('');
+    this.paidByMembers.set([]);
+    this.paidByMemberId.set('');
   }
 
   onPaidByDialogClick(event: MouseEvent): void {
@@ -224,22 +265,22 @@ export class ExpensesPageComponent implements OnInit {
 
   confirmPaidBy(): void {
     const id = this.pendingPaidExpenseId();
-    const paidBy = this.paidByName().trim();
     if (!id) {
       this.closePaidByModal();
       return;
     }
-    if (!paidBy) {
-      window.alert('Indica quién pagó');
+    const memberId = this.paidByMemberId().trim();
+    if (!memberId) {
+      globalThis.alert('Selecciona quién pagó');
       return;
     }
-    this.meApi.patchExpensePaid(id, true, paidBy).subscribe({
+    this.meApi.patchExpensePaid(id, true, memberId).subscribe({
       next: (row) => {
         this.applyPatchedExpense(id, row);
         this.closePaidByModal();
       },
       error: (err: unknown) => {
-        window.alert(formatApiHttpError(err));
+        globalThis.alert(formatApiHttpError(err));
       },
     });
   }
@@ -256,6 +297,9 @@ export class ExpensesPageComponent implements OnInit {
                 paymentDate: row.paymentDate ?? e.paymentDate,
                 bcvRateApplied: row.bcvRateApplied ?? e.bcvRateApplied,
                 bcvRateDate: row.bcvRateDate ?? e.bcvRateDate,
+                paidByDisplayName: row.paidByDisplayName ?? e.paidByDisplayName,
+                paidAt: row.paidAt ?? e.paidAt,
+                paidByMemberId: row.paidByMemberId ?? e.paidByMemberId,
               }
             : e,
         ),
@@ -275,11 +319,11 @@ export class ExpensesPageComponent implements OnInit {
   handleDeleteExpenses(): void {
     const sel = this.selectedExpenses();
     if (sel.size === 0) {
-      window.alert('Selecciona al menos un gasto para eliminar');
+      globalThis.alert('Selecciona al menos un gasto para eliminar');
       return;
     }
     if (
-      !window.confirm(
+      !globalThis.confirm(
         `¿Estás seguro de eliminar ${sel.size} gasto(s)?`,
       )
     ) {
@@ -294,7 +338,7 @@ export class ExpensesPageComponent implements OnInit {
         this.selectedExpenses.set(new Set());
       },
       error: (err: unknown) => {
-        window.alert(formatApiHttpError(err));
+        globalThis.alert(formatApiHttpError(err));
       },
     });
   }

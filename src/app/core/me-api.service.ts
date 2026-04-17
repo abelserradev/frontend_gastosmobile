@@ -20,8 +20,16 @@ export interface MeProfile {
   type: ProfileType;
 }
 
+export interface MeProfileMember {
+  id: string;
+  displayName: string;
+  createdAt: string;
+}
+
 export interface MeExpense {
   id: string;
+  profileId: string;
+  profileName: string | null;
   title: string;
   description: string;
   amount: number;
@@ -30,6 +38,9 @@ export interface MeExpense {
   paymentDate: string | null;
   bcvRateApplied: number | null;
   bcvRateDate: string | null;
+  paidByDisplayName: string | null;
+  paidAt: string | null;
+  paidByMemberId: string | null;
 }
 
 export interface MeState {
@@ -73,6 +84,28 @@ export class MeApiService {
     return this.http.delete<void>(`${this.base}/me/profiles/${id}`);
   }
 
+  listProfileMembers(profileId: string): Observable<MeProfileMember[]> {
+    return this.http.get<MeProfileMember[]>(
+      `${this.base}/me/profiles/${profileId}/members`,
+    );
+  }
+
+  createProfileMember(
+    profileId: string,
+    displayName: string,
+  ): Observable<MeProfileMember> {
+    return this.http.post<MeProfileMember>(
+      `${this.base}/me/profiles/${profileId}/members`,
+      { displayName },
+    );
+  }
+
+  deleteProfileMember(profileId: string, memberId: string): Observable<void> {
+    return this.http.delete<void>(
+      `${this.base}/me/profiles/${profileId}/members/${memberId}`,
+    );
+  }
+
   listExpenses(): Observable<MeExpense[]> {
     return this.http.get<MeExpense[]>(`${this.base}/me/expenses`);
   }
@@ -105,11 +138,11 @@ export class MeApiService {
   patchExpensePaid(
     id: string,
     isPaid: boolean,
-    paidByDisplayName?: string,
+    paidByMemberId?: string,
   ): Observable<MeExpense> {
     return this.http.patch<MeExpense>(`${this.base}/me/expenses/${id}`, {
       isPaid,
-      ...(paidByDisplayName ? { paidByDisplayName } : {}),
+      ...(paidByMemberId ? { paidByMemberId } : {}),
     });
   }
 

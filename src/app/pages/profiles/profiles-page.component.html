@@ -40,9 +40,7 @@
 
       <div class="space-y-6">
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2"
-            >Tipo de Perfil</label
-          >
+          <p class="block text-sm font-medium text-gray-700 mb-2">Tipo de Perfil</p>
           <div class="grid grid-cols-2 gap-3">
             <button
               type="button"
@@ -104,11 +102,14 @@
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2"
+          <label
+            class="block text-sm font-medium text-gray-700 mb-2"
+            for="profileNameInput"
             >Nombre del Perfil</label
           >
           <div class="flex gap-2">
             <input
+              id="profileNameInput"
               type="text"
               name="profileName"
               [(ngModel)]="profileName"
@@ -144,9 +145,7 @@
 
         @if (profiles.length > 0) {
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2"
-              >Perfiles Creados</label
-            >
+            <p class="block text-sm font-medium text-gray-700 mb-2">Perfiles Creados</p>
             <div class="space-y-2">
               @for (profile of profiles; track profile.id) {
                 <div
@@ -158,34 +157,112 @@
                       {{ profile.type }}
                     </p>
                   </div>
-                  <button
-                    type="button"
-                    (click)="handleRemoveProfile(profile.id)"
-                    class="text-red-500 hover:text-red-700 transition-colors p-2"
-                    aria-label="Eliminar perfil"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="18"
-                      height="18"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
+                  <div class="flex items-center gap-2">
+                    <button
+                      type="button"
+                      (click)="openMembers(profile)"
+                      class="text-indigo-600 hover:text-indigo-800 transition-colors text-sm font-medium"
                     >
-                      <path d="M3 6h18" />
-                      <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
-                      <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
-                      <line x1="10" x2="10" y1="11" y2="17" />
-                      <line x1="14" x2="14" y1="11" y2="17" />
-                    </svg>
-                  </button>
+                      Integrantes
+                    </button>
+                    <button
+                      type="button"
+                      (click)="handleRemoveProfile(profile.id)"
+                      class="text-red-500 hover:text-red-700 transition-colors p-2"
+                      aria-label="Eliminar perfil"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="18"
+                        height="18"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      >
+                        <path d="M3 6h18" />
+                        <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                        <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                        <line x1="10" x2="10" y1="11" y2="17" />
+                        <line x1="14" x2="14" y1="11" y2="17" />
+                      </svg>
+                    </button>
+                  </div>
                 </div>
               }
             </div>
           </div>
+        }
+
+        @if (membersModalOpen) {
+          <dialog
+            open
+            class="rounded-2xl shadow-xl w-full max-w-md p-0 backdrop:bg-black/40"
+            (click)="onMembersDialogClick($event)"
+            (keydown.escape)="closeMembers()"
+          >
+            <div class="bg-white rounded-2xl p-5">
+              <div class="flex items-start justify-between gap-2 mb-4">
+                <div>
+                  <h2 class="text-xl font-bold text-gray-800">Integrantes</h2>
+                  <p class="text-sm text-gray-600">
+                    Perfil: <span class="font-medium">{{ membersProfileName }}</span>
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  (click)="closeMembers()"
+                  class="text-gray-500 hover:text-gray-800"
+                  aria-label="Cerrar"
+                >
+                  Cerrar
+                </button>
+              </div>
+
+              <div class="flex gap-2">
+                <input
+                  type="text"
+                  [(ngModel)]="memberName"
+                  placeholder="Nombre del integrante"
+                  class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                />
+                <button
+                  type="button"
+                  (click)="addMember()"
+                  class="bg-indigo-600 text-white px-4 rounded-lg hover:bg-indigo-700 transition-colors"
+                >
+                  Agregar
+                </button>
+              </div>
+
+              <div class="mt-4">
+                @if (membersLoading) {
+                  <p class="text-sm text-gray-500">Cargando…</p>
+                } @else if (members.length === 0) {
+                  <p class="text-sm text-gray-500">
+                    Aún no hay integrantes. Agrega al menos uno para poder marcar pagos.
+                  </p>
+                } @else {
+                  <div class="space-y-2">
+                    @for (m of members; track m.id) {
+                      <div class="flex items-center justify-between px-3 py-2 rounded-lg bg-gray-50 border border-gray-200">
+                        <span class="text-gray-800">{{ m.displayName }}</span>
+                        <button
+                          type="button"
+                          (click)="removeMember(m.id)"
+                          class="text-red-500 hover:text-red-700 text-sm font-medium"
+                        >
+                          Quitar
+                        </button>
+                      </div>
+                    }
+                  </div>
+                }
+              </div>
+            </div>
+          </dialog>
         }
 
         <button

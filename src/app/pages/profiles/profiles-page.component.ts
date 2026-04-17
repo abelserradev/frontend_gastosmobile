@@ -9,7 +9,7 @@ import {
 } from '../../core/app-context.service';
 import { AuthService } from '../../core/auth.service';
 import { formatApiHttpError } from '../../core/http-error.util';
-import { MeApiService } from '../../core/me-api.service';
+import { MeApiService, type MeProfileMember } from '../../core/me-api.service';
 
 @Component({
   selector: 'app-profiles-page',
@@ -29,6 +29,12 @@ export class ProfilesPageComponent implements OnInit {
   profileType: ProfileType = 'familiar';
 
   profiles: UserProfile[] = [];
+  membersModalOpen = false;
+  membersProfileId: string | null = null;
+  membersProfileName: string | null = null;
+  membersLoading = false;
+  members: MeProfileMember[] = [];
+  memberName = '';
 
   ngOnInit(): void {
     if (!this.auth.hasSession()) {
@@ -41,7 +47,7 @@ export class ProfilesPageComponent implements OnInit {
         this.appContext.setProfiles(list);
       },
       error: (err: unknown) => {
-        window.alert(formatApiHttpError(err));
+        globalThis.alert(formatApiHttpError(err));
       },
     });
   }
@@ -49,7 +55,7 @@ export class ProfilesPageComponent implements OnInit {
   handleAddProfile(): void {
     const trimmed = this.profileName.trim();
     if (!trimmed) {
-      window.alert('Por favor ingresa un nombre para el perfil');
+      globalThis.alert('Por favor ingresa un nombre para el perfil');
       return;
     }
     this.meApi
@@ -61,7 +67,7 @@ export class ProfilesPageComponent implements OnInit {
           this.profileName = '';
         },
         error: (err: unknown) => {
-          window.alert(formatApiHttpError(err));
+          globalThis.alert(formatApiHttpError(err));
         },
       });
   }
@@ -80,17 +86,92 @@ export class ProfilesPageComponent implements OnInit {
         this.appContext.removeProfile(profileId);
       },
       error: (err: unknown) => {
-        window.alert(formatApiHttpError(err));
+        globalThis.alert(formatApiHttpError(err));
       },
     });
   }
 
   handleContinue(): void {
     if (this.profiles.length === 0) {
-      window.alert('Debes crear al menos un perfil para continuar');
+      globalThis.alert('Debes crear al menos un perfil para continuar');
       return;
     }
     void this.router.navigate(['/expenses']);
+  }
+
+  openMembers(profile: UserProfile): void {
+    this.membersModalOpen = true;
+    this.membersProfileId = profile.id;
+    this.membersProfileName = profile.name;
+    this.memberName = '';
+    this.members = [];
+    this.loadMembers();
+  }
+
+  closeMembers(): void {
+    this.membersModalOpen = false;
+    this.membersProfileId = null;
+    this.membersProfileName = null;
+    this.memberName = '';
+    this.members = [];
+    this.membersLoading = false;
+  }
+
+  onMembersDialogClick(event: MouseEvent): void {
+    if (event.target === event.currentTarget) {
+      this.closeMembers();
+    }
+  }
+
+  loadMembers(): void {
+    if (!this.membersProfileId || this.membersLoading) {
+      return;
+    }
+    this.membersLoading = true;
+    this.meApi.listProfileMembers(this.membersProfileId).subscribe({
+      next: (list) => {
+        this.membersLoading = false;
+        this.members = list;
+      },
+      error: (err: unknown) => {
+        this.membersLoading = false;
+        globalThis.alert(formatApiHttpError(err));
+      },
+    });
+  }
+
+  addMember(): void {
+    if (!this.membersProfileId) {
+      return;
+    }
+    const name = this.memberName.trim();
+    if (!name) {
+      globalThis.alert('Indica un nombre');
+      return;
+    }
+    this.meApi.createProfileMember(this.membersProfileId, name).subscribe({
+      next: (m) => {
+        this.members = [...this.members, m];
+        this.memberName = '';
+      },
+      error: (err: unknown) => {
+        globalThis.alert(formatApiHttpError(err));
+      },
+    });
+  }
+
+  removeMember(memberId: string): void {
+    if (!this.membersProfileId) {
+      return;
+    }
+    this.meApi.deleteProfileMember(this.membersProfileId, memberId).subscribe({
+      next: () => {
+        this.members = this.members.filter((m) => m.id !== memberId);
+      },
+      error: (err: unknown) => {
+        globalThis.alert(formatApiHttpError(err));
+      },
+    });
   }
 
   handleLogout(): void {

@@ -302,15 +302,16 @@
         <p class="text-sm text-gray-600 mb-3">
           Este nombre se guardará para el correo de notificación.
         </p>
-        <input
-          type="text"
-          [ngModel]="paidByName()"
-          (ngModelChange)="paidByName.set($event)"
+        <select
+          [ngModel]="paidByMemberId()"
+          (ngModelChange)="paidByMemberId.set($event)"
           class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-          placeholder="Ej: Carlos"
-          autocomplete="off"
-          autofocus
-        />
+        >
+          <option value="" disabled>Selecciona un integrante…</option>
+          @for (m of paidByMembers(); track m.id) {
+            <option [value]="m.id">{{ m.displayName }}</option>
+          }
+        </select>
         <div class="flex justify-end gap-2 mt-4">
           <button
             type="button"

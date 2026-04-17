@@ -17,6 +17,8 @@ export interface UserProfile {
 
 export interface ExpenseItem {
   id: string;
+  profileId: string;
+  profileName?: string | null;
   title: string;
   description: string;
   amount: number;
@@ -25,6 +27,9 @@ export interface ExpenseItem {
   paymentDate?: string | null;
   bcvRateApplied?: number | null;
   bcvRateDate?: string | null;
+  paidByDisplayName?: string | null;
+  paidAt?: string | null;
+  paidByMemberId?: string | null;
 }
 
 @Injectable({ providedIn: 'root' })
