@@ -60,15 +60,15 @@ export class LoginPageComponent implements OnInit {
   handleSubmit(): void {
     const loginMode = this.isLogin();
     if (!loginMode && this.formData.password !== this.formData.confirmPassword) {
-      window.alert('Las contraseñas no coinciden');
+      globalThis.alert('Las contraseñas no coinciden');
       return;
     }
     if (!this.formData.email.trim() || !this.formData.password) {
-      window.alert('Por favor completa todos los campos');
+      globalThis.alert('Por favor completa todos los campos');
       return;
     }
     if (!loginMode && !this.formData.name.trim()) {
-      window.alert('Por favor ingresa tu nombre');
+      globalThis.alert('Por favor ingresa tu nombre');
       return;
     }
     const email = this.formData.email.trim();
@@ -81,13 +81,13 @@ export class LoginPageComponent implements OnInit {
         void this.router.navigate(['/setup']);
       },
       error: (err: unknown) => {
-        window.alert(formatApiHttpError(err));
+        globalThis.alert(formatApiHttpError(err));
       },
     });
   }
 
   showForgotPasswordSoon(): void {
-    window.alert(
+    globalThis.alert(
       'Recuperación de contraseña estará disponible cuando conectemos el backend.',
     );
   }
@@ -97,7 +97,7 @@ export class LoginPageComponent implements OnInit {
       provider === 'google'
         ? 'Inicio de sesión con Google: pendiente de integración OAuth.'
         : 'Inicio de sesión con GitHub: pendiente de integración OAuth.';
-    window.alert(msg);
+    globalThis.alert(msg);
   }
 
   handleGoogleLogin(): void {
@@ -109,7 +109,7 @@ export class LoginPageComponent implements OnInit {
           void this.router.navigate(['/setup']);
         },
         error: (err: unknown) => {
-          window.alert(formatApiHttpError(err));
+          globalThis.alert(formatApiHttpError(err));
         },
       });
   }
