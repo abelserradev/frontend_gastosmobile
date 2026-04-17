@@ -102,9 +102,14 @@ export class MeApiService {
     }>(`${this.base}/bcv/oficial-por-dia${q}`);
   }
 
-  patchExpensePaid(id: string, isPaid: boolean): Observable<MeExpense> {
+  patchExpensePaid(
+    id: string,
+    isPaid: boolean,
+    paidByDisplayName?: string,
+  ): Observable<MeExpense> {
     return this.http.patch<MeExpense>(`${this.base}/me/expenses/${id}`, {
       isPaid,
+      ...(paidByDisplayName ? { paidByDisplayName } : {}),
     });
   }
 

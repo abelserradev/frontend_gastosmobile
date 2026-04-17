@@ -288,4 +288,46 @@
     [defaultCurrency]="ctx.currency()"
     (addExpense)="onAddExpense($event)"
   />
+
+  @if (paidByModalOpen()) {
+    <dialog
+      open
+      class="rounded-2xl shadow-xl w-full max-w-sm p-0 backdrop:bg-black/40"
+      (click)="onPaidByDialogClick($event)"
+      (keydown.escape)="closePaidByModal()"
+      aria-label="¿Quién pagó?"
+    >
+      <div class="bg-white rounded-2xl p-4">
+        <h3 class="text-lg font-bold text-gray-800 mb-2">¿Quién pagó?</h3>
+        <p class="text-sm text-gray-600 mb-3">
+          Este nombre se guardará para el correo de notificación.
+        </p>
+        <input
+          type="text"
+          [ngModel]="paidByName()"
+          (ngModelChange)="paidByName.set($event)"
+          class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+          placeholder="Ej: Carlos"
+          autocomplete="off"
+          autofocus
+        />
+        <div class="flex justify-end gap-2 mt-4">
+          <button
+            type="button"
+            (click)="closePaidByModal()"
+            class="px-3 py-2 text-gray-600 hover:text-gray-900 transition-colors"
+          >
+            Cancelar
+          </button>
+          <button
+            type="button"
+            (click)="confirmPaidBy()"
+            class="px-3 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+          >
+            Confirmar
+          </button>
+        </div>
+      </div>
+    </dialog>
+  }
 </div>

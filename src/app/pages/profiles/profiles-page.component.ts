@@ -9,7 +9,6 @@ import {
 } from '../../core/app-context.service';
 import { AuthService } from '../../core/auth.service';
 import { formatApiHttpError } from '../../core/http-error.util';
-import { EmailApiService } from '../../core/email-api.service';
 import { MeApiService } from '../../core/me-api.service';
 
 @Component({
@@ -23,11 +22,9 @@ export class ProfilesPageComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly appContext = inject(AppContextService);
   private readonly meApi = inject(MeApiService);
-  private readonly emailApi = inject(EmailApiService);
   private readonly auth = inject(AuthService);
 
   profileName = '';
-  resendTestLoading = false;
 
   profileType: ProfileType = 'familiar';
 
@@ -94,23 +91,6 @@ export class ProfilesPageComponent implements OnInit {
       return;
     }
     void this.router.navigate(['/expenses']);
-  }
-
-  handleResendTest(): void {
-    if (this.resendTestLoading) {
-      return;
-    }
-    this.resendTestLoading = true;
-    this.emailApi.sendResendTest().subscribe({
-      next: () => {
-        this.resendTestLoading = false;
-        window.alert('Revisá tu bandeja: se envió un correo de prueba desde el servidor (Resend).');
-      },
-      error: (err: unknown) => {
-        this.resendTestLoading = false;
-        window.alert(formatApiHttpError(err));
-      },
-    });
   }
 
   handleLogout(): void {

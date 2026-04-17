@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ChartData, ChartOptions } from 'chart.js';
 import {
@@ -8,7 +9,7 @@ import {
 } from '../../core/app-context.service';
 import { AuthService } from '../../core/auth.service';
 import { formatApiHttpError } from '../../core/http-error.util';
-import { MeApiService } from '../../core/me-api.service';
+import { MeApiService, type MeExpense } from '../../core/me-api.service';
 import { ExpenseModalComponent } from './expense-modal.component';
 import { ExpensePieChartComponent } from './expense-pie-chart.component';
 
@@ -26,7 +27,7 @@ const COLORS = [
 @Component({
   selector: 'app-expenses-page',
   standalone: true,
-  imports: [CommonModule, ExpenseModalComponent, ExpensePieChartComponent],
+  imports: [CommonModule, FormsModule, ExpenseModalComponent, ExpensePieChartComponent],
   templateUrl: './expenses-page.component.html',
   styleUrl: './expenses-page.component.scss',
 })
@@ -39,6 +40,9 @@ export class ExpensesPageComponent implements OnInit {
   readonly modalOpen = signal(false);
   readonly showChart = signal(false);
   readonly selectedExpenses = signal<Set<string>>(new Set());
+  readonly paidByModalOpen = signal(false);
+  readonly paidByName = signal('');
+  readonly pendingPaidExpenseId = signal<string | null>(null);
 
   readonly totalExpenses = computed(() => {
     const ex = this.ctx.userData().expenses;
@@ -188,28 +192,74 @@ export class ExpensesPageComponent implements OnInit {
     if (!ex) {
       return;
     }
-    this.meApi.patchExpensePaid(id, !ex.isPaid).subscribe({
+    if (!ex.isPaid) {
+      this.openPaidByModal(id);
+      return;
+    }
+    this.meApi.patchExpensePaid(id, false).subscribe({
+      next: (row) => this.applyPatchedExpense(id, row),
+      error: (err: unknown) => {
+        window.alert(formatApiHttpError(err));
+      },
+    });
+  }
+
+  openPaidByModal(expenseId: string): void {
+    this.pendingPaidExpenseId.set(expenseId);
+    this.paidByName.set('');
+    this.paidByModalOpen.set(true);
+  }
+
+  closePaidByModal(): void {
+    this.paidByModalOpen.set(false);
+    this.pendingPaidExpenseId.set(null);
+    this.paidByName.set('');
+  }
+
+  onPaidByDialogClick(event: MouseEvent): void {
+    if (event.target === event.currentTarget) {
+      this.closePaidByModal();
+    }
+  }
+
+  confirmPaidBy(): void {
+    const id = this.pendingPaidExpenseId();
+    const paidBy = this.paidByName().trim();
+    if (!id) {
+      this.closePaidByModal();
+      return;
+    }
+    if (!paidBy) {
+      window.alert('Indica quién pagó');
+      return;
+    }
+    this.meApi.patchExpensePaid(id, true, paidBy).subscribe({
       next: (row) => {
-        this.ctx.setExpenses(
-          this.ctx
-            .expenses()
-            .map((e) =>
-              e.id === id
-                ? {
-                    ...e,
-                    isPaid: row.isPaid,
-                    paymentDate: row.paymentDate ?? e.paymentDate,
-                    bcvRateApplied: row.bcvRateApplied ?? e.bcvRateApplied,
-                    bcvRateDate: row.bcvRateDate ?? e.bcvRateDate,
-                  }
-                : e,
-            ),
-        );
+        this.applyPatchedExpense(id, row);
+        this.closePaidByModal();
       },
       error: (err: unknown) => {
         window.alert(formatApiHttpError(err));
       },
     });
+  }
+
+  private applyPatchedExpense(id: string, row: MeExpense): void {
+    this.ctx.setExpenses(
+      this.ctx
+        .expenses()
+        .map((e) =>
+          e.id === id
+            ? {
+                ...e,
+                isPaid: row.isPaid,
+                paymentDate: row.paymentDate ?? e.paymentDate,
+                bcvRateApplied: row.bcvRateApplied ?? e.bcvRateApplied,
+                bcvRateDate: row.bcvRateDate ?? e.bcvRateDate,
+              }
+            : e,
+        ),
+    );
   }
 
   toggleExpenseSelection(expenseId: string): void {
