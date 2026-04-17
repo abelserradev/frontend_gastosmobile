@@ -98,18 +98,22 @@ export class AuthService {
   }
 
   /** Pide al servidor borrar la cookie y limpia el cliente. */
-  logout(): void {
+  logout(): Observable<void> {
     this.firebaseAuth.signOutFirebase();
-    this.http
+    return this.http
       .post<{ ok: boolean }>(
         `${environment.apiUrl}/auth/logout`,
         {},
         { withCredentials: true },
       )
-      .subscribe({
-        next: () => this.clearClientSession(),
-        error: () => this.clearClientSession(),
-      });
+      .pipe(
+        tap(() => this.clearClientSession()),
+        map(() => undefined),
+        catchError(() => {
+          this.clearClientSession();
+          return of(undefined);
+        }),
+      );
   }
 
   /** Sin llamada HTTP (p. ej. tras 401). */
