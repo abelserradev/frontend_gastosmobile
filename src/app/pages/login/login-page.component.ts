@@ -34,6 +34,14 @@ export class LoginPageComponent implements OnInit {
       void this.router.navigate(['/setup']);
       return;
     }
+    
+    const skipRestoreOnce =
+    globalThis.sessionStorage.getItem('gastos_skip_restore_once') === '1';
+    if (skipRestoreOnce) {
+      globalThis.sessionStorage.removeItem('gastos_skip_restore_once');
+      return;
+    }
+
     this.auth.tryRestoreSession().subscribe((ok) => {
       if (ok) {
         void this.router.navigate(['/setup']);

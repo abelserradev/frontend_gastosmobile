@@ -100,6 +100,7 @@ export class AuthService {
   /** Pide al servidor borrar la cookie y limpia el cliente. */
   logout(): Observable<void> {
     this.firebaseAuth.signOutFirebase();
+    globalThis.sessionStorage.setItem('gastos_skip_restore_once', '1');
     return this.http
       .post<{ ok: boolean }>(
         `${environment.apiUrl}/auth/logout`,
