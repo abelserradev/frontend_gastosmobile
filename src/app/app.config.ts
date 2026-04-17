@@ -9,6 +9,7 @@ import { routes } from './app.routes';
 import {
   apiCredentialsInterceptor,
   apiUnauthorizedInterceptor,
+  apiKeyInterceptor,
 } from './core/http.interceptors';
 
 export const appConfig: ApplicationConfig = {
@@ -17,6 +18,7 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes),
     provideHttpClient(
       withInterceptors([
+        apiKeyInterceptor,
         apiCredentialsInterceptor,
         apiUnauthorizedInterceptor,
       ]),

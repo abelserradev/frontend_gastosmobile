@@ -248,4 +248,9 @@ export class ExpensesPageComponent implements OnInit {
       },
     });
   }
+
+  handleLogout(): void {
+    this.auth.logout();
+    void this.router.navigate(['/login']);
+  }
 }

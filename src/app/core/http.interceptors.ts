@@ -47,3 +47,21 @@ export const apiUnauthorizedInterceptor: HttpInterceptorFn = (req, next) => {
     }),
   );
 };
+
+export const apiKeyInterceptor: HttpInterceptorFn = (req, next) => {
+  const base = environment.apiUrl;
+  const apikey = (environment as { apikey?: string}).apikey?.trim() ?? '';
+  if (!apikey) {
+    return next(req);
+  }
+  if (req.url.startsWith(base)) {
+    return next(
+      req.clone({
+        setHeaders: {
+          'x-api-key': apikey,
+        },
+      }),
+    );
+  }
+  return next(req);
+};

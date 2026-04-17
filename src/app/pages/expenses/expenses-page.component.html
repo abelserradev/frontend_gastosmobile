@@ -3,6 +3,16 @@
     class="bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-6 rounded-b-3xl shadow-lg"
   >
     <div class="max-w-md mx-auto">
+      <div class="flex justify-end mb-2">
+        <button
+          type="button"
+          (click)="handleLogout()"
+          class="text-xs font-medium text-indigo-100 hover:text-white transition-colors"
+          aria-label="Cerrar sesión"
+        >
+          Cerrar sesión
+        </button>
+      </div>
       <p class="text-center text-indigo-100 text-sm mb-2">Ingreso Mensual</p>
       <p class="text-center text-indigo-200/80 text-xs mb-1">Montos base en USD</p>
       <div class="text-center">
