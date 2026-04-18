@@ -233,8 +233,9 @@ export class ExpensesPageComponent implements OnInit {
       next: (list) => {
         this.paidByLoading.set(false);
         if (list.length === 0) {
+          const label = ex.profileName?.trim() || 'este perfil';
           globalThis.alert(
-            'Este perfil no tiene integrantes. Ve a Perfiles y agrega integrantes antes de marcar pagos.',
+            `«${label}» no tiene integrantes registrados. En Perfiles, toca «Integrantes» en ese perfil y agrega al menos una persona (no basta con crear el nombre del perfil).`,
           );
           this.pendingPaidExpenseId.set(null);
           return;
