@@ -139,11 +139,20 @@ export class MeApiService {
     id: string,
     isPaid: boolean,
     paidByMemberId?: string,
+    paidByDisplayName?: string,
   ): Observable<MeExpense> {
-    return this.http.patch<MeExpense>(`${this.base}/me/expenses/${id}`, {
-      isPaid,
-      ...(paidByMemberId ? { paidByMemberId } : {}),
-    });
+    const body: {
+      isPaid: boolean;
+      paidByMemberId?: string;
+      paidByDisplayName?: string;
+    } = { isPaid };
+    if (paidByMemberId) {
+      body.paidByMemberId = paidByMemberId;
+    }
+    if (paidByDisplayName) {
+      body.paidByDisplayName = paidByDisplayName;
+    }
+    return this.http.patch<MeExpense>(`${this.base}/me/expenses/${id}`, body);
   }
 
   deleteExpenses(ids: string[]): Observable<{ deleted: number }> {

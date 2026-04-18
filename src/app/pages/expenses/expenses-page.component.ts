@@ -6,7 +6,7 @@ import { ChartData, ChartOptions } from 'chart.js';
 import { AppContextService } from '../../core/app-context.service';
 import { AuthService } from '../../core/auth.service';
 import { formatApiHttpError } from '../../core/http-error.util';
-import { MeApiService, type MeExpense, type MeProfileMember } from '../../core/me-api.service';
+import { MeApiService, type MeExpense } from '../../core/me-api.service';
 import { ExpenseModalComponent } from './expense-modal.component';
 import { ExpensePieChartComponent } from './expense-pie-chart.component';
 
@@ -39,9 +39,8 @@ export class ExpensesPageComponent implements OnInit {
   readonly selectedExpenses = signal<Set<string>>(new Set());
   readonly paidByModalOpen = signal(false);
   readonly pendingPaidExpenseId = signal<string | null>(null);
-  readonly paidByMembers = signal<MeProfileMember[]>([]);
-  readonly paidByMemberId = signal<string>('');
-  readonly paidByLoading = signal(false);
+  /** Perfil (de la lista /profiles) que realizó el pago. */
+  readonly paidByProfileId = signal<string>('');
 
   readonly totalExpenses = computed(() => {
     const ex = this.ctx.userData().expenses;
@@ -225,37 +224,22 @@ export class ExpensesPageComponent implements OnInit {
       globalThis.alert('No se pudo determinar el perfil del gasto');
       return;
     }
+    const perfiles = this.ctx.profiles();
+    if (perfiles.length === 0) {
+      globalThis.alert(
+        'No hay perfiles. Ve a Perfiles, crea al menos uno y vuelve para indicar quién pagó.',
+      );
+      return;
+    }
     this.pendingPaidExpenseId.set(expenseId);
-    this.paidByMembers.set([]);
-    this.paidByMemberId.set('');
-    this.paidByLoading.set(true);
-    this.meApi.listProfileMembers(ex.profileId).subscribe({
-      next: (list) => {
-        this.paidByLoading.set(false);
-        if (list.length === 0) {
-          const label = ex.profileName?.trim() || 'este perfil';
-          globalThis.alert(
-            `«${label}» no tiene integrantes registrados. En Perfiles, toca «Integrantes» en ese perfil y agrega al menos una persona (no basta con crear el nombre del perfil).`,
-          );
-          this.pendingPaidExpenseId.set(null);
-          return;
-        }
-        this.paidByMembers.set(list);
-        this.paidByModalOpen.set(true);
-      },
-      error: (err: unknown) => {
-        this.paidByLoading.set(false);
-        globalThis.alert(formatApiHttpError(err));
-        this.pendingPaidExpenseId.set(null);
-      },
-    });
+    this.paidByProfileId.set('');
+    this.paidByModalOpen.set(true);
   }
 
   closePaidByModal(): void {
     this.paidByModalOpen.set(false);
     this.pendingPaidExpenseId.set(null);
-    this.paidByMembers.set([]);
-    this.paidByMemberId.set('');
+    this.paidByProfileId.set('');
   }
 
   onPaidByDialogClick(event: MouseEvent): void {
@@ -270,12 +254,17 @@ export class ExpensesPageComponent implements OnInit {
       this.closePaidByModal();
       return;
     }
-    const memberId = this.paidByMemberId().trim();
-    if (!memberId) {
-      globalThis.alert('Selecciona quién pagó');
+    const pid = this.paidByProfileId().trim();
+    if (!pid) {
+      globalThis.alert('Selecciona qué perfil realizó el pago');
       return;
     }
-    this.meApi.patchExpensePaid(id, true, memberId).subscribe({
+    const payer = this.ctx.profiles().find((p) => p.id === pid);
+    if (!payer) {
+      globalThis.alert('Perfil no válido; recarga la página e intenta de nuevo');
+      return;
+    }
+    this.meApi.patchExpensePaid(id, true, undefined, payer.name.trim()).subscribe({
       next: (row) => {
         this.applyPatchedExpense(id, row);
         this.closePaidByModal();

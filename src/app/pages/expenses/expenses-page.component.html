@@ -300,16 +300,16 @@
       <div class="bg-white rounded-2xl p-4">
         <h3 class="text-lg font-bold text-gray-800 mb-2">¿Quién pagó?</h3>
         <p class="text-sm text-gray-600 mb-3">
-          Este nombre se guardará para el correo de notificación.
+          Elige el perfil que realizó el pago (los mismos que creas en Perfiles). Se usará en la notificación por correo.
         </p>
         <select
-          [ngModel]="paidByMemberId()"
-          (ngModelChange)="paidByMemberId.set($event)"
+          [ngModel]="paidByProfileId()"
+          (ngModelChange)="paidByProfileId.set($event)"
           class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
         >
-          <option value="" disabled>Selecciona un integrante…</option>
-          @for (m of paidByMembers(); track m.id) {
-            <option [value]="m.id">{{ m.displayName }}</option>
+          <option value="" disabled>Selecciona un perfil…</option>
+          @for (p of ctx.profiles(); track p.id) {
+            <option [value]="p.id">{{ p.name }} ({{ p.type === 'familiar' ? 'Familiar' : 'Grupal' }})</option>
           }
         </select>
         <div class="flex justify-end gap-2 mt-4">
