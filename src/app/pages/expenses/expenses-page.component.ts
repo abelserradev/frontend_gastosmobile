@@ -340,4 +340,9 @@ export class ExpensesPageComponent implements OnInit {
       },
     });
   }
+
+
+  goBack(): void {
+    void this.router.navigate(['/profiles']);
+  }
 }

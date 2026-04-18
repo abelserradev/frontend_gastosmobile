@@ -44,7 +44,7 @@ export class LoginPageComponent implements OnInit {
 
     this.auth.tryRestoreSession().subscribe((ok) => {
       if (ok) {
-        void this.router.navigate(['/setup']);
+        void this.router.navigate(['/expenses']);
       }
     });
   }

@@ -2,12 +2,34 @@
   <div
     class="bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-6 rounded-b-3xl shadow-lg"
   >
-    <div class="max-w-md mx-auto">
-      <div class="flex justify-end mb-2">
+
+  <div class="max-w-md mx-auto">
+    <div class="flex justify-between items-center mb-2 gap-2">
+      <button
+        type="button"
+        (click)="goBack()"
+        class="inline-flex items-center text-xs font-medium text-indigo-100 hover:text-white transition-colors shrink-0"
+        aria-label="Volver atrás"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M15 18l-6-6 6-6" />
+        </svg>
+        </button>
         <button
           type="button"
           (click)="handleLogout()"
-          class="text-xs font-medium text-indigo-100 hover:text-white transition-colors"
+          class="text-xs font-medium text-indigo-100 hover:text-white transition-colors shrink-0"
           aria-label="Cerrar sesión"
         >
           Cerrar sesión
