@@ -6,7 +6,7 @@ import { AuthService } from '../../core/auth.service';
 import { FirebaseAuthService } from '../../core/firebase-auth.service';
 import { formatApiHttpError } from '../../core/http-error.util';
 import { switchMap } from 'rxjs';
-
+import { MeApiService, type MeState } from '../../core/me-api.service';
 @Component({
   selector: 'app-login-page',
   standalone: true,
@@ -18,7 +18,7 @@ export class LoginPageComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly auth = inject(AuthService);
   private readonly firebaseAuth = inject(FirebaseAuthService);
-
+  private readonly meApi = inject(MeApiService);
   readonly isLogin = signal(true);
   readonly showPassword = signal(false);
 
@@ -31,7 +31,7 @@ export class LoginPageComponent implements OnInit {
 
   ngOnInit(): void {
     if (this.auth.hasSession()) {
-      void this.router.navigate(['/expenses']);
+      this.navigateByOnBoardingState();
       return;
     }
     
@@ -44,9 +44,34 @@ export class LoginPageComponent implements OnInit {
 
     this.auth.tryRestoreSession().subscribe((ok) => {
       if (ok) {
-        void this.router.navigate(['/expenses']);
+        this.navigateByOnBoardingState();
       }
     });
+  }
+
+  private navigateByOnBoardingState(): void {
+    this.meApi.getState().subscribe({
+      next: (s: MeState) => {
+        const path = this.routeForState(s);
+        void this.router.navigate([path]);
+      },
+      error: (err: unknown) => {
+        globalThis.alert(formatApiHttpError(err));
+        void this.router.navigate(['/setup']);
+      },
+    });
+  }
+
+  private routeForState(s: MeState): string {
+    const hasPrefs = s.preferences != null;
+    const hasProfiles = s.profiles.length > 0;
+    if (hasPrefs && hasProfiles) {
+      return '/expenses';
+    }
+    if (hasPrefs && !hasProfiles) {
+      return '/profiles';
+    }
+    return '/setup';
   }
 
   setMode(login: boolean): void {
@@ -78,7 +103,7 @@ export class LoginPageComponent implements OnInit {
       : this.auth.registerRemote(email, password, this.formData.name.trim());
     req.subscribe({
       next: () => {
-        void this.router.navigate(['/setup']);
+        this.navigateByOnBoardingState();
       },
       error: (err: unknown) => {
         globalThis.alert(formatApiHttpError(err));
@@ -106,7 +131,7 @@ export class LoginPageComponent implements OnInit {
       .pipe(switchMap((idToken) => this.auth.loginWithFirebase(idToken)))
       .subscribe({
         next: () => {
-          void this.router.navigate(['/setup']);
+          this.navigateByOnBoardingState();
         },
         error: (err: unknown) => {
           globalThis.alert(formatApiHttpError(err));
