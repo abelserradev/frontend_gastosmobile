@@ -31,7 +31,7 @@ export class LoginPageComponent implements OnInit {
 
   ngOnInit(): void {
     if (this.auth.hasSession()) {
-      void this.router.navigate(['/setup']);
+      void this.router.navigate(['/expenses']);
       return;
     }
     
