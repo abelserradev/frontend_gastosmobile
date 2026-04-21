@@ -23,16 +23,6 @@ La salida útil para despliegue está en:
 dist/web/browser
 ```
 
-## Variables y entorno
-
-El frontend productivo consume:
-
-- `https://api-gastos.buildforge.work/api`
-- `https://mobilegastos.buildforge.work`
-
-La configuración Firebase web se mantiene en:
-
-- `src/environments/firebase-options.ts`
 
 ## Docker (producción)
 
