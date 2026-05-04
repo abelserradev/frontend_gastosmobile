@@ -11,12 +11,16 @@ interface ClientAuthPayload {
   userId: string;
   email: string;
   name: string | null;
+  /** Migración: si falta en JSON viejo se asume true hasta próximo /auth/me. */
+  hasPassword?: boolean;
 }
 
 export interface AuthApiUser {
   id: string;
   email: string;
   name: string;
+  /** Si el backend aún no envía el campo (despliegues viejos), el cliente asume true. */
+  hasPassword?: boolean;
 }
 
 export interface AuthSessionResponse {
@@ -34,6 +38,8 @@ export class AuthService {
   readonly userId = signal<string | null>(null);
   readonly email = signal<string | null>(null);
   readonly displayName = signal<string | null>(null);
+  /** Alineado con backend: false ⇒ debe pasar por /setup-password o enlace del correo. */
+  readonly hasPassword = signal(true);
 
   constructor() {
     this.hydrateFromStorage();
@@ -98,6 +104,19 @@ export class AuthService {
     );
   }
 
+  /** Primera contraseña con sesión Google ya iniciada (cookie JWT). */
+  setupPasswordRemote(password: string): Observable<AuthSessionResponse> {
+    return this.http
+      .post<AuthSessionResponse>(
+        `${environment.apiUrl}/auth/password/setup`,
+        { password },
+      )
+      .pipe(
+        tap((res) => this.persistUser(res.user)),
+        catchError((err) => throwError(() => err)),
+      );
+  }
+
   /** Intercambia ID token de Firebase (Google) por sesión JWT en cookie. */
   loginWithFirebase(idToken: string): Observable<AuthSessionResponse> {
     return this.http
@@ -138,6 +157,7 @@ export class AuthService {
     this.userId.set(null);
     this.email.set(null);
     this.displayName.set(null);
+    this.hasPassword.set(true);
   }
 
   private persistUser(user: AuthApiUser): void {
@@ -145,11 +165,13 @@ export class AuthService {
       userId: user.id,
       email: user.email,
       name: user.name?.trim() ? user.name : null,
+      hasPassword: user.hasPassword ?? true,
     };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
     this.userId.set(payload.userId);
     this.email.set(payload.email);
     this.displayName.set(payload.name);
+    this.hasPassword.set(user.hasPassword ?? true);
   }
 
   private hydrateFromStorage(): void {
@@ -169,6 +191,9 @@ export class AuthService {
         this.userId.set(p.userId);
         this.email.set(p.email);
         this.displayName.set(p.name ?? null);
+        this.hasPassword.set(
+          typeof p.hasPassword === 'boolean' ? p.hasPassword : true,
+        );
       }
     } catch {
       localStorage.removeItem(STORAGE_KEY);

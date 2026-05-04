@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../core/auth.service';
 import { FirebaseAuthService } from '../../core/firebase-auth.service';
+import { routePathForMeState } from '../../core/me-route.util';
 import { formatApiHttpError } from '../../core/http-error.util';
 import { switchMap } from 'rxjs';
 import { MeApiService, type MeState } from '../../core/me-api.service';
@@ -53,9 +54,13 @@ export class LoginPageComponent implements OnInit {
   }
 
   private navigateByOnBoardingState(): void {
+    if (!this.auth.hasPassword()) {
+      this.router.navigate(['/setup-password']).catch(() => undefined);
+      return;
+    }
     this.meApi.getState().subscribe({
       next: (s: MeState) => {
-        const path = this.routeForState(s);
+        const path = routePathForMeState(s);
         this.router.navigate([path]).catch(() => undefined);
       },
       error: (err: unknown) => {
@@ -63,18 +68,6 @@ export class LoginPageComponent implements OnInit {
         this.router.navigate(['/setup']).catch(() => undefined);
       },
     });
-  }
-
-  private routeForState(s: MeState): string {
-    const hasPrefs = s.preferences != null;
-    const hasProfiles = s.profiles.length > 0;
-    if (hasPrefs && hasProfiles) {
-      return '/expenses';
-    }
-    if (hasPrefs && !hasProfiles) {
-      return '/profiles';
-    }
-    return '/setup';
   }
 
   setMode(login: boolean): void {
@@ -104,7 +97,7 @@ export class LoginPageComponent implements OnInit {
         this.forgotSending.set(false);
         this.forgotPasswordOpen.set(false);
         globalThis.alert(
-          'Si existe una cuenta con ese correo y contraseña registrada, recibirás un enlace para restablecerla.',
+          'Si tu cuenta existe, recibirás un correo con un enlace para crear o restablecer tu contraseña.',
         );
       },
       error: (err: unknown) => {
