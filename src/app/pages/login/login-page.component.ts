@@ -22,6 +22,8 @@ export class LoginPageComponent implements OnInit {
   private readonly meApi = inject(MeApiService);
   readonly isLogin = signal(true);
   readonly showPassword = signal(false);
+  readonly forgotPasswordOpen = signal(false);
+  readonly forgotSending = signal(false);
 
   formData = {
     name: '',
@@ -54,11 +56,11 @@ export class LoginPageComponent implements OnInit {
     this.meApi.getState().subscribe({
       next: (s: MeState) => {
         const path = this.routeForState(s);
-        void this.router.navigate([path]);
+        this.router.navigate([path]).catch(() => undefined);
       },
       error: (err: unknown) => {
         globalThis.alert(formatApiHttpError(err));
-        void this.router.navigate(['/setup']);
+        this.router.navigate(['/setup']).catch(() => undefined);
       },
     });
   }
@@ -76,7 +78,40 @@ export class LoginPageComponent implements OnInit {
   }
 
   setMode(login: boolean): void {
+    if (!login) {
+      this.forgotPasswordOpen.set(false);
+    }
     this.isLogin.set(login);
+  }
+
+  openForgotPassword(): void {
+    this.forgotPasswordOpen.set(true);
+  }
+
+  cancelForgotPassword(): void {
+    this.forgotPasswordOpen.set(false);
+  }
+
+  submitForgotPassword(): void {
+    const email = this.formData.email.trim();
+    if (!email) {
+      globalThis.alert('Ingresá tu correo electrónico.');
+      return;
+    }
+    this.forgotSending.set(true);
+    this.auth.requestPasswordReset(email).subscribe({
+      next: () => {
+        this.forgotSending.set(false);
+        this.forgotPasswordOpen.set(false);
+        globalThis.alert(
+          'Si existe una cuenta con ese correo y contraseña registrada, recibirás un enlace para restablecerla.',
+        );
+      },
+      error: (err: unknown) => {
+        this.forgotSending.set(false);
+        globalThis.alert(formatApiHttpError(err));
+      },
+    });
   }
 
   toggleShowPassword(): void {
@@ -112,12 +147,6 @@ export class LoginPageComponent implements OnInit {
     });
   }
 
-  showForgotPasswordSoon(): void {
-    globalThis.alert(
-      'Recuperación de contraseña estará disponible cuando conectemos el backend.',
-    );
-  }
-
   showSocialSoon(provider: 'google' | 'github'): void {
     const msg =
       provider === 'google'
@@ -129,7 +158,7 @@ export class LoginPageComponent implements OnInit {
   handleGoogleLogin(): void {
     this.firebaseAuth
       .signInWithGoogle()
-      .pipe(switchMap((idToken) => this.auth.loginWithFirebase(idToken)))
+      .pipe(switchMap((idToken: string) => this.auth.loginWithFirebase(idToken)))
       .subscribe({
         next: () => {
           this.navigateByOnBoardingState();

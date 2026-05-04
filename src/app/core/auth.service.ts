@@ -83,6 +83,21 @@ export class AuthService {
       );
   }
 
+  /** Solicitud genérica: no revela si el correo existe (solo cuentas con contraseña reciben mail). */
+  requestPasswordReset(email: string): Observable<{ ok: true }> {
+    return this.http.post<{ ok: true }>(
+      `${environment.apiUrl}/auth/forgot-password`,
+      { email },
+    );
+  }
+
+  resetPassword(token: string, password: string): Observable<{ ok: true }> {
+    return this.http.post<{ ok: true }>(
+      `${environment.apiUrl}/auth/reset-password`,
+      { token, password },
+    );
+  }
+
   /** Intercambia ID token de Firebase (Google) por sesión JWT en cookie. */
   loginWithFirebase(idToken: string): Observable<AuthSessionResponse> {
     return this.http
