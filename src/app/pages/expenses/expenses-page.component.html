@@ -127,7 +127,8 @@
             <div
               class="flex items-center gap-3 p-3 rounded-lg border-2 transition-all"
               [ngClass]="{
-                'border-red-400 bg-red-50': isSelected(expense.id),
+                'border-indigo-500 bg-indigo-50 ring-1 ring-indigo-200':
+                  isSelected(expense.id),
                 'border-green-200 bg-green-50':
                   !isSelected(expense.id) && expense.isPaid,
                 'border-gray-200 hover:border-gray-300':
@@ -221,30 +222,52 @@
               <button
                 type="button"
                 (click)="toggleExpenseSelection(expense.id)"
-                class="flex-shrink-0 p-2 rounded-lg transition-colors"
+                class="flex-shrink-0 rounded-lg transition-colors relative w-11 h-11 inline-flex items-center justify-center ring-2 ring-transparent"
                 [ngClass]="{
-                  'bg-red-500 text-white': isSelected(expense.id),
-                  'bg-gray-100 text-gray-400 hover:bg-gray-200': !isSelected(
+                  'bg-indigo-600 text-white ring-indigo-300': isSelected(
                     expense.id
                   ),
+                  'bg-white border-2 border-gray-300 text-gray-400 hover:border-indigo-300 hover:bg-indigo-50/50':
+                    !isSelected(expense.id),
                 }"
-                title="Seleccionar (pagar varios o eliminar)"
+                [attr.title]="
+                  isSelected(expense.id)
+                    ? 'Quitar de la selección'
+                    : 'Seleccionar para pagar varios o eliminar'
+                "
+                [attr.aria-checked]="isSelected(expense.id)"
+                role="checkbox"
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                >
-                  <path d="M3 6h18" />
-                  <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
-                  <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
-                  <line x1="10" x2="10" y1="11" y2="17" />
-                  <line x1="14" x2="14" y1="11" y2="17" />
-                </svg>
+                @if (isSelected(expense.id)) {
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="22"
+                    height="22"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M20 6 9 17l-5-5" />
+                  </svg>
+                } @else {
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="22"
+                    height="22"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    class="opacity-40"
+                    aria-hidden="true"
+                  >
+                    <rect x="4" y="4" width="16" height="16" rx="2" ry="2" />
+                  </svg>
+                }
               </button>
             </div>
           }
