@@ -37,6 +37,9 @@ yarn-error.log
 testem.log
 /typings
 
+# Firebase Web API key (no versionar; usar FIREBASE_WEB_API_KEY en CI o copiar desde firebase-api-key.example.ts)
+/src/environments/firebase-api-key.ts
+
 # System files
 .DS_Store
 Thumbs.db

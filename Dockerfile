@@ -10,6 +10,11 @@ COPY package.json package-lock.json ./
 RUN npm ci --include=dev
 
 COPY . .
+
+# La API key web de Firebase no debe ir en el repo; Coolify/build debe pasar build-arg o env en tiempo de build.
+ARG FIREBASE_WEB_API_KEY
+ENV FIREBASE_WEB_API_KEY=${FIREBASE_WEB_API_KEY}
+
 RUN npm run build
 
 FROM nginx:1.27-alpine
