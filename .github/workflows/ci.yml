@@ -40,4 +40,6 @@ jobs:
         run: npm audit --audit-level=moderate
 
       - name: Build producción
+        env:
+          FIREBASE_WEB_API_KEY: ${{ secrets.FIREBASE_WEB_API_KEY || 'ci-placeholder-firebase-web-api-key' }}
         run: npm run build
