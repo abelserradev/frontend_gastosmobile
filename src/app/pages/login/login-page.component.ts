@@ -7,6 +7,7 @@ import { FirebaseAuthService } from '../../core/firebase-auth.service';
 import { formatApiHttpError } from '../../core/http-error.util';
 import { switchMap } from 'rxjs';
 import { MeApiService, type MeState } from '../../core/me-api.service';
+
 @Component({
   selector: 'app-login-page',
   standalone: true,

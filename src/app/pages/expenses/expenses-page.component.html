@@ -228,7 +228,7 @@
                     expense.id
                   ),
                 }"
-                title="Seleccionar para eliminar"
+                title="Seleccionar (pagar varios o eliminar)"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -253,25 +253,54 @@
     </div>
 
     <div class="grid grid-cols-2 gap-3">
-      <button
-        type="button"
-        (click)="openModal()"
-        class="flex items-center justify-center gap-2 bg-indigo-600 text-white py-3 rounded-lg font-medium hover:bg-indigo-700 transition-colors shadow-md"
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="20"
-          height="20"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
+      @if (selectedExpenses().size === 0) {
+        <button
+          type="button"
+          (click)="openModal()"
+          class="flex items-center justify-center gap-2 bg-indigo-600 text-white py-3 rounded-lg font-medium hover:bg-indigo-700 transition-colors shadow-md"
         >
-          <path d="M5 12h14" />
-          <path d="M12 5v14" />
-        </svg>
-        Crear Gasto
-      </button>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path d="M5 12h14" />
+            <path d="M12 5v14" />
+          </svg>
+          Crear Gasto
+        </button>
+      } @else {
+        <button
+          type="button"
+          (click)="openBulkPaidByModal()"
+          [disabled]="!hasPendingPaySelection()"
+          class="flex items-center justify-center gap-2 py-3 rounded-lg font-medium transition-colors shadow-md"
+          [ngClass]="{
+            'bg-gray-300 text-gray-500 cursor-not-allowed':
+              !hasPendingPaySelection(),
+            'bg-emerald-600 text-white hover:bg-emerald-700':
+              hasPendingPaySelection(),
+          }"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+            <path d="m9 11 3 3L22 4" />
+          </svg>
+          Pagar
+        </button>
+      }
       <button
         type="button"
         (click)="handleDeleteExpenses()"
@@ -321,6 +350,16 @@
     >
       <div class="bg-white rounded-2xl p-4">
         <h3 class="text-lg font-bold text-gray-800 mb-2">¿Quién pagó?</h3>
+        @if ((pendingPaidExpenseIds() ?? []).length > 0) {
+          <p class="text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 mb-3">
+            @if ((pendingPaidExpenseIds() ?? []).length === 1) {
+              Al confirmar se enviará <strong>un correo</strong> con el detalle del gasto.
+            } @else {
+              Vas a marcar <strong>{{ (pendingPaidExpenseIds() ?? []).length }}</strong> gastos como pagados. Se enviará
+              <strong>un solo correo</strong> con el detalle de todos.
+            }
+          </p>
+        }
         <p class="text-sm text-gray-600 mb-3">
           Elige el perfil que realizó el pago (los mismos que creas en Perfiles). Se usará en la notificación por correo.
         </p>

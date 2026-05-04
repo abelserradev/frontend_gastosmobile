@@ -54,6 +54,11 @@ export class ExpenseModalComponent implements OnChanges {
     }
   }
 
+  /** Tope del datepicker: mismo criterio que el API (no tasas futuras en Caracas). */
+  paymentDateMaxYmd(): string {
+    return todayYmdCaracas();
+  }
+
   scheduleBsPreview(): void {
     if (this.defaultCurrency() !== 'BS') {
       return;
@@ -64,11 +69,17 @@ export class ExpenseModalComponent implements OnChanges {
     this.previewTimer = setTimeout(() => this.refreshUsdPreview(), 350);
   }
 
+  /** type="number" + ngModel puede dejar number | null, no string — evitar .trim() directo */
+  private amountBsText(): string {
+    return String(this.amountBs ?? '').trim();
+  }
+
   private refreshUsdPreview(): void {
     this.previewTimer = null;
-    const date = this.paymentDate.trim() || todayYmdCaracas();
-    const bs = Number.parseFloat(this.amountBs);
-    if (this.amountBs.trim() === '' || Number.isNaN(bs) || bs <= 0) {
+    const date = String(this.paymentDate ?? '').trim() || todayYmdCaracas();
+    const bsRaw = this.amountBsText();
+    const bs = Number.parseFloat(bsRaw);
+    if (bsRaw === '' || Number.isNaN(bs) || bs <= 0) {
       this.usdPreview = null;
       this.previewLoading = false;
       return;
@@ -98,7 +109,7 @@ export class ExpenseModalComponent implements OnChanges {
         window.alert('Monto en USD no válido');
         return;
       }
-      const pay = this.paymentDate.trim() || undefined;
+      const pay = String(this.paymentDate ?? '').trim() || undefined;
       this.emitAndClose({
         title: this.title.trim(),
         description: this.description.trim(),
@@ -108,8 +119,8 @@ export class ExpenseModalComponent implements OnChanges {
       });
       return;
     }
-    const date = this.paymentDate.trim() || todayYmdCaracas();
-    const bs = Number.parseFloat(this.amountBs);
+    const date = String(this.paymentDate ?? '').trim() || todayYmdCaracas();
+    const bs = Number.parseFloat(this.amountBsText());
     if (Number.isNaN(bs) || bs < 0) {
       window.alert('Monto en Bs. no válido');
       return;

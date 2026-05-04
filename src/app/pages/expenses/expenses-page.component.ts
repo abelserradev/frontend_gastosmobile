@@ -38,7 +38,8 @@ export class ExpensesPageComponent implements OnInit {
   readonly showChart = signal(false);
   readonly selectedExpenses = signal<Set<string>>(new Set());
   readonly paidByModalOpen = signal(false);
-  readonly pendingPaidExpenseId = signal<string | null>(null);
+  /** Gastos a marcar como pagados al confirmar el modal (uno o varios). */
+  readonly pendingPaidExpenseIds = signal<string[] | null>(null);
   /** Perfil (de la lista /profiles) que realizó el pago. */
   readonly paidByProfileId = signal<string>('');
 
@@ -150,6 +151,19 @@ export class ExpensesPageComponent implements OnInit {
     this.showChart.update((v) => !v);
   }
 
+  /** Al menos un seleccionado sigue pendiente → habilita “Pagar”. */
+  hasPendingPaySelection(): boolean {
+    const sel = this.selectedExpenses();
+    const list = this.ctx.expenses();
+    for (const id of sel) {
+      const row = list.find((e) => e.id === id);
+      if (row && !row.isPaid) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   openModal(): void {
     this.modalOpen.set(true);
   }
@@ -231,14 +245,36 @@ export class ExpensesPageComponent implements OnInit {
       );
       return;
     }
-    this.pendingPaidExpenseId.set(expenseId);
+    this.pendingPaidExpenseIds.set([expenseId]);
+    this.paidByProfileId.set('');
+    this.paidByModalOpen.set(true);
+  }
+
+  openBulkPaidByModal(): void {
+    const pendientes = [...this.selectedExpenses()].filter((id) => {
+      const row = this.ctx.expenses().find((e) => e.id === id);
+      return row && !row.isPaid;
+    });
+    if (pendientes.length === 0) {
+      globalThis.alert(
+        'Selecciona al menos un gasto pendiente para marcarlo como pagado.',
+      );
+      return;
+    }
+    if (this.ctx.profiles().length === 0) {
+      globalThis.alert(
+        'No hay perfiles. Ve a Perfiles, crea al menos uno y vuelve para indicar quién pagó.',
+      );
+      return;
+    }
+    this.pendingPaidExpenseIds.set(pendientes);
     this.paidByProfileId.set('');
     this.paidByModalOpen.set(true);
   }
 
   closePaidByModal(): void {
     this.paidByModalOpen.set(false);
-    this.pendingPaidExpenseId.set(null);
+    this.pendingPaidExpenseIds.set(null);
     this.paidByProfileId.set('');
   }
 
@@ -249,8 +285,8 @@ export class ExpensesPageComponent implements OnInit {
   }
 
   confirmPaidBy(): void {
-    const id = this.pendingPaidExpenseId();
-    if (!id) {
+    const ids = this.pendingPaidExpenseIds();
+    if (!ids?.length) {
       this.closePaidByModal();
       return;
     }
@@ -264,15 +300,27 @@ export class ExpensesPageComponent implements OnInit {
       globalThis.alert('Perfil no válido; recarga la página e intenta de nuevo');
       return;
     }
-    this.meApi.patchExpensePaid(id, true, undefined, payer.name.trim()).subscribe({
-      next: (row) => {
-        this.applyPatchedExpense(id, row);
-        this.closePaidByModal();
-      },
-      error: (err: unknown) => {
-        globalThis.alert(formatApiHttpError(err));
-      },
-    });
+    const nombrePagador = payer.name.trim();
+    this.meApi
+      .markExpensesPaid({ ids, paidByDisplayName: nombrePagador })
+      .subscribe({
+        next: (rows) => {
+          for (const row of rows) {
+            this.applyPatchedExpense(row.id, row);
+          }
+          this.selectedExpenses.update((prev) => {
+            const next = new Set(prev);
+            for (const id of ids) {
+              next.delete(id);
+            }
+            return next;
+          });
+          this.closePaidByModal();
+        },
+        error: (err: unknown) => {
+          globalThis.alert(formatApiHttpError(err));
+        },
+      });
   }
 
   private applyPatchedExpense(id: string, row: MeExpense): void {

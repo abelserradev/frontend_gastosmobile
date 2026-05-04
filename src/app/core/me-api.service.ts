@@ -155,6 +155,18 @@ export class MeApiService {
     return this.http.patch<MeExpense>(`${this.base}/me/expenses/${id}`, body);
   }
 
+  /** Varios pendientes → un solo correo de resumen (backend / Resend). */
+  markExpensesPaid(body: {
+    ids: string[];
+    paidByDisplayName: string;
+    paidByMemberId?: string;
+  }): Observable<MeExpense[]> {
+    return this.http.post<MeExpense[]>(
+      `${this.base}/me/expenses/mark-paid`,
+      body,
+    );
+  }
+
   deleteExpenses(ids: string[]): Observable<{ deleted: number }> {
     return this.http.post<{ deleted: number }>(
       `${this.base}/me/expenses/delete-many`,
