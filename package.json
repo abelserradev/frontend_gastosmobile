@@ -15,7 +15,7 @@
     "@angular/core": "^20.0.0",
     "@angular/forms": "^20.0.0",
     "@angular/platform-browser": "^20.0.0",
-    "@angular/platform-browser-dynamic": "^20.0.0",
+    "@angular/platform-browser-dynamic": "^21.2.11",
     "@angular/router": "^20.0.0",
     "chart.js": "^4.4.7",
     "firebase": "^11.10.0",
