@@ -128,9 +128,9 @@
               class="flex items-center gap-3 p-3 rounded-lg border-2 transition-all"
               [ngClass]="{
                 'border-indigo-500 bg-indigo-50 ring-1 ring-indigo-200':
-                  isSelected(expense.id),
+                  isSelected(expense.id) && !expense.isPaid,
                 'border-green-200 bg-green-50':
-                  !isSelected(expense.id) && expense.isPaid,
+                  expense.isPaid,
                 'border-gray-200 hover:border-gray-300':
                   !isSelected(expense.id) && !expense.isPaid,
               }"
@@ -140,7 +140,9 @@
                 (click)="toggleExpensePaid(expense.id)"
                 class="flex-shrink-0"
                 [attr.title]="
-                  expense.isPaid ? 'Marcar como pendiente' : 'Marcar como pagado'
+                  expense.isPaid
+                    ? 'Marcar como pendiente'
+                    : 'Seleccionar para pagar con «Pagar»'
                 "
               >
                 @if (expense.isPaid) {
@@ -219,56 +221,58 @@
                 </div>
               </div>
 
-              <button
-                type="button"
-                (click)="toggleExpenseSelection(expense.id)"
-                class="flex-shrink-0 rounded-lg transition-colors relative w-11 h-11 inline-flex items-center justify-center ring-2 ring-transparent"
-                [ngClass]="{
-                  'bg-indigo-600 text-white ring-indigo-300': isSelected(
-                    expense.id
-                  ),
-                  'bg-white border-2 border-gray-300 text-gray-400 hover:border-indigo-300 hover:bg-indigo-50/50':
-                    !isSelected(expense.id),
-                }"
-                [attr.title]="
-                  isSelected(expense.id)
-                    ? 'Quitar de la selección'
-                    : 'Seleccionar para pagar varios o eliminar'
-                "
-                [attr.aria-checked]="isSelected(expense.id)"
-                role="checkbox"
-              >
-                @if (isSelected(expense.id)) {
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="22"
-                    height="22"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2.5"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    aria-hidden="true"
-                  >
-                    <path d="M20 6 9 17l-5-5" />
-                  </svg>
-                } @else {
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="22"
-                    height="22"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    class="opacity-40"
-                    aria-hidden="true"
-                  >
-                    <rect x="4" y="4" width="16" height="16" rx="2" ry="2" />
-                  </svg>
-                }
-              </button>
+              @if (!expense.isPaid) {
+                <button
+                  type="button"
+                  (click)="toggleExpenseSelection(expense.id)"
+                  class="shrink-0 rounded-lg transition-colors relative w-11 h-11 inline-flex items-center justify-center ring-2 ring-transparent"
+                  [ngClass]="{
+                    'bg-indigo-600 text-white ring-indigo-300': isSelected(
+                      expense.id
+                    ),
+                    'bg-white border-2 border-gray-300 text-gray-400 hover:border-indigo-300 hover:bg-indigo-50/50':
+                      !isSelected(expense.id),
+                  }"
+                  [attr.title]="
+                    isSelected(expense.id)
+                      ? 'Quitar de la selección'
+                      : 'Seleccionar para pagar o eliminar'
+                  "
+                  [attr.aria-checked]="isSelected(expense.id)"
+                  role="checkbox"
+                >
+                  @if (isSelected(expense.id)) {
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="22"
+                      height="22"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2.5"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      aria-hidden="true"
+                    >
+                      <path d="M20 6 9 17l-5-5" />
+                    </svg>
+                  } @else {
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="22"
+                      height="22"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      class="opacity-40"
+                      aria-hidden="true"
+                    >
+                      <rect x="4" y="4" width="16" height="16" rx="2" ry="2" />
+                    </svg>
+                  }
+                </button>
+              }
             </div>
           }
         </div>
@@ -364,15 +368,25 @@
   />
 
   @if (paidByModalOpen()) {
-    <dialog
-      open
-      class="rounded-2xl shadow-xl w-full max-w-sm p-0 backdrop:bg-black/40"
-      (click)="onPaidByDialogClick($event)"
-      (keydown.escape)="closePaidByModal()"
-      aria-label="¿Quién pagó?"
+    <div
+      class="fixed inset-0 z-[100] flex items-center justify-center p-4"
+      role="presentation"
     >
-      <div class="bg-white rounded-2xl p-4">
-        <h3 class="text-lg font-bold text-gray-800 mb-2">¿Quién pagó?</h3>
+      <div
+        class="absolute inset-0 bg-black/50"
+        (click)="closePaidByModal()"
+        aria-hidden="true"
+      ></div>
+      <div
+        class="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 max-h-[85vh] overflow-y-auto"
+        (click)="stopPaidByModalBubble($event)"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="paid-by-modal-title"
+      >
+        <h3 id="paid-by-modal-title" class="text-lg font-bold text-gray-800 mb-2">
+          ¿Quién pagó?
+        </h3>
         @if ((pendingPaidExpenseIds() ?? []).length > 0) {
           <p class="text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 mb-3">
             @if ((pendingPaidExpenseIds() ?? []).length === 1) {
@@ -413,6 +427,6 @@
           </button>
         </div>
       </div>
-    </dialog>
+    </div>
   }
 </div>

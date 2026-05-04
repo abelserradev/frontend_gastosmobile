@@ -1,5 +1,12 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import {
+  Component,
+  computed,
+  HostListener,
+  inject,
+  OnInit,
+  signal,
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ChartData, ChartOptions } from 'chart.js';
@@ -102,6 +109,13 @@ export class ExpensesPageComponent implements OnInit {
       },
     };
   });
+
+  @HostListener('document:keydown.escape')
+  onPaidByModalEscape(): void {
+    if (this.paidByModalOpen()) {
+      this.closePaidByModal();
+    }
+  }
 
   ngOnInit(): void {
     if (!this.auth.hasSession()) {
@@ -221,7 +235,8 @@ export class ExpensesPageComponent implements OnInit {
       return;
     }
     if (!ex.isPaid) {
-      this.openPaidByModal(id);
+      // El modal “¿Quién pagó?” solo desde el botón Pagar; igual que la casilla derecha.
+      this.toggleExpenseSelection(id);
       return;
     }
     this.meApi.patchExpensePaid(id, false).subscribe({
@@ -230,24 +245,6 @@ export class ExpensesPageComponent implements OnInit {
         globalThis.alert(formatApiHttpError(err));
       },
     });
-  }
-
-  openPaidByModal(expenseId: string): void {
-    const ex = this.ctx.expenses().find((e) => e.id === expenseId);
-    if (!ex?.profileId) {
-      globalThis.alert('No se pudo determinar el perfil del gasto');
-      return;
-    }
-    const perfiles = this.ctx.profiles();
-    if (perfiles.length === 0) {
-      globalThis.alert(
-        'No hay perfiles. Ve a Perfiles, crea al menos uno y vuelve para indicar quién pagó.',
-      );
-      return;
-    }
-    this.pendingPaidExpenseIds.set([expenseId]);
-    this.paidByProfileId.set('');
-    this.paidByModalOpen.set(true);
   }
 
   openBulkPaidByModal(): void {
@@ -276,12 +273,6 @@ export class ExpensesPageComponent implements OnInit {
     this.paidByModalOpen.set(false);
     this.pendingPaidExpenseIds.set(null);
     this.paidByProfileId.set('');
-  }
-
-  onPaidByDialogClick(event: MouseEvent): void {
-    if (event.target === event.currentTarget) {
-      this.closePaidByModal();
-    }
   }
 
   confirmPaidBy(): void {
@@ -323,7 +314,18 @@ export class ExpensesPageComponent implements OnInit {
       });
   }
 
+  stopPaidByModalBubble(event: Event): void {
+    event.stopPropagation();
+  }
+
   private applyPatchedExpense(id: string, row: MeExpense): void {
+    if (row.isPaid) {
+      this.selectedExpenses.update((prev) => {
+        const nextSel = new Set(prev);
+        nextSel.delete(id);
+        return nextSel;
+      });
+    }
     this.ctx.setExpenses(
       this.ctx
         .expenses()
@@ -345,6 +347,10 @@ export class ExpensesPageComponent implements OnInit {
   }
 
   toggleExpenseSelection(expenseId: string): void {
+    const ex = this.ctx.expenses().find((e) => e.id === expenseId);
+    if (ex?.isPaid) {
+      return;
+    }
     const next = new Set(this.selectedExpenses());
     if (next.has(expenseId)) {
       next.delete(expenseId);
