@@ -1,0 +1,39 @@
+# Deploy manual del SPA/nginx en Coolify.
+#
+# Secret → Actions (este repo): COOLIFY_WEBHOOK_FRONTEND = URL del Deploy Webhook de ese recurso.
+name: Deploy Coolify
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  trigger:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Disparar webhook Coolify (frontend)
+        env:
+          WEBHOOK: ${{ secrets.COOLIFY_WEBHOOK_FRONTEND }}
+        run: |
+          set -euo pipefail
+          if [ -z "${WEBHOOK:-}" ]; then
+            echo "::error::Definí el repository secret COOLIFY_WEBHOOK_FRONTEND."
+            exit 1
+          fi
+          echo "Disparando deploy frontend..."
+          code="$(curl -sS -o /tmp/coolify_body -w "%{http_code}" \
+            -X POST "$WEBHOOK" \
+            -H "Accept: application/json" \
+            -H "Content-Type: application/json" \
+            --data '{}' \
+            --max-time 120 \
+            --retry 2 \
+            --retry-delay 3)"
+          if [ "$code" -lt 200 ] || [ "$code" -ge 300 ]; then
+            echo "::error::Webhook respondió HTTP $code"
+            head -c 512 /tmp/coolify_body >&2 || true
+            exit 1
+          fi
+          echo "Deploy solicitado. Revisá Coolify."

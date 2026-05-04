@@ -50,7 +50,7 @@ export class ResetPasswordPageComponent implements OnInit {
       next: () => {
         this.submitting.set(false);
         globalThis.alert(
-          'Contraseña actualizada. Ya podés iniciar sesión con tu nueva clave.',
+          'Contraseña actualizada. Ya puedes iniciar sesión con tu nueva clave.',
         );
         this.router.navigate(['/login']).catch(() => undefined);
       },
