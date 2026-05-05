@@ -1,1 +1,11 @@
-/* Modal posicionado fixed; el host no fuerza layout */
+/* Dialog nativo: quitar chrome por defecto y unificar backdrop con el diseño anterior */
+dialog.expense-modal-dialog {
+  &::backdrop {
+    background-color: rgb(0 0 0 / 0.5);
+  }
+
+  &:not([open]) {
+    display: none;
+  }
+}
+

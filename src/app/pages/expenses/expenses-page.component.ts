@@ -1,11 +1,15 @@
 import { CommonModule } from '@angular/common';
 import {
+  afterNextRender,
   Component,
   computed,
-  HostListener,
+  effect,
+  ElementRef,
   inject,
+  Injector,
   OnInit,
   signal,
+  viewChild,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -16,6 +20,8 @@ import { formatApiHttpError } from '../../core/http-error.util';
 import { MeApiService, type MeExpense } from '../../core/me-api.service';
 import { ExpenseModalComponent } from './expense-modal.component';
 import { ExpensePieChartComponent } from './expense-pie-chart.component';
+
+const EXPENSES_PAGE_SIZE = 6;
 
 const COLORS = [
   '#6366f1',
@@ -40,6 +46,29 @@ export class ExpensesPageComponent implements OnInit {
   private readonly meApi = inject(MeApiService);
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly injector = inject(Injector);
+
+  readonly paidByDialog =
+    viewChild<ElementRef<HTMLDialogElement>>('paidByDialog');
+
+  /** 1-based; solo la lista visible está paginada. */
+  readonly expensesPage = signal(1);
+
+  readonly expenseTotalPages = computed(() => {
+    const n = this.ctx.expenses().length;
+    return Math.max(1, Math.ceil(n / EXPENSES_PAGE_SIZE));
+  });
+
+  readonly showExpensePagination = computed(
+    () => this.ctx.expenses().length > EXPENSES_PAGE_SIZE,
+  );
+
+  readonly expensesPageSlice = computed(() => {
+    const all = this.ctx.expenses();
+    const page = this.expensesPage();
+    const start = (page - 1) * EXPENSES_PAGE_SIZE;
+    return all.slice(start, start + EXPENSES_PAGE_SIZE);
+  });
 
   readonly modalOpen = signal(false);
   readonly showChart = signal(false);
@@ -110,10 +139,34 @@ export class ExpensesPageComponent implements OnInit {
     };
   });
 
-  @HostListener('document:keydown.escape')
-  onPaidByModalEscape(): void {
-    if (this.paidByModalOpen()) {
-      this.closePaidByModal();
+  constructor() {
+    effect(() => {
+      const pages = this.expenseTotalPages();
+      if (this.expensesPage() > pages) {
+        this.expensesPage.set(pages);
+      }
+    });
+    effect(() => {
+      const abierto = this.paidByModalOpen();
+      afterNextRender(() => this.syncPaidByDialogOpen(abierto), {
+        injector: this.injector,
+      });
+    });
+  }
+
+  private syncPaidByDialogOpen(isOpen: boolean): void {
+    const host = this.paidByDialog()?.nativeElement;
+    if (!host) {
+      return;
+    }
+    if (isOpen) {
+      if (!host.open) {
+        host.showModal();
+      }
+      return;
+    }
+    if (host.open) {
+      host.close();
     }
   }
 
@@ -203,6 +256,7 @@ export class ExpensesPageComponent implements OnInit {
       })
       .subscribe({
         next: (row) => {
+          this.expensesPage.set(1);
           this.ctx.setExpenses([
             {
               id: row.id,
@@ -314,8 +368,30 @@ export class ExpensesPageComponent implements OnInit {
       });
   }
 
+  onPaidByDialogBackdropClick(event: MouseEvent): void {
+    const host = this.paidByDialog()?.nativeElement;
+    if (host && event.target === host) {
+      this.closePaidByModal();
+    }
+  }
+
+  onPaidByDialogKeydown(event: KeyboardEvent): void {
+    if (event.key !== 'Escape') {
+      return;
+    }
+    event.preventDefault();
+    this.closePaidByModal();
+  }
+
   stopPaidByModalBubble(event: Event): void {
     event.stopPropagation();
+  }
+
+  /** Paridad con `(click)` en el panel del modal; Escape lo gestiona el <dialog>. */
+  onPaidByPanelKeydown(event: KeyboardEvent): void {
+    if (!event.cancelable) {
+      return;
+    }
   }
 
   private applyPatchedExpense(id: string, row: MeExpense): void {
@@ -398,5 +474,14 @@ export class ExpensesPageComponent implements OnInit {
 
   goBack(): void {
     void this.router.navigate(['/profiles']);
+  }
+
+  goPrevExpensePage(): void {
+    this.expensesPage.update((p) => Math.max(1, p - 1));
+  }
+
+  goNextExpensePage(): void {
+    const max = this.expenseTotalPages();
+    this.expensesPage.update((p) => Math.min(max, p + 1));
   }
 }

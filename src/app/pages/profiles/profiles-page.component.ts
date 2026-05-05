@@ -181,4 +181,9 @@ export class ProfilesPageComponent implements OnInit {
       },
     });
   }
+
+  /** Volver al ingreso inicial por si cambió el sueldo / disponibilidad mensual. */
+  goBackToIncomeSetup(): void {
+    void this.router.navigate(['/setup']);
+  }
 }

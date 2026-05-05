@@ -1,11 +1,15 @@
 import { CommonModule } from '@angular/common';
 import {
+  afterNextRender,
   Component,
+  ElementRef,
   inject,
+  Injector,
   input,
   OnChanges,
   output,
   SimpleChanges,
+  viewChild,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import type { CategoryDraft, CurrencyCode } from '../../core/app-context.service';
@@ -21,6 +25,9 @@ import { MeApiService } from '../../core/me-api.service';
 })
 export class ExpenseModalComponent implements OnChanges {
   private readonly meApi = inject(MeApiService);
+  private readonly injector = inject(Injector);
+  readonly expenseDialog =
+    viewChild<ElementRef<HTMLDialogElement>>('expenseDialog');
 
   readonly open = input.required<boolean>();
   readonly categories = input.required<CategoryDraft[]>();
@@ -51,6 +58,28 @@ export class ExpenseModalComponent implements OnChanges {
     if (changes['open']?.currentValue === true) {
       this.reset();
       this.paymentDate = todayYmdCaracas();
+    }
+    if (changes['open']) {
+      afterNextRender(() => this.syncExpenseDialogOpen(), {
+        injector: this.injector,
+      });
+    }
+  }
+
+  /** showModal/close enlazan el <dialog> con el input open() del padre. */
+  private syncExpenseDialogOpen(): void {
+    const host = this.expenseDialog()?.nativeElement;
+    if (!host) {
+      return;
+    }
+    if (this.open()) {
+      if (!host.open) {
+        host.showModal();
+      }
+      return;
+    }
+    if (host.open) {
+      host.close();
     }
   }
 
@@ -99,14 +128,14 @@ export class ExpenseModalComponent implements OnChanges {
 
   handleSubmit(): void {
     if (!this.title.trim() || !this.category) {
-      window.alert('Por favor completa título y categoría');
+      globalThis.alert('Por favor completa título y categoría');
       return;
     }
     const cur = this.defaultCurrency();
     if (cur === 'USD') {
       const n = Number.parseFloat(this.amountUsd);
       if (Number.isNaN(n) || n < 0) {
-        window.alert('Monto en USD no válido');
+        globalThis.alert('Monto en USD no válido');
         return;
       }
       const pay = String(this.paymentDate ?? '').trim() || undefined;
@@ -122,7 +151,7 @@ export class ExpenseModalComponent implements OnChanges {
     const date = String(this.paymentDate ?? '').trim() || todayYmdCaracas();
     const bs = Number.parseFloat(this.amountBsText());
     if (Number.isNaN(bs) || bs < 0) {
-      window.alert('Monto en Bs. no válido');
+      globalThis.alert('Monto en Bs. no válido');
       return;
     }
     this.meApi.getBcvOfficialRate(date).subscribe({
@@ -137,7 +166,7 @@ export class ExpenseModalComponent implements OnChanges {
         });
       },
       error: () => {
-        window.alert('No se pudo obtener la tasa BCV para esa fecha.');
+        globalThis.alert('No se pudo obtener la tasa BCV para esa fecha.');
       },
     });
   }
@@ -159,8 +188,27 @@ export class ExpenseModalComponent implements OnChanges {
     this.openChange.emit(false);
   }
 
-  onBackdropClick(): void {
+  onBackdropClick(event: MouseEvent): void {
+    const host = this.expenseDialog()?.nativeElement;
+    if (host && event.target === host) {
+      this.handleCancel();
+    }
+  }
+
+  /** Escape cierra el modal y notifica al padre; `preventDefault` evita el cierre nativo duplicado antes de `close()` en sync. */
+  onDialogKeydown(event: KeyboardEvent): void {
+    if (event.key !== 'Escape') {
+      return;
+    }
+    event.preventDefault();
     this.handleCancel();
+  }
+
+  /** Paridad accesibilidad con `(click)` en el panel; no interceptamos teclas — el <dialog> gestiona Escape. */
+  onExpensePanelKeydown(event: KeyboardEvent): void {
+    if (!event.cancelable) {
+      return;
+    }
   }
 
   stopBubble(event: Event): void {

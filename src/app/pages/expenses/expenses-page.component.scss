@@ -1,3 +1,13 @@
 :host {
   display: block;
 }
+
+dialog.paid-by-modal-dialog {
+  &::backdrop {
+    background-color: rgb(0 0 0 / 0.5);
+  }
+
+  &:not([open]) {
+    display: none;
+  }
+}
