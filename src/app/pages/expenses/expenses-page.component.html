@@ -1,6 +1,6 @@
-<div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 pb-8">
+<div class="min-h-screen bg-gradient-to-br from-muted to-background pb-8">
   <div
-    class="bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-6 rounded-b-3xl shadow-lg"
+    class="bg-gradient-to-r from-primary to-secondary text-secondary-foreground p-6 rounded-b-3xl shadow-lg"
   >
 
   <div class="max-w-md mx-auto">
@@ -8,7 +8,7 @@
       <button
         type="button"
         (click)="goBack()"
-        class="inline-flex items-center text-xs font-medium text-indigo-100 hover:text-white transition-colors shrink-0"
+        class="inline-flex items-center text-xs font-medium text-secondary-foreground/90 hover:text-secondary-foreground transition-colors shrink-0"
         aria-label="Volver atrás"
       >
         <svg
@@ -29,14 +29,14 @@
         <button
           type="button"
           (click)="handleLogout()"
-          class="text-xs font-medium text-indigo-100 hover:text-white transition-colors shrink-0"
+          class="text-xs font-medium text-secondary-foreground/90 hover:text-secondary-foreground transition-colors shrink-0"
           aria-label="Cerrar sesión"
         >
           Cerrar sesión
         </button>
       </div>
-      <p class="text-center text-indigo-100 text-sm mb-2">Ingreso Mensual</p>
-      <p class="text-center text-indigo-200/80 text-xs mb-1">Montos base en USD</p>
+      <p class="text-center text-secondary-foreground/90 text-sm mb-2">Ingreso Mensual</p>
+      <p class="text-center text-secondary-foreground/75 text-xs mb-1">Montos base en USD</p>
       <div class="text-center">
         <p class="text-4xl font-bold">
           $
@@ -44,17 +44,17 @@
         </p>
       </div>
       <div class="mt-4 grid grid-cols-2 gap-3 text-sm">
-        <div class="bg-white/20 rounded-lg p-3 backdrop-blur-sm">
-          <p class="text-indigo-100">Total Gastado</p>
+        <div class="bg-card/20 rounded-lg p-3 backdrop-blur-sm">
+          <p class="text-secondary-foreground/90">Total Gastado</p>
           <p class="text-xl font-bold">
             $ {{ totalExpenses().toFixed(2) }}
           </p>
         </div>
-        <div class="bg-white/20 rounded-lg p-3 backdrop-blur-sm">
-          <p class="text-indigo-100">Disponible</p>
+        <div class="bg-card/20 rounded-lg p-3 backdrop-blur-sm">
+          <p class="text-secondary-foreground/90">Disponible</p>
           <p
             class="text-xl font-bold"
-            [class.text-red-300]="remaining() < 0"
+            [class.text-destructive]="remaining() < 0"
           >
             $ {{ remaining().toFixed(2) }}
           </p>
@@ -67,7 +67,7 @@
     <button
       type="button"
       (click)="toggleChart()"
-      class="w-full bg-white rounded-lg shadow-md p-4 mb-4 flex items-center justify-between hover:shadow-lg transition-shadow"
+      class="w-full bg-card rounded-lg shadow-md p-4 mb-4 flex items-center justify-between hover:shadow-lg transition-shadow"
     >
       <div class="flex items-center gap-2">
         <svg
@@ -78,23 +78,23 @@
           fill="none"
           stroke="currentColor"
           stroke-width="2"
-          class="text-indigo-600 shrink-0"
+          class="text-primary shrink-0"
         >
           <path
             d="M21.21 15.89A10 10 0 1 1 8 2.83"
           />
           <path d="M22 12A10 10 0 0 0 12 2v10z" />
         </svg>
-        <span class="font-medium text-gray-700">
+        <span class="font-medium text-foreground">
           {{ showChart() ? 'Ocultar' : 'Ver' }} Gráfico de Categorías
         </span>
       </div>
-      <span class="text-indigo-600 text-xl">{{ showChart() ? '−' : '+' }}</span>
+      <span class="text-primary text-xl">{{ showChart() ? '−' : '+' }}</span>
     </button>
 
     @if (showChart() && (pieChartData().labels?.length ?? 0) > 0) {
-      <div class="bg-white rounded-xl shadow-md p-4 mb-4">
-        <h3 class="text-lg font-bold text-gray-800 mb-4 text-center">
+      <div class="bg-card rounded-xl shadow-md p-4 mb-4">
+        <h3 class="text-lg font-bold text-card-foreground mb-4 text-center">
           Gastos por Categoría
         </h3>
         <div class="h-[300px] w-full relative">
@@ -107,17 +107,17 @@
     }
 
     <div class="flex items-center justify-between mb-4">
-      <h2 class="text-xl font-bold text-gray-800">Mis Gastos</h2>
+      <h2 class="text-xl font-bold text-card-foreground">Mis Gastos</h2>
       @if (selectedExpenses().size > 0) {
-        <span class="text-sm text-indigo-600 font-medium">
+        <span class="text-sm text-primary font-medium">
           {{ selectedExpenses().size }} seleccionado(s)
         </span>
       }
     </div>
 
-    <div class="bg-white rounded-xl shadow-md p-4 mb-4">
+    <div class="bg-card rounded-xl shadow-md p-4 mb-4">
       @if (ctx.expenses().length === 0) {
-        <div class="text-center py-8 text-gray-500">
+        <div class="text-center py-8 text-muted-foreground">
           <p>No hay gastos registrados</p>
           <p class="text-sm mt-2">Agrega tu primer gasto usando el botón de abajo</p>
         </div>
@@ -127,11 +127,11 @@
             <div
               class="flex items-center gap-3 p-3 rounded-lg border-2 transition-all"
               [ngClass]="{
-                'border-indigo-500 bg-indigo-50 ring-1 ring-indigo-200':
+                'border-primary bg-muted ring-1 ring-ring/50':
                   isSelected(expense.id) && !expense.isPaid,
-                'border-green-200 bg-green-50':
+                'border-accent/50 bg-muted':
                   expense.isPaid,
-                'border-gray-200 hover:border-gray-300':
+                'border-border hover:border-input':
                   !isSelected(expense.id) && !expense.isPaid,
               }"
             >
@@ -154,7 +154,7 @@
                     fill="none"
                     stroke="currentColor"
                     stroke-width="2"
-                    class="text-green-600"
+                    class="text-accent"
                   >
                     <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
                     <path d="m9 11 3 3L22 4" />
@@ -168,7 +168,7 @@
                     fill="none"
                     stroke="currentColor"
                     stroke-width="2"
-                    class="text-gray-400"
+                    class="text-muted-foreground"
                   >
                     <circle cx="12" cy="12" r="10" />
                   </svg>
@@ -180,22 +180,22 @@
                   <div>
                     <p
                       class="font-medium"
-                      [class.text-gray-800]="expense.isPaid"
-                      [class.text-gray-600]="!expense.isPaid"
+                      [class.text-card-foreground]="expense.isPaid"
+                      [class.text-muted-foreground]="!expense.isPaid"
                     >
                       {{ expense.title }}
                     </p>
                     @if (expense.description) {
-                      <p class="text-sm text-gray-500 mt-1">
+                      <p class="text-sm text-muted-foreground mt-1">
                         {{ expense.description }}
                       </p>
                     }
-                    <p class="text-xs text-gray-400 mt-1">{{ expense.category }}</p>
+                    <p class="text-xs text-muted-foreground/90 mt-1">{{ expense.category }}</p>
                     @if (expense.bcvRateApplied != null) {
-                      <p class="text-xs text-indigo-600 mt-1">
+                      <p class="text-xs text-primary mt-1">
                         Tasa BCV {{ expense.bcvRateApplied.toFixed(4) }} Bs/USD
                         @if (expense.bcvRateDate) {
-                          <span class="text-gray-500"
+                          <span class="text-muted-foreground"
                             >({{ expense.bcvRateDate }})</span
                           >
                         }
@@ -205,15 +205,15 @@
                   <div class="text-right shrink-0">
                     <p
                       class="font-bold"
-                      [class.text-gray-900]="expense.isPaid"
-                      [class.text-gray-500]="!expense.isPaid"
+                      [class.text-foreground]="expense.isPaid"
+                      [class.text-muted-foreground]="!expense.isPaid"
                     >
                       $ {{ expense.amount.toFixed(2) }}
                     </p>
                     <p
                       class="text-xs mt-1 font-medium"
-                      [class.text-green-600]="expense.isPaid"
-                      [class.text-orange-600]="!expense.isPaid"
+                      [class.text-accent]="expense.isPaid"
+                      [class.text-primary]="!expense.isPaid"
                     >
                       {{ expense.isPaid ? 'Pagado' : 'Pendiente' }}
                     </p>
@@ -223,7 +223,7 @@
 
               @if (!expense.isPaid) {
                 <label
-                  class="shrink-0 relative inline-flex w-11 h-11 cursor-pointer rounded-lg transition-colors ring-2 ring-transparent hover:border-indigo-300 hover:bg-indigo-50/50 has-[:focus-visible]:outline-none has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-indigo-400"
+                  class="shrink-0 relative inline-flex w-11 h-11 cursor-pointer rounded-lg transition-colors ring-2 ring-transparent hover:border-ring/50 hover:bg-muted/80 has-[:focus-visible]:outline-none has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring"
                   [attr.title]="
                     isSelected(expense.id)
                       ? 'Quitar de la selección'
@@ -242,7 +242,7 @@
                     "
                   />
                   <span
-                    class="pointer-events-none absolute inset-0 flex items-center justify-center rounded-lg border-2 border-gray-300 bg-white text-gray-400 transition-colors peer-checked:border-indigo-600 peer-checked:bg-indigo-600 peer-checked:text-white peer-checked:ring-indigo-300 peer-checked:ring-2"
+                    class="pointer-events-none absolute inset-0 flex items-center justify-center rounded-lg border-2 border-border bg-card text-muted-foreground transition-colors peer-checked:border-primary peer-checked:bg-primary peer-checked:text-primary-foreground peer-checked:ring-ring peer-checked:ring-2"
                   >
                   @if (isSelected(expense.id)) {
                     <svg
@@ -282,7 +282,7 @@
         </div>
         @if (showExpensePagination()) {
           <nav
-            class="flex items-center justify-between gap-3 pt-3 mt-1 border-t border-gray-100"
+            class="flex items-center justify-between gap-3 pt-3 mt-1 border-t border-border"
             aria-label="Paginación de gastos"
           >
             <button
@@ -291,15 +291,15 @@
               [disabled]="expensesPage() <= 1"
               class="px-3 py-2 rounded-lg text-sm font-medium transition-colors min-w-[7rem]"
               [ngClass]="{
-                'bg-gray-100 text-gray-400 cursor-not-allowed':
+                'bg-muted text-muted-foreground cursor-not-allowed':
                   expensesPage() <= 1,
-                'bg-indigo-50 text-indigo-700 hover:bg-indigo-100':
+                'bg-muted text-primary hover:opacity-90':
                   expensesPage() > 1,
               }"
             >
               Anterior
             </button>
-            <span class="text-sm text-gray-600 shrink-0 tabular-nums">
+            <span class="text-sm text-muted-foreground shrink-0 tabular-nums">
               {{ expensesPage() }} / {{ expenseTotalPages() }}
             </span>
             <button
@@ -308,9 +308,9 @@
               [disabled]="expensesPage() >= expenseTotalPages()"
               class="px-3 py-2 rounded-lg text-sm font-medium transition-colors min-w-[7rem]"
               [ngClass]="{
-                'bg-gray-100 text-gray-400 cursor-not-allowed':
+                'bg-muted text-muted-foreground cursor-not-allowed':
                   expensesPage() >= expenseTotalPages(),
-                'bg-indigo-50 text-indigo-700 hover:bg-indigo-100':
+                'bg-muted text-primary hover:opacity-90':
                   expensesPage() < expenseTotalPages(),
               }"
             >
@@ -326,7 +326,7 @@
         <button
           type="button"
           (click)="openModal()"
-          class="flex items-center justify-center gap-2 bg-indigo-600 text-white py-3 rounded-lg font-medium hover:bg-indigo-700 transition-colors shadow-md"
+          class="flex items-center justify-center gap-2 bg-primary text-primary-foreground py-3 rounded-lg font-medium hover:opacity-90 transition-colors shadow-md"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -349,9 +349,9 @@
           [disabled]="!hasPendingPaySelection()"
           class="flex items-center justify-center gap-2 py-3 rounded-lg font-medium transition-colors shadow-md"
           [ngClass]="{
-            'bg-gray-300 text-gray-500 cursor-not-allowed':
+            'bg-muted text-muted-foreground cursor-not-allowed':
               !hasPendingPaySelection(),
-            'bg-emerald-600 text-white hover:bg-emerald-700':
+            'bg-accent text-accent-foreground hover:opacity-90':
               hasPendingPaySelection(),
           }"
         >
@@ -376,9 +376,9 @@
         [disabled]="selectedExpenses().size === 0"
         class="flex items-center justify-center gap-2 py-3 rounded-lg font-medium transition-colors shadow-md"
         [ngClass]="{
-          'bg-gray-300 text-gray-500 cursor-not-allowed':
+          'bg-muted text-muted-foreground cursor-not-allowed':
             selectedExpenses().size === 0,
-          'bg-red-600 text-white hover:bg-red-700': selectedExpenses().size > 0,
+          'bg-destructive text-destructive-foreground hover:opacity-90': selectedExpenses().size > 0,
         }"
       >
         <svg
@@ -417,15 +417,15 @@
     aria-labelledby="paid-by-modal-title"
   >
     <div
-      class="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 max-h-[85vh] overflow-y-auto"
+      class="relative bg-card rounded-2xl shadow-2xl w-full max-w-sm p-6 max-h-[85vh] overflow-y-auto"
       (click)="stopPaidByModalBubble($event)"
       (keydown)="onPaidByPanelKeydown($event)"
     >
-        <h3 id="paid-by-modal-title" class="text-lg font-bold text-gray-800 mb-2">
+        <h3 id="paid-by-modal-title" class="text-lg font-bold text-card-foreground mb-2">
           ¿Quién pagó?
         </h3>
         @if ((pendingPaidExpenseIds() ?? []).length > 0) {
-          <p class="text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 mb-3">
+          <p class="text-sm text-foreground bg-muted border border-primary/35 rounded-lg px-3 py-2 mb-3">
             @if ((pendingPaidExpenseIds() ?? []).length === 1) {
               Al confirmar se enviará <strong>un correo</strong> con el detalle del gasto.
             } @else {
@@ -434,13 +434,13 @@
             }
           </p>
         }
-        <p class="text-sm text-gray-600 mb-3">
+        <p class="text-sm text-muted-foreground mb-3">
           Elige el perfil que realizó el pago (los mismos que creas en Perfiles). Se usará en la notificación por correo.
         </p>
         <select
           [ngModel]="paidByProfileId()"
           (ngModelChange)="paidByProfileId.set($event)"
-          class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+          class="w-full border border-border rounded-lg px-3 py-2 focus:ring-2 focus:ring-ring focus:border-transparent"
         >
           <option value="" disabled>Selecciona un perfil…</option>
           @for (p of ctx.profiles(); track p.id) {
@@ -451,14 +451,14 @@
           <button
             type="button"
             (click)="closePaidByModal()"
-            class="px-3 py-2 text-gray-600 hover:text-gray-900 transition-colors"
+            class="px-3 py-2 text-muted-foreground hover:text-foreground transition-colors"
           >
             Cancelar
           </button>
           <button
             type="button"
             (click)="confirmPaidBy()"
-            class="px-3 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+            class="px-3 py-2 bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition-colors"
           >
             Confirmar
           </button>

@@ -1,11 +1,11 @@
-<div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-6">
+<div class="min-h-screen bg-gradient-to-br from-muted to-background p-6">
   <div class="max-w-md mx-auto">
-    <div class="bg-white rounded-2xl shadow-xl p-6 mt-8">
+    <div class="bg-card rounded-2xl shadow-xl p-6 mt-8">
       <div class="flex justify-between items-center gap-2 mb-2">
         <button
           type="button"
           (click)="goBackToIncomeSetup()"
-          class="inline-flex items-center text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors shrink-0"
+          class="inline-flex items-center text-sm font-medium text-muted-foreground hover:text-foreground transition-colors shrink-0"
           aria-label="Volver a ingreso mensual"
         >
           <svg
@@ -26,7 +26,7 @@
         <button
           type="button"
           (click)="handleLogout()"
-          class="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors shrink-0 ml-auto"
+          class="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors shrink-0 ml-auto"
           aria-label="Cerrar sesión"
         >
           Cerrar sesión
@@ -43,7 +43,7 @@
           stroke-width="2"
           stroke-linecap="round"
           stroke-linejoin="round"
-          class="text-indigo-600"
+          class="text-primary"
           aria-hidden="true"
         >
           <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
@@ -52,23 +52,23 @@
           <path d="M16 3.13a4 4 0 0 1 0 7.75" />
         </svg>
       </div>
-      <h1 class="text-3xl font-bold text-center text-indigo-900 mb-2">
+      <h1 class="text-3xl font-bold text-center text-foreground mb-2">
         Crear Perfiles
       </h1>
-      <p class="text-center text-gray-600 mb-6">
+      <p class="text-center text-muted-foreground mb-6">
         Gestiona gastos familiares o grupales
       </p>
 
       <div class="space-y-6">
         <div>
-          <p class="block text-sm font-medium text-gray-700 mb-2">Tipo de Perfil</p>
+          <p class="block text-sm font-medium text-foreground mb-2">Tipo de Perfil</p>
           <div class="grid grid-cols-2 gap-3">
             <button
               type="button"
               (click)="profileType = 'familiar'"
               [ngClass]="{
-                'bg-indigo-600 text-white shadow-md': profileType === 'familiar',
-                'bg-gray-100 text-gray-700 hover:bg-gray-200':
+                'bg-primary text-primary-foreground shadow-md': profileType === 'familiar',
+                'bg-muted text-muted-foreground hover:opacity-90':
                   profileType !== 'familiar',
               }"
               class="py-3 px-4 rounded-lg font-medium transition-all flex items-center justify-center gap-2"
@@ -95,8 +95,8 @@
               type="button"
               (click)="profileType = 'grupal'"
               [ngClass]="{
-                'bg-indigo-600 text-white shadow-md': profileType === 'grupal',
-                'bg-gray-100 text-gray-700 hover:bg-gray-200':
+                'bg-primary text-primary-foreground shadow-md': profileType === 'grupal',
+                'bg-muted text-muted-foreground hover:opacity-90':
                   profileType !== 'grupal',
               }"
               class="py-3 px-4 rounded-lg font-medium transition-all flex items-center justify-center gap-2"
@@ -124,7 +124,7 @@
 
         <div>
           <label
-            class="block text-sm font-medium text-gray-700 mb-2"
+            class="block text-sm font-medium text-foreground mb-2"
             for="profileNameInput"
             >Nombre del Perfil</label
           >
@@ -136,12 +136,12 @@
               [(ngModel)]="profileName"
               (keydown)="onNameKeydown($event)"
               placeholder="Ej: Familia García, Amigos del trabajo..."
-              class="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              class="flex-1 px-4 py-3 border border-border rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent"
             />
             <button
               type="button"
               (click)="handleAddProfile()"
-              class="bg-indigo-600 text-white px-4 rounded-lg hover:bg-indigo-700 transition-colors flex items-center gap-2 shrink-0"
+              class="bg-primary text-primary-foreground px-4 rounded-lg hover:opacity-90 transition-colors flex items-center gap-2 shrink-0"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -166,15 +166,15 @@
 
         @if (profiles.length > 0) {
           <div>
-            <p class="block text-sm font-medium text-gray-700 mb-2">Perfiles Creados</p>
+            <p class="block text-sm font-medium text-foreground mb-2">Perfiles Creados</p>
             <div class="space-y-2">
               @for (profile of profiles; track profile.id) {
                 <div
-                  class="flex items-center justify-between bg-gradient-to-r from-indigo-50 to-purple-50 px-4 py-3 rounded-lg border border-indigo-100"
+                  class="flex items-center justify-between bg-gradient-to-r from-muted to-muted px-4 py-3 rounded-lg border border-border"
                 >
                   <div>
-                    <p class="font-medium text-gray-800">{{ profile.name }}</p>
-                    <p class="text-sm text-gray-500 capitalize">
+                    <p class="font-medium text-card-foreground">{{ profile.name }}</p>
+                    <p class="text-sm text-muted-foreground capitalize">
                       {{ profile.type }}
                     </p>
                   </div>
@@ -182,14 +182,14 @@
                     <button
                       type="button"
                       (click)="openMembers(profile)"
-                      class="text-indigo-600 hover:text-indigo-800 transition-colors text-sm font-medium"
+                      class="text-primary hover:opacity-80 transition-colors text-sm font-medium"
                     >
                       Integrantes
                     </button>
                     <button
                       type="button"
                       (click)="handleRemoveProfile(profile.id)"
-                      class="text-red-500 hover:text-red-700 transition-colors p-2"
+                      class="text-destructive hover:opacity-80 transition-colors p-2"
                       aria-label="Eliminar perfil"
                     >
                       <svg
@@ -220,22 +220,22 @@
         @if (membersModalOpen) {
           <dialog
             open
-            class="rounded-2xl shadow-xl w-full max-w-md p-0 backdrop:bg-black/40"
+            class="rounded-2xl shadow-xl w-full max-w-md p-0 backdrop:bg-foreground/40"
             (click)="onMembersDialogClick($event)"
             (keydown.escape)="closeMembers()"
           >
-            <div class="bg-white rounded-2xl p-5">
+            <div class="bg-card rounded-2xl p-5">
               <div class="flex items-start justify-between gap-2 mb-4">
                 <div>
-                  <h2 class="text-xl font-bold text-gray-800">Integrantes</h2>
-                  <p class="text-sm text-gray-600">
+                  <h2 class="text-xl font-bold text-card-foreground">Integrantes</h2>
+                  <p class="text-sm text-muted-foreground">
                     Perfil: <span class="font-medium">{{ membersProfileName }}</span>
                   </p>
                 </div>
                 <button
                   type="button"
                   (click)="closeMembers()"
-                  class="text-gray-500 hover:text-gray-800"
+                  class="text-muted-foreground hover:text-foreground"
                   aria-label="Cerrar"
                 >
                   Cerrar
@@ -247,12 +247,12 @@
                   type="text"
                   [(ngModel)]="memberName"
                   placeholder="Nombre del integrante"
-                  class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  class="flex-1 px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent"
                 />
                 <button
                   type="button"
                   (click)="addMember()"
-                  class="bg-indigo-600 text-white px-4 rounded-lg hover:bg-indigo-700 transition-colors"
+                  class="bg-primary text-primary-foreground px-4 rounded-lg hover:opacity-90 transition-colors"
                 >
                   Agregar
                 </button>
@@ -260,20 +260,20 @@
 
               <div class="mt-4">
                 @if (membersLoading) {
-                  <p class="text-sm text-gray-500">Cargando…</p>
+                  <p class="text-sm text-muted-foreground">Cargando…</p>
                 } @else if (members.length === 0) {
-                  <p class="text-sm text-gray-500">
+                  <p class="text-sm text-muted-foreground">
                     Aún no hay integrantes. Agrega al menos uno para poder marcar pagos.
                   </p>
                 } @else {
                   <div class="space-y-2">
                     @for (m of members; track m.id) {
-                      <div class="flex items-center justify-between px-3 py-2 rounded-lg bg-gray-50 border border-gray-200">
-                        <span class="text-gray-800">{{ m.displayName }}</span>
+                      <div class="flex items-center justify-between px-3 py-2 rounded-lg bg-muted border border-border">
+                        <span class="text-card-foreground">{{ m.displayName }}</span>
                         <button
                           type="button"
                           (click)="removeMember(m.id)"
-                          class="text-red-500 hover:text-red-700 text-sm font-medium"
+                          class="text-destructive hover:opacity-80 text-sm font-medium"
                         >
                           Quitar
                         </button>
@@ -289,7 +289,7 @@
         <button
           type="button"
           (click)="handleContinue()"
-          class="w-full bg-indigo-600 text-white py-3 rounded-lg font-medium hover:bg-indigo-700 transition-colors shadow-md mt-8"
+          class="w-full bg-primary text-primary-foreground py-3 rounded-lg font-medium hover:opacity-90 transition-colors shadow-md mt-8"
         >
           Continuar
         </button>

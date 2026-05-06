@@ -6,18 +6,18 @@
   aria-labelledby="expense-modal-title"
 >
   <div
-    class="relative bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl max-h-[90vh] overflow-y-auto"
+    class="relative bg-card rounded-2xl p-6 w-full max-w-md shadow-2xl max-h-[90vh] overflow-y-auto"
     (click)="stopBubble($event)"
     (keydown)="onExpensePanelKeydown($event)"
   >
-    <h2 id="expense-modal-title" class="text-2xl font-bold text-gray-900 mb-4">
+    <h2 id="expense-modal-title" class="text-2xl font-bold text-foreground mb-4">
       Agregar Gasto
     </h2>
 
     <form (ngSubmit)="handleSubmit()" class="space-y-4">
       <div>
         <label
-          class="block text-sm font-medium text-gray-700 mb-1"
+          class="block text-sm font-medium text-foreground mb-1"
           for="expense-title-input"
           >Título *</label
         >
@@ -27,14 +27,14 @@
           name="title"
           [(ngModel)]="title"
           placeholder="Ej: Supermercado, Gasolina..."
-          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+          class="w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent"
           required
         />
       </div>
 
       <div>
         <label
-          class="block text-sm font-medium text-gray-700 mb-1"
+          class="block text-sm font-medium text-foreground mb-1"
           for="expense-description-input"
           >Descripción</label
         >
@@ -44,13 +44,13 @@
           [(ngModel)]="description"
           placeholder="Detalles adicionales (opcional)"
           rows="3"
-          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none"
+          class="w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent resize-none"
         ></textarea>
       </div>
 
       <div>
         <label
-          class="block text-sm font-medium text-gray-700 mb-1"
+          class="block text-sm font-medium text-foreground mb-1"
           for="expense-category-select"
           >Categoría *</label
         >
@@ -58,7 +58,7 @@
           id="expense-category-select"
           name="category"
           [(ngModel)]="category"
-          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+          class="w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent"
           required
         >
           <option value="">Selecciona una categoría</option>
@@ -70,7 +70,7 @@
 
       <div>
         <label
-          class="block text-sm font-medium text-gray-700 mb-1"
+          class="block text-sm font-medium text-foreground mb-1"
           for="expense-payment-date"
           >Fecha del pago *</label
         >
@@ -81,10 +81,10 @@
           [(ngModel)]="paymentDate"
           (ngModelChange)="scheduleBsPreview()"
           [max]="paymentDateMaxYmd()"
-          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+          class="w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent"
           [required]="defaultCurrency() === 'BS'"
         />
-        <p class="text-xs text-gray-500 mt-1">
+        <p class="text-xs text-muted-foreground mt-1">
           @if (defaultCurrency() === 'BS') {
             La tasa BCV aplicada será la de esta fecha.
           } @else {
@@ -96,7 +96,7 @@
       @if (defaultCurrency() === 'BS') {
         <div>
           <label
-            class="block text-sm font-medium text-gray-700 mb-1"
+            class="block text-sm font-medium text-foreground mb-1"
             for="expense-amount-bs"
             >Monto en Bs. *</label
           >
@@ -108,27 +108,27 @@
             [(ngModel)]="amountBs"
             (ngModelChange)="scheduleBsPreview()"
             placeholder="0.00"
-            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+            class="w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent"
             required
           />
         </div>
         <div
-          class="rounded-xl border border-indigo-200 bg-indigo-50/80 px-4 py-3"
+          class="rounded-xl border border-border bg-muted/90 px-4 py-3"
         >
-          <p class="text-xs text-gray-600 uppercase tracking-wide mb-1">
+          <p class="text-xs text-muted-foreground uppercase tracking-wide mb-1">
             Monto en USD (según tasa del día elegido)
           </p>
           @if (previewLoading) {
-            <p class="text-sm text-gray-500">Calculando…</p>
+            <p class="text-sm text-muted-foreground">Calculando…</p>
           } @else if (usdPreview != null) {
-            <p class="text-lg font-semibold text-indigo-900 tabular-nums">
+            <p class="text-lg font-semibold text-foreground tabular-nums">
               ${{ usdPreview | number: '1.2-2' }} USD
             </p>
-            <p class="text-xs text-gray-500 mt-1">
+            <p class="text-xs text-muted-foreground mt-1">
               Se guardará este monto en dólares en tu resumen.
             </p>
           } @else {
-            <p class="text-sm text-gray-500">
+            <p class="text-sm text-muted-foreground">
               Ingresa un monto en Bs. para ver el equivalente.
             </p>
           }
@@ -136,13 +136,13 @@
       } @else {
         <div>
           <label
-            class="block text-sm font-medium text-gray-700 mb-1"
+            class="block text-sm font-medium text-foreground mb-1"
             for="expense-amount-usd"
             >Monto en USD *</label
           >
           <div class="relative">
             <span
-              class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"
+              class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
               aria-hidden="true"
               >$</span
             >
@@ -153,7 +153,7 @@
               step="0.01"
               [(ngModel)]="amountUsd"
               placeholder="0.00"
-              class="w-full pl-8 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              class="w-full pl-8 pr-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent"
               required
             />
           </div>
@@ -164,13 +164,13 @@
         <button
           type="button"
           (click)="handleCancel()"
-          class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+          class="flex-1 px-4 py-2 border border-border text-foreground rounded-lg hover:bg-muted transition-colors font-medium"
         >
           Cancelar
         </button>
         <button
           type="submit"
-          class="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium"
+          class="flex-1 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition-colors font-medium"
         >
           Aceptar
         </button>

@@ -4,7 +4,8 @@
 
 dialog.paid-by-modal-dialog {
   &::backdrop {
-    background-color: rgb(0 0 0 / 0.5);
+    /* Opacidad sobre foreground: evita negro fuera de la paleta */
+    background-color: color-mix(in srgb, var(--foreground) 45%, transparent);
   }
 
   &:not([open]) {

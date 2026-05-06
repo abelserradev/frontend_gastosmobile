@@ -1,7 +1,7 @@
 /* Dialog nativo: quitar chrome por defecto y unificar backdrop con el diseño anterior */
 dialog.expense-modal-dialog {
   &::backdrop {
-    background-color: rgb(0 0 0 / 0.5);
+    background-color: color-mix(in srgb, var(--foreground) 45%, transparent);
   }
 
   &:not([open]) {

@@ -2,6 +2,93 @@
 
 @source "./**/*.{html,ts}";
 
+/* Pokémon Palette — única fuente de color del proyecto (light + dark). */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+}
+
+:root {
+  --background: #fdfcfc;
+  --foreground: #281e15;
+  --card: #ffffff;
+  --card-foreground: #281e15;
+  --popover: #ffffff;
+  --popover-foreground: #281e15;
+  --primary: #ee8329;
+  --primary-foreground: #0a0a0a;
+  --secondary: #cd5241;
+  --secondary-foreground: #ffffff;
+  --muted: #f7f3f2;
+  --muted-foreground: #846662;
+  --accent: #084152;
+  --accent-foreground: #ffffff;
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  --border: #ebe5e0;
+  --input: #ebe5e0;
+  --ring: #ee822b;
+  --chart-1: #ee8329;
+  --chart-2: #cd5241;
+  --chart-3: #084152;
+  --chart-4: #ee8329;
+  --chart-5: #cd5241;
+}
+
+.dark {
+  --background: #1a1714;
+  --foreground: #f6f5f4;
+  --card: #27211b;
+  --card-foreground: #f6f5f4;
+  --popover: #27211b;
+  --popover-foreground: #f6f5f4;
+  --primary: #ee822b;
+  --primary-foreground: #0a0a0a;
+  --secondary: #cf594a;
+  --secondary-foreground: #ffffff;
+  --muted: #372725;
+  --muted-foreground: #b39b98;
+  --accent: #2ebeea;
+  --accent-foreground: #0a0a0a;
+  --destructive: #dc2626;
+  --destructive-foreground: #ffffff;
+  --border: #43372d;
+  --input: #43372d;
+  --ring: #ee822b;
+  --chart-1: #ee8329;
+  --chart-2: #cd5241;
+  --chart-3: #084152;
+  --chart-4: #ee8329;
+  --chart-5: #cd5241;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+}
+
 input[type="number"]::-webkit-outer-spin-button,
 input[type="number"]::-webkit-inner-spin-button {
   -webkit-appearance: none;

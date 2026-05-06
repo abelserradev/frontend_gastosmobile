@@ -23,16 +23,8 @@ import { ExpensePieChartComponent } from './expense-pie-chart.component';
 
 const EXPENSES_PAGE_SIZE = 6;
 
-const COLORS = [
-  '#6366f1',
-  '#8b5cf6',
-  '#ec4899',
-  '#f59e0b',
-  '#10b981',
-  '#3b82f6',
-  '#ef4444',
-  '#06b6d4',
-];
+/* Solo chart-1…3 + destructive de la paleta fija */
+const COLORS = ['#ee8329', '#cd5241', '#084152', '#ef4444'];
 
 @Component({
   selector: 'app-expenses-page',
