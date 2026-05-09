@@ -42,9 +42,10 @@
             >Ingreso Mensual</label
           >
           <p class="text-xs text-muted-foreground mb-2">
-            El resumen de la app usa siempre <strong>USD</strong> como monto base;
-            si eliges Bs., convertimos con la tasa del día y guardamos el equivalente
-            en dólares.
+            Los gastos y totales de la app siguen en <strong>USD</strong>. Si
+            elegís Bs., guardamos tu monto nominal en bolívares y el equivalente
+            en dólares se recalcula cada vez con la tasa oficial más reciente: mismos
+            Bs., distinto poder adquisitivo en USD si la tasa cambia.
           </p>
           @if (currency === 'BS') {
             @if (bcvLoading) {
@@ -98,7 +99,8 @@
               </p>
               <p class="text-xs text-muted-foreground mt-1">
                 A la tasa de {{ bcvVesPerUsd | number: '1.2-4' }} Bs/USD del
-                {{ bcvRateDisplayDate }}.
+                {{ bcvRateDisplayDate }} (referencia del formulario; el resumen
+                usará la tasa del día en cada consulta).
               </p>
             </div>
           }

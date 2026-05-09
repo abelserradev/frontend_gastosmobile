@@ -7,7 +7,20 @@ import type { CurrencyCode, ProfileType } from './app-context.service';
 export interface MePreferences {
   defaultCurrency: CurrencyCode;
   monthlyIncome: number;
+  incomeFixedBs: number | null;
+  monthlyIncomeUsdAtRegistration: number | null;
+  bcvVesPerUsdNow: number | null;
+  bcvRateDateNow: string | null;
+  bcvVesPerUsdAtRegistration: number | null;
+  bcvRateDateAtRegistration: string | null;
+  usdEquivalentDelta: number | null;
+  bsIncomeNarrative: string | null;
+  bcvQuoteIsStale: boolean;
 }
+
+export type MePreferencesPut =
+  | { defaultCurrency: 'USD'; monthlyIncome: number }
+  | { defaultCurrency: 'BS'; monthlyIncomeBs: number };
 
 export interface MeCategory {
   id: string;
@@ -59,7 +72,7 @@ export class MeApiService {
     return this.http.get<MeState>(`${this.base}/me`);
   }
 
-  updatePreferences(body: MePreferences): Observable<MePreferences> {
+  updatePreferences(body: MePreferencesPut): Observable<MePreferences> {
     return this.http.put<MePreferences>(`${this.base}/me/preferences`, body);
   }
 

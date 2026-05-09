@@ -9,7 +9,7 @@ import {
 } from '../../core/app-context.service';
 import { AuthService } from '../../core/auth.service';
 import { formatApiHttpError } from '../../core/http-error.util';
-import { MeApiService } from '../../core/me-api.service';
+import { MeApiService, type MePreferencesPut } from '../../core/me-api.service';
 
 @Component({
   selector: 'app-initial-form',
@@ -51,15 +51,31 @@ export class InitialFormComponent implements OnInit {
           this.appContext.setCurrency(s.preferences.defaultCurrency);
           const incomeUsd = s.preferences.monthlyIncome;
           this.appContext.setMonthlyIncome(incomeUsd);
+          this.appContext.setBsIncomeContext({
+            incomeFixedBs: s.preferences.incomeFixedBs,
+            narrative: s.preferences.bsIncomeNarrative,
+            stale: s.preferences.bcvQuoteIsStale,
+          });
           if (this.currency === 'BS') {
-            this.loadBcvRate(() => {
-              if (this.bcvVesPerUsd != null) {
-                this.income = (incomeUsd * this.bcvVesPerUsd).toFixed(2);
-              }
-            });
+            if (s.preferences.incomeFixedBs != null) {
+              this.income = String(s.preferences.incomeFixedBs);
+              this.loadBcvRate();
+            } else {
+              this.loadBcvRate(() => {
+                if (this.bcvVesPerUsd != null && incomeUsd > 0) {
+                  this.income = (incomeUsd * this.bcvVesPerUsd).toFixed(2);
+                }
+              });
+            }
           } else {
             this.income = String(incomeUsd);
           }
+        } else {
+          this.appContext.setBsIncomeContext({
+            incomeFixedBs: null,
+            narrative: null,
+            stale: false,
+          });
         }
         if (s.categories.length > 0) {
           this.categories = s.categories.map((c) => c.name);
@@ -140,31 +156,33 @@ export class InitialFormComponent implements OnInit {
       window.alert('Por favor completa todos los campos requeridos');
       return;
     }
-    let monthlyIncomeUsd: number;
+    let putBody: MePreferencesPut;
     if (this.currency === 'BS') {
       if (this.bcvVesPerUsd == null || this.bcvVesPerUsd <= 0) {
         window.alert('Espera la tasa BCV o revisa la conexión antes de guardar.');
         return;
       }
-      monthlyIncomeUsd = this.incomeAmount / this.bcvVesPerUsd;
+      putBody = { defaultCurrency: 'BS', monthlyIncomeBs: this.incomeAmount };
     } else {
       const raw = Number.parseFloat(this.income);
       if (Number.isNaN(raw)) {
         window.alert('Ingreso mensual no válido');
         return;
       }
-      monthlyIncomeUsd = raw;
+      putBody = { defaultCurrency: 'USD', monthlyIncome: raw };
     }
     forkJoin([
-      this.meApi.updatePreferences({
-        defaultCurrency: this.currency,
-        monthlyIncome: monthlyIncomeUsd,
-      }),
+      this.meApi.updatePreferences(putBody),
       this.meApi.replaceCategories(this.categories),
     ]).subscribe({
       next: ([pref, cats]) => {
         this.appContext.setCurrency(pref.defaultCurrency);
         this.appContext.setMonthlyIncome(pref.monthlyIncome);
+        this.appContext.setBsIncomeContext({
+          incomeFixedBs: pref.incomeFixedBs,
+          narrative: pref.bsIncomeNarrative,
+          stale: pref.bcvQuoteIsStale,
+        });
         this.appContext.setCategories(
           cats.map((c) => ({ id: c.id, name: c.name })),
         );

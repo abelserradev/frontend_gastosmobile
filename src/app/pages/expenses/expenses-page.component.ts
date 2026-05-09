@@ -172,6 +172,17 @@ export class ExpensesPageComponent implements OnInit {
         if (s.preferences) {
           this.ctx.setCurrency(s.preferences.defaultCurrency);
           this.ctx.setMonthlyIncome(s.preferences.monthlyIncome);
+          this.ctx.setBsIncomeContext({
+            incomeFixedBs: s.preferences.incomeFixedBs,
+            narrative: s.preferences.bsIncomeNarrative,
+            stale: s.preferences.bcvQuoteIsStale,
+          });
+        } else {
+          this.ctx.setBsIncomeContext({
+            incomeFixedBs: null,
+            narrative: null,
+            stale: false,
+          });
         }
         this.ctx.setCategories(
           s.categories.map((c) => ({ id: c.id, name: c.name })),

@@ -36,6 +36,10 @@ export interface ExpenseItem {
 export class AppContextService {
   readonly currency = signal<CurrencyCode>('USD');
   readonly monthlyIncome = signal<number>(0);
+  /** Monto en Bs. fijado por el usuario cuando controla en bolívares. */
+  readonly incomeFixedBs = signal<number | null>(null);
+  readonly bsIncomeNarrative = signal<string | null>(null);
+  readonly bcvQuoteIsStale = signal(false);
   readonly categories = signal<CategoryDraft[]>([]);
   readonly profiles = signal<UserProfile[]>([]);
   readonly expenses = signal<ExpenseItem[]>([]);
@@ -43,6 +47,8 @@ export class AppContextService {
   readonly userData = computed(() => ({
     currency: this.currency(),
     monthlyIncome: this.monthlyIncome(),
+    incomeFixedBs: this.incomeFixedBs(),
+    bsIncomeNarrative: this.bsIncomeNarrative(),
     categories: this.categories(),
     profiles: this.profiles(),
     expenses: this.expenses(),
@@ -54,6 +60,16 @@ export class AppContextService {
 
   setMonthlyIncome(value: number): void {
     this.monthlyIncome.set(value);
+  }
+
+  setBsIncomeContext(p: {
+    incomeFixedBs: number | null;
+    narrative: string | null;
+    stale: boolean;
+  }): void {
+    this.incomeFixedBs.set(p.incomeFixedBs);
+    this.bsIncomeNarrative.set(p.narrative);
+    this.bcvQuoteIsStale.set(p.stale);
   }
 
   setCategories(list: CategoryDraft[]): void {

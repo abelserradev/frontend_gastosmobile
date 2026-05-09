@@ -36,13 +36,30 @@
         </button>
       </div>
       <p class="text-center text-secondary-foreground/90 text-sm mb-2">Ingreso Mensual</p>
-      <p class="text-center text-secondary-foreground/75 text-xs mb-1">Montos base en USD</p>
+      @if (ctx.incomeFixedBs() != null) {
+        <p class="text-center text-secondary-foreground/80 text-xs mb-1">
+          {{ ctx.incomeFixedBs() | number: '1.2-2' }} Bs. nominales
+        </p>
+      }
+      <p class="text-center text-secondary-foreground/75 text-xs mb-1">
+        Equivalente en USD (tasa vigente)
+        @if (ctx.bcvQuoteIsStale()) {
+          <span class="text-amber-200">· última tasa en caché</span>
+        }
+      </p>
       <div class="text-center">
         <p class="text-4xl font-bold">
           $
           {{ ctx.monthlyIncome().toFixed(2) }}
         </p>
       </div>
+      @if (ctx.bsIncomeNarrative()) {
+        <p
+          class="text-center text-xs text-indigo-50/95 leading-snug mt-3 mx-auto max-w-sm px-2"
+        >
+          {{ ctx.bsIncomeNarrative() }}
+        </p>
+      }
       <div class="mt-4 grid grid-cols-2 gap-3 text-sm">
         <div class="bg-card/20 rounded-lg p-3 backdrop-blur-sm">
           <p class="text-secondary-foreground/90">Total Gastado</p>
