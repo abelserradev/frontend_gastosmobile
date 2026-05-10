@@ -7,10 +7,10 @@
       <p class="text-center text-muted-foreground mb-6">Configura tu perfil financiero</p>
 
       <form (ngSubmit)="handleSubmit()" class="space-y-6">
-        <div>
-          <label class="block text-sm font-medium text-foreground mb-2"
-            >Tipo de Moneda</label
-          >
+        <fieldset class="border-0 p-0 m-0 min-w-0">
+          <legend class="float-none block w-full px-0 text-sm font-medium text-foreground mb-2">
+            Tipo de Moneda
+          </legend>
           <div class="grid grid-cols-2 gap-3">
             <button
               type="button"
@@ -35,10 +35,10 @@
               BS (Bs.)
             </button>
           </div>
-        </div>
+        </fieldset>
 
         <div>
-          <label class="block text-sm font-medium text-foreground mb-2"
+          <label class="block text-sm font-medium text-foreground mb-2" for="monthly-income"
             >Ingreso Mensual</label
           >
           <p class="text-xs text-muted-foreground mb-2">
@@ -73,6 +73,7 @@
               {{ currency === 'USD' ? '$' : 'Bs.' }}
             </span>
             <input
+              id="monthly-income"
               type="number"
               step="0.01"
               name="income"
@@ -107,7 +108,7 @@
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-foreground mb-2"
+          <label class="block text-sm font-medium text-foreground mb-2" for="category-input"
             >Categorías de Gastos</label
           >
 
@@ -144,6 +145,7 @@
 
           <div class="flex gap-2">
             <input
+              id="category-input"
               type="text"
               name="categoryInput"
               [(ngModel)]="categoryInput"
