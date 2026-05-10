@@ -57,15 +57,16 @@ export class InitialFormComponent implements OnInit {
             stale: s.preferences.bcvQuoteIsStale,
           });
           if (this.currency === 'BS') {
-            if (s.preferences.incomeFixedBs != null) {
-              this.income = String(s.preferences.incomeFixedBs);
-              this.loadBcvRate();
-            } else {
+            const storedNominalBs = s.preferences.incomeFixedBs;
+            if (storedNominalBs === null) {
               this.loadBcvRate(() => {
-                if (this.bcvVesPerUsd != null && incomeUsd > 0) {
+                if (this.bcvVesPerUsd !== null && incomeUsd > 0) {
                   this.income = (incomeUsd * this.bcvVesPerUsd).toFixed(2);
                 }
               });
+            } else {
+              this.income = String(storedNominalBs);
+              this.loadBcvRate();
             }
           } else {
             this.income = String(incomeUsd);
@@ -85,7 +86,7 @@ export class InitialFormComponent implements OnInit {
         }
       },
       error: (err: unknown) => {
-        window.alert(formatApiHttpError(err));
+        globalThis.alert(formatApiHttpError(err));
       },
     });
   }
@@ -153,20 +154,20 @@ export class InitialFormComponent implements OnInit {
 
   handleSubmit(): void {
     if (!this.income || this.categories.length === 0) {
-      window.alert('Por favor completa todos los campos requeridos');
+      globalThis.alert('Por favor completa todos los campos requeridos');
       return;
     }
     let putBody: MePreferencesPut;
     if (this.currency === 'BS') {
       if (this.bcvVesPerUsd == null || this.bcvVesPerUsd <= 0) {
-        window.alert('Espera la tasa BCV o revisa la conexión antes de guardar.');
+        globalThis.alert('Espera la tasa BCV o revisa la conexión antes de guardar.');
         return;
       }
       putBody = { defaultCurrency: 'BS', monthlyIncomeBs: this.incomeAmount };
     } else {
       const raw = Number.parseFloat(this.income);
       if (Number.isNaN(raw)) {
-        window.alert('Ingreso mensual no válido');
+        globalThis.alert('Ingreso mensual no válido');
         return;
       }
       putBody = { defaultCurrency: 'USD', monthlyIncome: raw };
@@ -189,7 +190,7 @@ export class InitialFormComponent implements OnInit {
         void this.router.navigate(['/profiles']);
       },
       error: (err: unknown) => {
-        window.alert(formatApiHttpError(err));
+        globalThis.alert(formatApiHttpError(err));
       },
     });
   }
