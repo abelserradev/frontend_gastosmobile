@@ -1,6 +1,6 @@
-<div class="min-h-screen bg-gradient-to-br from-muted to-background pb-8">
+<div class="min-h-screen bg-linear-to-br from-muted to-background pb-8">
   <div
-    class="bg-gradient-to-r from-primary to-secondary text-secondary-foreground p-6 rounded-b-3xl shadow-lg"
+    class="bg-linear-to-r from-primary to-secondary text-secondary-foreground p-6 rounded-b-3xl shadow-lg"
   >
 
   <div class="max-w-md mx-auto">
@@ -155,7 +155,7 @@
               <button
                 type="button"
                 (click)="toggleExpensePaid(expense.id)"
-                class="flex-shrink-0"
+                class="shrink-0"
                 [attr.title]="
                   expense.isPaid
                     ? 'Marcar como pendiente'
@@ -240,7 +240,7 @@
 
               @if (!expense.isPaid) {
                 <label
-                  class="shrink-0 relative inline-flex w-11 h-11 cursor-pointer rounded-lg transition-colors ring-2 ring-transparent hover:border-ring/50 hover:bg-muted/80 has-[:focus-visible]:outline-none has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring"
+                  class="shrink-0 relative inline-flex w-11 h-11 cursor-pointer rounded-lg transition-colors ring-2 ring-transparent hover:border-ring/50 hover:bg-muted/80 has-focus-visible:outline-none has-focus-visible:ring-2 has-focus-visible:ring-ring"
                   [attr.title]="
                     isSelected(expense.id)
                       ? 'Quitar de la selección'
@@ -306,7 +306,7 @@
               type="button"
               (click)="goPrevExpensePage()"
               [disabled]="expensesPage() <= 1"
-              class="px-3 py-2 rounded-lg text-sm font-medium transition-colors min-w-[7rem]"
+              class="px-3 py-2 rounded-lg text-sm font-medium transition-colors min-w-28"
               [ngClass]="{
                 'bg-muted text-muted-foreground cursor-not-allowed':
                   expensesPage() <= 1,
@@ -323,7 +323,7 @@
               type="button"
               (click)="goNextExpensePage()"
               [disabled]="expensesPage() >= expenseTotalPages()"
-              class="px-3 py-2 rounded-lg text-sm font-medium transition-colors min-w-[7rem]"
+              class="px-3 py-2 rounded-lg text-sm font-medium transition-colors min-w-28"
               [ngClass]="{
                 'bg-muted text-muted-foreground cursor-not-allowed':
                   expensesPage() >= expenseTotalPages(),
@@ -428,7 +428,7 @@
 
   <dialog
     #paidByDialog
-    class="paid-by-modal-dialog fixed inset-0 z-[100] flex items-center justify-center p-4 m-0 w-full max-w-none h-full max-h-none bg-transparent border-0 shadow-none open:flex"
+    class="paid-by-modal-dialog fixed inset-0 z-100 flex items-center justify-center p-4 m-0 w-full max-w-none h-full max-h-none bg-transparent border-0 shadow-none open:flex"
     (click)="onPaidByDialogBackdropClick($event)"
     (keydown)="onPaidByDialogKeydown($event)"
     aria-labelledby="paid-by-modal-title"
