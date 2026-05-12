@@ -128,7 +128,7 @@
             for="profileNameInput"
             >Nombre del Perfil</label
           >
-          <div class="flex gap-2">
+          <div class="flex flex-col md:flex-row gap-3">
             <input
               id="profileNameInput"
               type="text"
@@ -141,7 +141,7 @@
             <button
               type="button"
               (click)="handleAddProfile()"
-              class="bg-primary text-primary-foreground px-4 rounded-lg hover:opacity-90 transition-colors flex items-center gap-2 shrink-0"
+              class="bg-primary text-primary-foreground px-4 py-3 rounded-lg hover:opacity-90 transition-colors flex items-center justify-center gap-2 w-full md:w-auto md:shrink-0"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
