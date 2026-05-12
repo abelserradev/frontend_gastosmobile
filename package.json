@@ -18,7 +18,7 @@
     "@angular/forms": "^20.0.0",
     "@angular/platform-browser": "^20.0.0",
     "@angular/platform-browser-dynamic": "^20.0.0",
-    "@angular/router": "^20.0.0",
+    "@angular/router": "^21.2.12",
     "chart.js": "^4.4.7",
     "firebase": "^12.13.0",
     "rxjs": "~7.8.0",
