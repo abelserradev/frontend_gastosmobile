@@ -1,9 +1,18 @@
-<div class="min-h-screen bg-linear-to-br from-muted to-background pb-8">
+<div class="min-h-screen bg-linear-to-br from-muted to-background pb-8 relative">
   <div
-    class="bg-linear-to-r from-primary to-secondary text-secondary-foreground p-6 rounded-b-3xl shadow-lg"
+    class="bg-linear-to-r from-primary to-secondary text-secondary-foreground p-6 rounded-b-3xl shadow-lg relative"
   >
 
   <div class="max-w-md mx-auto">
+    <!-- Logo Mobile (arriba del todo, centrado) -->
+    <div class="md:hidden flex justify-center -mt-4 -mb-4 overflow-visible">
+      <img
+        src="/titulo-remove.png"
+        alt="Finflow"
+        class="w-[95vw] h-auto object-contain drop-shadow-md brightness-0 invert pointer-events-none"
+      />
+    </div>
+
     <div class="flex justify-between items-center mb-2 gap-2">
       <button
         type="button"
@@ -124,6 +133,14 @@
     }
 
     <div class="flex items-center justify-between mb-4">
+      <!-- Logo Desktop (absoluto a la izquierda de la pantalla, alineado con Mis Gastos) -->
+      <div class="hidden md:flex absolute left-8 items-center mt-50">
+        <img
+          src="/logo-remove.png"
+          alt="Finflow"
+          class="h-90 w-auto object-contain"
+        />
+      </div>
       <h2 class="text-xl font-bold text-card-foreground">Mis Gastos</h2>
       @if (selectedExpenses().size > 0) {
         <span class="text-sm text-primary font-medium">
