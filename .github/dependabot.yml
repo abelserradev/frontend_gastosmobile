@@ -7,6 +7,27 @@ updates:
     open-pull-requests-limit: 15
     labels:
       - dependencies
+    groups:
+      # Angular debe actualizarse todo junto para evitar incompatibilidades de peer dependencies
+      angular:
+        patterns:
+          - "@angular/*"
+          - "@angular-devkit/*"
+        update-types:
+          - "minor"
+          - "patch"
+    ignore:
+      # TypeScript 6.0+ no es compatible con Angular 20 - esperar a Angular 21
+      - dependency-name: "typescript"
+        versions: [">=6.0.0"]
+      # Zone.js 0.16+ requiere Angular 21
+      - dependency-name: "zone.js"
+        versions: [">=0.16.0"]
+      # Ignorar major updates de Angular hasta estar listos para migrar
+      - dependency-name: "@angular/*"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@angular-devkit/*"
+        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: github-actions
     directory: /
