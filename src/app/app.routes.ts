@@ -9,6 +9,7 @@ import { LoginPageComponent } from './pages/login/login-page.component';
 import { ProfilesPageComponent } from './pages/profiles/profiles-page.component';
 import { ResetPasswordPageComponent } from './pages/reset-password/reset-password-page.component';
 import { SetupPasswordPageComponent } from './pages/setup-password/setup-password-page.component';
+import { HistorialPageComponent } from './pages/historial/historial-page.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
@@ -32,6 +33,16 @@ export const routes: Routes = [
   {
     path: 'expenses',
     component: ExpensesPageComponent,
+    canActivate: [requiresPasswordGuard],
+  },
+  {
+    path: 'historial/:ym',
+    component: HistorialPageComponent,
+    canActivate: [requiresPasswordGuard],
+  },
+  {
+    path: 'historial',
+    component: HistorialPageComponent,
     canActivate: [requiresPasswordGuard],
   },
   { path: '**', redirectTo: 'login' },
