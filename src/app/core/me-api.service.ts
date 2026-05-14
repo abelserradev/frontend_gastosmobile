@@ -8,6 +8,8 @@ export interface MePreferences {
   defaultCurrency: CurrencyCode;
   monthlyIncome: number;
   incomeFixedBs: number | null;
+  /** YYYY-MM-DD del mes confirmado para el ingreso. */
+  incomeReferenceMonth: string | null;
   monthlyIncomeUsdAtRegistration: number | null;
   bcvVesPerUsdNow: number | null;
   bcvRateDateNow: string | null;
@@ -48,6 +50,7 @@ export interface MeExpense {
   amount: number;
   category: string;
   isPaid: boolean;
+  referenceMonth: string;
   paymentDate: string | null;
   bcvRateApplied: number | null;
   bcvRateDate: string | null;
@@ -56,11 +59,20 @@ export interface MeExpense {
   paidByMemberId: string | null;
 }
 
+export interface MeHistoryMonthSummary {
+  month: string;
+  expenseCount: number;
+  totalAmountUsd: number;
+}
+
 export interface MeState {
   preferences: MePreferences | null;
   categories: MeCategory[];
   profiles: MeProfile[];
   expenses: MeExpense[];
+  /** Primer día del mes en curso (Caracas), YYYY-MM-DD. */
+  activeReferenceMonth: string;
+  needsMonthlyIncomeSetup: boolean;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -121,6 +133,18 @@ export class MeApiService {
 
   listExpenses(): Observable<MeExpense[]> {
     return this.http.get<MeExpense[]>(`${this.base}/me/expenses`);
+  }
+
+  listExpenseHistoryMonths(): Observable<MeHistoryMonthSummary[]> {
+    return this.http.get<MeHistoryMonthSummary[]>(
+      `${this.base}/me/history/months`,
+    );
+  }
+
+  listExpenseHistoryForMonth(ym: string): Observable<MeExpense[]> {
+    return this.http.get<MeExpense[]>(
+      `${this.base}/me/history/months/${encodeURIComponent(ym)}`,
+    );
   }
 
   createExpense(body: {

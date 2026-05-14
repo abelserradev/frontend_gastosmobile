@@ -37,6 +37,13 @@
         </button>
         <button
           type="button"
+          (click)="goHistorial()"
+          class="text-xs font-medium text-secondary-foreground/90 hover:text-secondary-foreground transition-colors shrink-0"
+        >
+          Historial
+        </button>
+        <button
+          type="button"
           (click)="handleLogout()"
           class="text-xs font-medium text-secondary-foreground/90 hover:text-secondary-foreground transition-colors shrink-0"
           aria-label="Cerrar sesión"
@@ -44,7 +51,12 @@
           Cerrar sesión
         </button>
       </div>
-      <p class="text-center text-secondary-foreground/90 text-sm mb-2">Ingreso Mensual</p>
+      <p class="text-center text-secondary-foreground/90 text-sm mb-1">Ingreso Mensual</p>
+      @if (monthLabelActive()) {
+        <p class="text-center text-secondary-foreground/75 text-xs mb-2 capitalize">
+          Mes en curso · {{ monthLabelActive() }}
+        </p>
+      }
       @if (ctx.incomeFixedBs() != null) {
         <p class="text-center text-secondary-foreground/80 text-xs mb-1">
           {{ ctx.incomeFixedBs() | number: '1.2-2' }} Bs. nominales

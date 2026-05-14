@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import {
   AppContextService,
   ProfileType,
@@ -14,7 +14,7 @@ import { MeApiService, type MeProfileMember } from '../../core/me-api.service';
 @Component({
   selector: 'app-profiles-page',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './profiles-page.component.html',
   styleUrl: './profiles-page.component.scss',
 })
@@ -41,10 +41,21 @@ export class ProfilesPageComponent implements OnInit {
       void this.router.navigate(['/login']);
       return;
     }
-    this.meApi.listProfiles().subscribe({
-      next: (list) => {
-        this.profiles = list;
-        this.appContext.setProfiles(list);
+    this.meApi.getState().subscribe({
+      next: (s) => {
+        if (s.needsMonthlyIncomeSetup) {
+          void this.router.navigate(['/setup']);
+          return;
+        }
+        this.meApi.listProfiles().subscribe({
+          next: (list) => {
+            this.profiles = list;
+            this.appContext.setProfiles(list);
+          },
+          error: (err: unknown) => {
+            globalThis.alert(formatApiHttpError(err));
+          },
+        });
       },
       error: (err: unknown) => {
         globalThis.alert(formatApiHttpError(err));

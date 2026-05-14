@@ -10,6 +10,7 @@ import {
 import { AuthService } from '../../core/auth.service';
 import { formatApiHttpError } from '../../core/http-error.util';
 import { MeApiService, type MePreferencesPut } from '../../core/me-api.service';
+import { routePathForMeState } from '../../core/me-route.util';
 
 @Component({
   selector: 'app-initial-form',
@@ -39,6 +40,9 @@ export class InitialFormComponent implements OnInit {
     'Varios',
   ];
 
+  /** True cuando ya hay preferencias pero hay que revalidar ingreso por mes nuevo (Caracas). */
+  monthlyRenewal = false;
+
   ngOnInit(): void {
     if (!this.auth.hasSession()) {
       void this.router.navigate(['/login']);
@@ -46,6 +50,8 @@ export class InitialFormComponent implements OnInit {
     }
     this.meApi.getState().subscribe({
       next: (s) => {
+        this.monthlyRenewal =
+          s.preferences != null && s.needsMonthlyIncomeSetup;
         if (s.preferences) {
           this.currency = s.preferences.defaultCurrency;
           this.appContext.setCurrency(s.preferences.defaultCurrency);
@@ -153,7 +159,7 @@ export class InitialFormComponent implements OnInit {
   }
 
   handleSubmit(): void {
-    if (!this.income || this.categories.length === 0) {
+    if (!this.income || (!this.monthlyRenewal && this.categories.length === 0)) {
       globalThis.alert('Por favor completa todos los campos requeridos');
       return;
     }
@@ -171,6 +177,31 @@ export class InitialFormComponent implements OnInit {
         return;
       }
       putBody = { defaultCurrency: 'USD', monthlyIncome: raw };
+    }
+    if (this.monthlyRenewal) {
+      this.meApi.updatePreferences(putBody).subscribe({
+        next: (pref) => {
+          this.appContext.setCurrency(pref.defaultCurrency);
+          this.appContext.setMonthlyIncome(pref.monthlyIncome);
+          this.appContext.setBsIncomeContext({
+            incomeFixedBs: pref.incomeFixedBs,
+            narrative: pref.bsIncomeNarrative,
+            stale: pref.bcvQuoteIsStale,
+          });
+          this.meApi.getState().subscribe({
+            next: (st) => {
+              void this.router.navigate([routePathForMeState(st)]);
+            },
+            error: (err: unknown) => {
+              globalThis.alert(formatApiHttpError(err));
+            },
+          });
+        },
+        error: (err: unknown) => {
+          globalThis.alert(formatApiHttpError(err));
+        },
+      });
+      return;
     }
     forkJoin([
       this.meApi.updatePreferences(putBody),

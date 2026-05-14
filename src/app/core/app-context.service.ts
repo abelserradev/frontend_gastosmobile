@@ -24,6 +24,7 @@ export interface ExpenseItem {
   amount: number;
   category: string;
   isPaid: boolean;
+  referenceMonth?: string;
   paymentDate?: string | null;
   bcvRateApplied?: number | null;
   bcvRateDate?: string | null;

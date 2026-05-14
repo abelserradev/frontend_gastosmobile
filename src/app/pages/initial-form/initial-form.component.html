@@ -4,7 +4,13 @@
       <h1 class="text-3xl font-bold text-center text-foreground mb-2">
         Control de Gastos
       </h1>
-      <p class="text-center text-muted-foreground mb-6">Configura tu perfil financiero</p>
+      @if (monthlyRenewal) {
+        <p class="text-center text-muted-foreground mb-2 text-sm font-medium">
+          Nuevo mes: confirmá tu ingreso para seguir registrando gastos. El historial de meses anteriores no se pierde.
+        </p>
+      } @else {
+        <p class="text-center text-muted-foreground mb-6">Configura tu perfil financiero</p>
+      }
 
       <form (ngSubmit)="handleSubmit()" class="space-y-6">
         <fieldset class="border-0 p-0 m-0 min-w-0">
@@ -107,6 +113,7 @@
           }
         </div>
 
+        @if (!monthlyRenewal) {
         <div>
           <label class="block text-sm font-medium text-foreground mb-2" for="category-input"
             >Categorías de Gastos</label
@@ -176,12 +183,27 @@
             </button>
           </div>
         </div>
+        } @else {
+        <div class="rounded-xl border border-border bg-muted/40 px-4 py-3">
+          <p class="text-xs text-muted-foreground mb-2">
+            Categorías y perfiles se mantienen. Solo actualizamos el ingreso de este mes; podés ver meses anteriores en Historial.
+          </p>
+          @if (categories.length > 0) {
+            <p class="text-sm text-foreground font-medium">Categorías activas</p>
+            <ul class="mt-1 text-sm text-muted-foreground list-disc list-inside">
+              @for (cat of categories; track cat) {
+                <li>{{ cat }}</li>
+              }
+            </ul>
+          }
+        </div>
+        }
 
         <button
           type="submit"
           class="w-full bg-primary text-primary-foreground py-3 rounded-lg font-medium hover:opacity-90 transition-colors shadow-md mt-8"
         >
-          Continuar
+          {{ monthlyRenewal ? 'Guardar ingreso del mes' : 'Continuar' }}
         </button>
       </form>
     </div>

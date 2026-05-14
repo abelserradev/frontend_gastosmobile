@@ -1,7 +1,10 @@
 import type { MeState } from './me-api.service';
 
-/** Misma lógica que el login post-auth: preferencias → perfiles → expenses. */
+/** Post-login / post-password: ingreso del mes vigente primero; luego perfiles → gastos. */
 export function routePathForMeState(s: MeState): string {
+  if (s.needsMonthlyIncomeSetup) {
+    return '/setup';
+  }
   const hasPrefs = s.preferences != null;
   const hasProfiles = s.profiles.length > 0;
   if (hasPrefs && hasProfiles) {

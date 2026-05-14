@@ -64,6 +64,23 @@ export class ExpensesPageComponent implements OnInit {
 
   readonly modalOpen = signal(false);
   readonly showChart = signal(false);
+  /** YYYY-MM-01 del mes de control activo (API, calendario Caracas). */
+  readonly activeReferenceMonth = signal('');
+  readonly monthLabelActive = computed(() => {
+    const ymd = this.activeReferenceMonth();
+    if (!ymd || ymd.length < 7) {
+      return '';
+    }
+    const [y, m] = ymd.split('-').map(Number);
+    if (!y || !m) {
+      return '';
+    }
+    return new Date(Date.UTC(y, m - 1, 12)).toLocaleDateString('es-VE', {
+      month: 'long',
+      year: 'numeric',
+      timeZone: 'UTC',
+    });
+  });
   readonly selectedExpenses = signal<Set<string>>(new Set());
   readonly paidByModalOpen = signal(false);
   /** Gastos a marcar como pagados al confirmar el modal (uno o varios). */
@@ -169,6 +186,11 @@ export class ExpensesPageComponent implements OnInit {
     }
     this.meApi.getState().subscribe({
       next: (s) => {
+        if (s.needsMonthlyIncomeSetup) {
+          void this.router.navigate(['/setup']);
+          return;
+        }
+        this.activeReferenceMonth.set(s.activeReferenceMonth);
         if (s.preferences) {
           this.ctx.setCurrency(s.preferences.defaultCurrency);
           this.ctx.setMonthlyIncome(s.preferences.monthlyIncome);
@@ -198,6 +220,7 @@ export class ExpensesPageComponent implements OnInit {
             amount: e.amount,
             category: e.category,
             isPaid: e.isPaid,
+            referenceMonth: e.referenceMonth,
             paymentDate: e.paymentDate,
             bcvRateApplied: e.bcvRateApplied,
             bcvRateDate: e.bcvRateDate,
@@ -270,6 +293,7 @@ export class ExpensesPageComponent implements OnInit {
               amount: row.amount,
               category: row.category,
               isPaid: row.isPaid,
+              referenceMonth: row.referenceMonth,
               paymentDate: row.paymentDate,
               bcvRateApplied: row.bcvRateApplied,
               bcvRateDate: row.bcvRateDate,
@@ -413,6 +437,7 @@ export class ExpensesPageComponent implements OnInit {
             ? {
                 ...e,
                 isPaid: row.isPaid,
+                referenceMonth: row.referenceMonth ?? e.referenceMonth,
                 paymentDate: row.paymentDate ?? e.paymentDate,
                 bcvRateApplied: row.bcvRateApplied ?? e.bcvRateApplied,
                 bcvRateDate: row.bcvRateDate ?? e.bcvRateDate,
@@ -477,6 +502,10 @@ export class ExpensesPageComponent implements OnInit {
 
   goBack(): void {
     void this.router.navigate(['/profiles']);
+  }
+
+  goHistorial(): void {
+    void this.router.navigate(['/historial']);
   }
 
   goPrevExpensePage(): void {
