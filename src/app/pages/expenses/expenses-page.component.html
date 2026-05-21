@@ -371,7 +371,7 @@
       @if (selectedExpenses().size === 0) {
         <button
           type="button"
-          (click)="openModal()"
+          (click)="openTypeSelector()"
           class="flex items-center justify-center gap-2 bg-primary text-primary-foreground py-3 rounded-lg font-medium hover:opacity-90 transition-colors shadow-md"
         >
           <svg
@@ -447,11 +447,28 @@
     </div>
   </div>
 
+  <!-- Paso 1: Selector de tipo de gasto -->
+  <app-expense-type-selector
+    [open]="selectorOpen()"
+    (openChange)="onSelectorOpenChange($event)"
+    (modeSelected)="onCreationModeSelected($event)"
+  />
+
+  <!-- Paso 2 (opcional): subida de imagen + OCR -->
+  <app-image-upload-modal
+    [open]="imageUploadOpen()"
+    [mode]="imageUploadMode()"
+    (openChange)="onImageUploadOpenChange($event)"
+    (ocrDone)="onOcrDone($event)"
+  />
+
+  <!-- Paso 3: formulario de gasto (con o sin prefill OCR) -->
   <app-expense-modal
     [open]="modalOpen()"
     (openChange)="onModalOpenChange($event)"
     [categories]="ctx.categories()"
     [defaultCurrency]="ctx.currency()"
+    [ocrPrefill]="ocrPrefill()"
     (addExpense)="onAddExpense($event)"
   />
 

@@ -18,8 +18,11 @@ import { AppContextService } from '../../core/app-context.service';
 import { AuthService } from '../../core/auth.service';
 import { formatApiHttpError } from '../../core/http-error.util';
 import { MeApiService, type MeExpense } from '../../core/me-api.service';
+import type { ParseInvoiceResult } from '../../core/ocr-api.service';
 import { ExpenseModalComponent } from './expense-modal.component';
 import { ExpensePieChartComponent } from './expense-pie-chart.component';
+import { ExpenseTypeSelectorComponent, type ExpenseCreationMode } from './expense-type-selector.component';
+import { ImageUploadModalComponent, type ImageUploadMode } from './image-upload-modal.component';
 
 const EXPENSES_PAGE_SIZE = 6;
 
@@ -29,7 +32,14 @@ const COLORS = ['#ee8329', '#cd5241', '#084152', '#ef4444'];
 @Component({
   selector: 'app-expenses-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, ExpenseModalComponent, ExpensePieChartComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    ExpenseModalComponent,
+    ExpensePieChartComponent,
+    ExpenseTypeSelectorComponent,
+    ImageUploadModalComponent,
+  ],
   templateUrl: './expenses-page.component.html',
   styleUrl: './expenses-page.component.scss',
 })
@@ -62,7 +72,13 @@ export class ExpensesPageComponent implements OnInit {
     return all.slice(start, start + EXPENSES_PAGE_SIZE);
   });
 
+  // --- Flujo de creación de gasto (3 pasos posibles) ---
+  readonly selectorOpen = signal(false);
+  readonly imageUploadOpen = signal(false);
+  readonly imageUploadMode = signal<ImageUploadMode>('invoice');
   readonly modalOpen = signal(false);
+  /** Datos del OCR que se pasan al formulario; null = sin prefill (gasto manual). */
+  readonly ocrPrefill = signal<ParseInvoiceResult | null>(null);
   readonly showChart = signal(false);
   /** YYYY-MM-01 del mes de control activo (API, calendario Caracas). */
   readonly activeReferenceMonth = signal('');
@@ -257,12 +273,38 @@ export class ExpensesPageComponent implements OnInit {
     return false;
   }
 
-  openModal(): void {
+  /** Punto de entrada único: abre el selector de tipo de gasto. */
+  openTypeSelector(): void {
+    this.selectorOpen.set(true);
+  }
+
+  onSelectorOpenChange(open: boolean): void {
+    this.selectorOpen.set(open);
+  }
+
+  onCreationModeSelected(mode: ExpenseCreationMode): void {
+    if (mode === 'manual') {
+      this.ocrPrefill.set(null);
+      this.modalOpen.set(true);
+      return;
+    }
+    this.imageUploadMode.set(mode);
+    this.imageUploadOpen.set(true);
+  }
+
+  onImageUploadOpenChange(open: boolean): void {
+    this.imageUploadOpen.set(open);
+  }
+
+  /** Callback cuando el OCR termina en el ImageUploadModal. */
+  onOcrDone(result: ParseInvoiceResult): void {
+    this.ocrPrefill.set(result);
     this.modalOpen.set(true);
   }
 
   onModalOpenChange(open: boolean): void {
     this.modalOpen.set(open);
+    if (!open) this.ocrPrefill.set(null);
   }
 
   onAddExpense(payload: {

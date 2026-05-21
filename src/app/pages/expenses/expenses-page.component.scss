@@ -2,7 +2,9 @@
   display: block;
 }
 
-dialog.paid-by-modal-dialog {
+dialog.paid-by-modal-dialog,
+dialog.type-selector-dialog,
+dialog.image-upload-dialog {
   &::backdrop {
     /* Opacidad sobre foreground: evita negro fuera de la paleta */
     background-color: color-mix(in srgb, var(--foreground) 45%, transparent);

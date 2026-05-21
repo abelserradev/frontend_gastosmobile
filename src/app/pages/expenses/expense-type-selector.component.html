@@ -1,0 +1,91 @@
+<dialog
+  #selectorDialog
+  class="type-selector-dialog fixed inset-0 z-50 flex items-center justify-center p-4 m-0 w-full max-w-none h-full max-h-none bg-transparent border-0 shadow-none open:flex"
+  (click)="onBackdropClick($event)"
+  (keydown)="onKeydown($event)"
+  aria-labelledby="selector-title"
+>
+  <div
+    class="relative bg-card rounded-2xl p-6 w-full max-w-sm shadow-2xl"
+    (click)="stopBubble($event)"
+  >
+    <h2 id="selector-title" class="text-xl font-bold text-foreground mb-1 text-center">
+      Agregar Gasto
+    </h2>
+    <p class="text-sm text-muted-foreground text-center mb-6">
+      ¿Cómo quieres registrarlo?
+    </p>
+
+    <div class="flex flex-col gap-3">
+      <!-- Manual -->
+      <button
+        type="button"
+        (click)="select('manual')"
+        class="flex items-center gap-4 w-full p-4 rounded-xl border-2 border-border hover:border-primary hover:bg-muted transition-all text-left group"
+      >
+        <span class="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full bg-primary/10 group-hover:bg-primary/20 transition-colors">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+            class="text-primary">
+            <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+          </svg>
+        </span>
+        <div>
+          <p class="font-semibold text-foreground">Gasto manual</p>
+          <p class="text-xs text-muted-foreground">Ingresa título, monto y categoría</p>
+        </div>
+      </button>
+
+      <!-- Factura OCR -->
+      <button
+        type="button"
+        (click)="select('invoice')"
+        class="flex items-center gap-4 w-full p-4 rounded-xl border-2 border-border hover:border-primary hover:bg-muted transition-all text-left group"
+      >
+        <span class="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full bg-primary/10 group-hover:bg-primary/20 transition-colors">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+            class="text-primary">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+            <line x1="16" y1="13" x2="8" y2="13"/>
+            <line x1="16" y1="17" x2="8" y2="17"/>
+            <polyline points="10 9 9 9 8 9"/>
+          </svg>
+        </span>
+        <div>
+          <p class="font-semibold text-foreground">Cargar factura</p>
+          <p class="text-xs text-muted-foreground">Extrae datos automáticamente con IA</p>
+        </div>
+      </button>
+
+      <!-- Comprobante de pago -->
+      <button
+        type="button"
+        (click)="select('payment')"
+        class="flex items-center gap-4 w-full p-4 rounded-xl border-2 border-border hover:border-primary hover:bg-muted transition-all text-left group"
+      >
+        <span class="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full bg-primary/10 group-hover:bg-primary/20 transition-colors">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+            class="text-primary">
+            <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
+            <line x1="1" y1="10" x2="23" y2="10"/>
+          </svg>
+        </span>
+        <div>
+          <p class="font-semibold text-foreground">Comprobante de pago</p>
+          <p class="text-xs text-muted-foreground">Pago móvil o transferencia bancaria</p>
+        </div>
+      </button>
+    </div>
+
+    <button
+      type="button"
+      (click)="cancel()"
+      class="mt-5 w-full py-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+    >
+      Cancelar
+    </button>
+  </div>
+</dialog>
