@@ -1,0 +1,72 @@
+<dialog
+  #viewerDialog
+  class="receipt-viewer-dialog fixed inset-0 z-50 flex items-center justify-center p-4 m-0 w-full max-w-none h-full max-h-none bg-transparent border-0 shadow-none open:flex"
+  (click)="onBackdropClick($event)"
+  (keydown)="onKeydown($event)"
+  aria-labelledby="receipt-title"
+>
+  <div
+    class="relative bg-card rounded-2xl p-5 w-full max-w-lg shadow-2xl max-h-[92vh] flex flex-col"
+    (click)="stopBubble($event)"
+  >
+    <!-- Cabecera -->
+    <div class="flex items-center justify-between mb-4 shrink-0">
+      <h2 id="receipt-title" class="text-lg font-bold text-foreground">
+        Imagen del comprobante
+      </h2>
+      <button
+        type="button"
+        (click)="close()"
+        class="text-muted-foreground hover:text-foreground transition-colors p-1 rounded"
+        aria-label="Cerrar"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none"
+          viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"/>
+          <line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Cuerpo scrollable -->
+    <div class="flex-1 overflow-auto flex items-center justify-center min-h-0">
+      @if (loading()) {
+        <div class="flex flex-col items-center gap-3 py-12 text-muted-foreground">
+          <svg class="animate-spin h-8 w-8 text-primary" xmlns="http://www.w3.org/2000/svg"
+            fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+            <path class="opacity-75" fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+          </svg>
+          <span class="text-sm">Cargando imagen…</span>
+        </div>
+      } @else if (error(); as err) {
+        <div class="flex flex-col items-center gap-2 py-12 text-center px-4">
+          <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="none"
+            viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"
+            class="text-muted-foreground">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909"/>
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M3.75 20.25h16.5M21 12V6.75A2.25 2.25 0 0018.75 4.5h-13.5A2.25 2.25 0 003 6.75V12"/>
+          </svg>
+          <p class="text-sm text-muted-foreground">{{ err }}</p>
+        </div>
+      } @else if (imageUrl(); as src) {
+        <img
+          [src]="src"
+          alt="Comprobante de gasto"
+          class="max-w-full max-h-full rounded-lg object-contain"
+        />
+      }
+    </div>
+
+    <button
+      type="button"
+      (click)="close()"
+      class="mt-4 shrink-0 w-full py-2 text-sm text-muted-foreground hover:text-foreground border border-border rounded-lg transition-colors"
+    >
+      Cerrar
+    </button>
+  </div>
+</dialog>
