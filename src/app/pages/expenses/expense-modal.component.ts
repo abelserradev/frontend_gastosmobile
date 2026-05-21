@@ -16,7 +16,7 @@ import { FormsModule } from '@angular/forms';
 import type { CategoryDraft, CurrencyCode } from '../../core/app-context.service';
 import { todayYmdCaracas } from '../../core/caracas-date';
 import { MeApiService } from '../../core/me-api.service';
-import { OcrApiService, type ParseInvoiceResult } from '../../core/ocr-api.service';
+import type { ParseInvoiceResult } from '../../core/ocr-api.service';
 
 @Component({
   selector: 'app-expense-modal',
@@ -27,17 +27,17 @@ import { OcrApiService, type ParseInvoiceResult } from '../../core/ocr-api.servi
 })
 export class ExpenseModalComponent implements OnChanges {
   private readonly meApi = inject(MeApiService);
-  private readonly ocrApi = inject(OcrApiService);
   private readonly injector = inject(Injector);
-  readonly expenseDialog =
-    viewChild<ElementRef<HTMLDialogElement>>('expenseDialog');
-  readonly invoiceFileInput =
-    viewChild<ElementRef<HTMLInputElement>>('invoiceFileInput');
+
+  readonly expenseDialog = viewChild<ElementRef<HTMLDialogElement>>('expenseDialog');
 
   readonly open = input.required<boolean>();
   readonly categories = input.required<CategoryDraft[]>();
   /** Si BS: dos montos (Bs + USD); si USD: un solo monto en $. */
   readonly defaultCurrency = input<CurrencyCode>('USD');
+  /** Datos pre-rellenados desde el OCR (llega desde ImageUploadModal). */
+  readonly ocrPrefill = input<ParseInvoiceResult | null>(null);
+
   readonly openChange = output<boolean>();
   readonly addExpense = output<{
     title: string;
@@ -50,26 +50,26 @@ export class ExpenseModalComponent implements OnChanges {
   title = '';
   description = '';
   category = '';
-  /** Monto en USD cuando defaultCurrency es USD. */
   amountUsd = '';
-  /** Monto en Bs. cuando defaultCurrency es BS. */
   amountBs = '';
   paymentDate = '';
   usdPreview: number | null = null;
   previewLoading = false;
   private previewTimer: ReturnType<typeof setTimeout> | null = null;
 
-  // OCR / Escanear factura
-  readonly ocrProcessing = signal(false);
-  readonly ocrError = signal<string | null>(null);
-  readonly ocrImagePreview = signal<string | null>(null);
+  // Referencia visual a campos que vinieron del OCR
   readonly ocrDetectedFields = signal<ParseInvoiceResult | null>(null);
-  private selectedInvoiceFile: File | null = null;
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['open']?.currentValue === true) {
       this.reset();
       this.paymentDate = todayYmdCaracas();
+
+      // Si vienen datos del OCR, pre-rellenar el formulario
+      const prefill = this.ocrPrefill();
+      if (prefill) {
+        this.applyOcrPrefill(prefill);
+      }
     }
     if (changes['open']) {
       afterNextRender(() => this.syncExpenseDialogOpen(), {
@@ -78,39 +78,26 @@ export class ExpenseModalComponent implements OnChanges {
     }
   }
 
-  /** showModal/close enlazan el <dialog> con el input open() del padre. */
   private syncExpenseDialogOpen(): void {
     const host = this.expenseDialog()?.nativeElement;
-    if (!host) {
-      return;
-    }
+    if (!host) return;
     if (this.open()) {
-      if (!host.open) {
-        host.showModal();
-      }
+      if (!host.open) host.showModal();
       return;
     }
-    if (host.open) {
-      host.close();
-    }
+    if (host.open) host.close();
   }
 
-  /** Tope del datepicker: mismo criterio que el API (no tasas futuras en Caracas). */
   paymentDateMaxYmd(): string {
     return todayYmdCaracas();
   }
 
   scheduleBsPreview(): void {
-    if (this.defaultCurrency() !== 'BS') {
-      return;
-    }
-    if (this.previewTimer) {
-      clearTimeout(this.previewTimer);
-    }
+    if (this.defaultCurrency() !== 'BS') return;
+    if (this.previewTimer) clearTimeout(this.previewTimer);
     this.previewTimer = setTimeout(() => this.refreshUsdPreview(), 350);
   }
 
-  /** type="number" + ngModel puede dejar number | null, no string — evitar .trim() directo */
   private amountBsText(): string {
     return String(this.amountBs ?? '').trim();
   }
@@ -202,25 +189,17 @@ export class ExpenseModalComponent implements OnChanges {
 
   onBackdropClick(event: MouseEvent): void {
     const host = this.expenseDialog()?.nativeElement;
-    if (host && event.target === host) {
-      this.handleCancel();
-    }
+    if (host && event.target === host) this.handleCancel();
   }
 
-  /** Escape cierra el modal y notifica al padre; `preventDefault` evita el cierre nativo duplicado antes de `close()` en sync. */
   onDialogKeydown(event: KeyboardEvent): void {
-    if (event.key !== 'Escape') {
-      return;
-    }
+    if (event.key !== 'Escape') return;
     event.preventDefault();
     this.handleCancel();
   }
 
-  /** Paridad accesibilidad con `(click)` en el panel; no interceptamos teclas — el <dialog> gestiona Escape. */
-  onExpensePanelKeydown(event: KeyboardEvent): void {
-    if (!event.cancelable) {
-      return;
-    }
+  onExpensePanelKeydown(_event: KeyboardEvent): void {
+    // El <dialog> gestiona Escape; este handler es solo para paridad de accesibilidad.
   }
 
   stopBubble(event: Event): void {
@@ -236,146 +215,40 @@ export class ExpenseModalComponent implements OnChanges {
     this.paymentDate = '';
     this.usdPreview = null;
     this.previewLoading = false;
-    this.ocrProcessing.set(false);
-    this.ocrError.set(null);
-    this.ocrImagePreview.set(null);
     this.ocrDetectedFields.set(null);
-    this.selectedInvoiceFile = null;
-    // Resetear input file
-    const fileInput = this.invoiceFileInput()?.nativeElement;
-    if (fileInput) {
-      fileInput.value = '';
-    }
   }
 
-  // ========== OCR / Escanear factura ==========
+  /** Aplica los datos que devolvió el OCR al abrir el formulario. */
+  private applyOcrPrefill(result: ParseInvoiceResult): void {
+    this.ocrDetectedFields.set(result);
 
-  /** Abre el selector de archivos para escanear factura. */
-  openInvoiceScanner(): void {
-    const fileInput = this.invoiceFileInput()?.nativeElement;
-    if (fileInput) {
-      fileInput.click();
-    }
-  }
-
-  /** Maneja la selección de imagen de factura. */
-  onInvoiceImageSelected(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    const file = input.files?.[0];
-    if (!file) {
-      return;
-    }
-
-    // Validar tipo
-    if (!file.type.startsWith('image/')) {
-      this.ocrError.set('Solo se permiten imágenes (JPG, PNG, WebP)');
-      return;
-    }
-
-    // Validar tamaño (10MB)
-    if (file.size > 10 * 1024 * 1024) {
-      this.ocrError.set('La imagen es demasiado grande. Máximo 10MB');
-      return;
-    }
-
-    this.selectedInvoiceFile = file;
-    this.ocrError.set(null);
-
-    // Mostrar preview
-    const reader = new FileReader();
-    reader.onload = () => {
-      this.ocrImagePreview.set(reader.result as string);
-      this.processInvoiceWithOcr();
-    };
-    reader.readAsDataURL(file);
-  }
-
-  /** Envía la imagen al servicio OCR y autocompleta campos. */
-  private processInvoiceWithOcr(): void {
-    if (!this.selectedInvoiceFile) {
-      return;
-    }
-
-    this.ocrProcessing.set(true);
-    this.ocrError.set(null);
-
-    this.ocrApi.parseInvoice(this.selectedInvoiceFile).subscribe({
-      next: (result) => {
-        this.ocrProcessing.set(false);
-        this.ocrDetectedFields.set(result);
-
-        // Autocompletar campos según resultado
-        this.applyOcrResultToForm(result);
-      },
-      error: (err: unknown) => {
-        this.ocrProcessing.set(false);
-        const message =
-          err instanceof Error ? err.message : 'Error al procesar la factura';
-        this.ocrError.set(message);
-      },
-    });
-  }
-
-  /** Aplica los datos OCR al formulario con indicadores visuales. */
-  private applyOcrResultToForm(result: ParseInvoiceResult): void {
-    // Título: usar merchant si está disponible
     if (result.merchant) {
       this.title = result.merchant;
+      // Intentar mapear categoría por nombre parcial
+      const merchantLower = result.merchant.toLowerCase();
+      const match = this.categories().find((c) =>
+        merchantLower.includes(c.name.toLowerCase()),
+      );
+      if (match) this.category = match.name;
     }
 
-    // Fecha
-    if (result.date) {
-      this.paymentDate = result.date;
-    }
+    if (result.date) this.paymentDate = result.date;
 
-    // Monto
+    if (result.description) this.description = result.description;
+
     if (result.amount != null && result.amount > 0) {
       if (this.defaultCurrency() === 'USD' || result.currency === 'USD') {
         this.amountUsd = String(result.amount);
       } else if (result.currency === 'BS') {
         this.amountBs = String(result.amount);
-        // Recalcular preview USD si es necesario
-        if (this.defaultCurrency() === 'BS') {
-          this.scheduleBsPreview();
-        }
-      }
-    }
-
-    // Descripción
-    if (result.description) {
-      this.description = result.description;
-    }
-
-    // Intentar mapear categoría si hay merchant que coincida
-    if (result.merchant) {
-      const merchantLower = result.merchant.toLowerCase();
-      const matchingCategory = this.categories().find((cat) =>
-        merchantLower.includes(cat.name.toLowerCase()),
-      );
-      if (matchingCategory) {
-        this.category = matchingCategory.name;
+        if (this.defaultCurrency() === 'BS') this.scheduleBsPreview();
       }
     }
   }
 
-  /** Limpia la imagen seleccionada y reinicia OCR. */
-  clearInvoiceImage(): void {
-    this.ocrImagePreview.set(null);
-    this.ocrDetectedFields.set(null);
-    this.ocrError.set(null);
-    this.selectedInvoiceFile = null;
-    const fileInput = this.invoiceFileInput()?.nativeElement;
-    if (fileInput) {
-      fileInput.value = '';
-    }
-  }
-
-  /** Confianza del OCR como porcentaje para mostrar en UI. */
   get ocrConfidencePercent(): number {
     const fields = this.ocrDetectedFields();
-    if (!fields) {
-      return 0;
-    }
+    if (!fields) return 0;
     return Math.round(fields.confidence * 100);
   }
 }
