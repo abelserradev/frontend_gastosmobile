@@ -5,10 +5,7 @@
   (keydown)="onKeydown($event)"
   aria-labelledby="selector-title"
 >
-  <div
-    class="relative bg-card rounded-2xl p-6 w-full max-w-sm shadow-2xl"
-    (click)="stopBubble($event)"
-  >
+  <div class="relative bg-card rounded-2xl p-6 w-full max-w-sm shadow-2xl">
     <h2 id="selector-title" class="text-xl font-bold text-foreground mb-1 text-center">
       Agregar Gasto
     </h2>
@@ -23,7 +20,7 @@
         (click)="select('manual')"
         class="flex items-center gap-4 w-full p-4 rounded-xl border-2 border-border hover:border-primary hover:bg-muted transition-all text-left group"
       >
-        <span class="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full bg-primary/10 group-hover:bg-primary/20 transition-colors">
+        <span class="shrink-0 w-10 h-10 flex items-center justify-center rounded-full bg-primary/10 group-hover:bg-primary/20 transition-colors">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
             class="text-primary">
@@ -42,7 +39,7 @@
         (click)="select('invoice')"
         class="flex items-center gap-4 w-full p-4 rounded-xl border-2 border-border hover:border-primary hover:bg-muted transition-all text-left group"
       >
-        <span class="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full bg-primary/10 group-hover:bg-primary/20 transition-colors">
+        <span class="shrink-0 w-10 h-10 flex items-center justify-center rounded-full bg-primary/10 group-hover:bg-primary/20 transition-colors">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
             class="text-primary">
@@ -65,7 +62,7 @@
         (click)="select('payment')"
         class="flex items-center gap-4 w-full p-4 rounded-xl border-2 border-border hover:border-primary hover:bg-muted transition-all text-left group"
       >
-        <span class="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full bg-primary/10 group-hover:bg-primary/20 transition-colors">
+        <span class="shrink-0 w-10 h-10 flex items-center justify-center rounded-full bg-primary/10 group-hover:bg-primary/20 transition-colors">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
             class="text-primary">

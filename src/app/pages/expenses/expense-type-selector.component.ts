@@ -65,10 +65,6 @@ export class ExpenseTypeSelectorComponent implements OnChanges {
     if (e.target === this.dialog()?.nativeElement) this.cancel();
   }
 
-  stopBubble(e: Event): void {
-    e.stopPropagation();
-  }
-
   onKeydown(e: KeyboardEvent): void {
     if (e.key === 'Escape') {
       e.preventDefault();
