@@ -57,6 +57,8 @@ export interface MeExpense {
   paidByDisplayName: string | null;
   paidAt: string | null;
   paidByMemberId: string | null;
+  /** true si el gasto tiene una imagen de comprobante/factura almacenada. */
+  hasReceipt: boolean;
 }
 
 export interface MeHistoryMonthSummary {
@@ -156,6 +158,39 @@ export class MeApiService {
     paymentDate?: string;
   }): Observable<MeExpense> {
     return this.http.post<MeExpense>(`${this.base}/me/expenses`, body);
+  }
+
+  /**
+   * Crea un gasto con imagen de comprobante/factura.
+   * El amount puede estar en USD o BS (amountCurrency indica cuál).
+   * El título es opcional; si falta el backend genera "Comprobante · YYYY-MM-DD".
+   */
+  createExpenseWithReceipt(params: {
+    file: File;
+    amount: number;
+    amountCurrency: 'USD' | 'BS';
+    categoryName: string;
+    paymentDate?: string;
+    title?: string;
+  }): Observable<MeExpense> {
+    const fd = new FormData();
+    fd.append('file', params.file, params.file.name);
+    fd.append('amount', String(params.amount));
+    fd.append('amountCurrency', params.amountCurrency);
+    fd.append('categoryName', params.categoryName);
+    if (params.paymentDate) fd.append('paymentDate', params.paymentDate);
+    if (params.title) fd.append('title', params.title);
+    return this.http.post<MeExpense>(`${this.base}/me/expenses/with-receipt`, fd);
+  }
+
+  /**
+   * Devuelve los bytes del comprobante como Blob para mostrarlo en un <img>.
+   * La imagen viene protegida por JWT (mismo interceptor que el resto de llamadas).
+   */
+  getExpenseReceipt(id: string): Observable<Blob> {
+    return this.http.get(`${this.base}/me/expenses/${id}/receipt`, {
+      responseType: 'blob',
+    });
   }
 
   /** Tasa dólar oficial (Bs/USD) para un día; sin fecha = hoy Caracas. */

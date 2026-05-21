@@ -23,11 +23,34 @@ import { ExpenseModalComponent } from './expense-modal.component';
 import { ExpensePieChartComponent } from './expense-pie-chart.component';
 import { ExpenseTypeSelectorComponent, type ExpenseCreationMode } from './expense-type-selector.component';
 import { ImageUploadModalComponent, type ImageUploadMode } from './image-upload-modal.component';
+import { ReceiptViewerComponent } from './receipt-viewer.component';
 
 const EXPENSES_PAGE_SIZE = 6;
 
 /* Solo chart-1…3 + destructive de la paleta fija */
 const COLORS = ['#ee8329', '#cd5241', '#084152', '#ef4444'];
+
+/** Mapeo canónico MeExpense → item de contexto; centralizado aquí para no repetirlo en cada acción. */
+function toExpenseItem(e: MeExpense) {
+  return {
+    id: e.id,
+    profileId: e.profileId,
+    profileName: e.profileName,
+    title: e.title,
+    description: e.description,
+    amount: e.amount,
+    category: e.category,
+    isPaid: e.isPaid,
+    referenceMonth: e.referenceMonth,
+    paymentDate: e.paymentDate,
+    bcvRateApplied: e.bcvRateApplied,
+    bcvRateDate: e.bcvRateDate,
+    paidByDisplayName: e.paidByDisplayName,
+    paidAt: e.paidAt,
+    paidByMemberId: e.paidByMemberId,
+    hasReceipt: e.hasReceipt ?? false,
+  };
+}
 
 @Component({
   selector: 'app-expenses-page',
@@ -39,6 +62,7 @@ const COLORS = ['#ee8329', '#cd5241', '#084152', '#ef4444'];
     ExpensePieChartComponent,
     ExpenseTypeSelectorComponent,
     ImageUploadModalComponent,
+    ReceiptViewerComponent,
   ],
   templateUrl: './expenses-page.component.html',
   styleUrl: './expenses-page.component.scss',
@@ -79,6 +103,10 @@ export class ExpensesPageComponent implements OnInit {
   readonly modalOpen = signal(false);
   /** Datos del OCR que se pasan al formulario; null = sin prefill (gasto manual). */
   readonly ocrPrefill = signal<ParseInvoiceResult | null>(null);
+
+  // --- Visor de comprobantes ---
+  readonly receiptViewerOpen = signal(false);
+  readonly receiptExpenseId = signal<string | null>(null);
   readonly showChart = signal(false);
   /** YYYY-MM-01 del mes de control activo (API, calendario Caracas). */
   readonly activeReferenceMonth = signal('');
@@ -226,25 +254,7 @@ export class ExpensesPageComponent implements OnInit {
           s.categories.map((c) => ({ id: c.id, name: c.name })),
         );
         this.ctx.setProfiles(s.profiles);
-        this.ctx.setExpenses(
-          s.expenses.map((e) => ({
-            id: e.id,
-            profileId: e.profileId,
-            profileName: e.profileName,
-            title: e.title,
-            description: e.description,
-            amount: e.amount,
-            category: e.category,
-            isPaid: e.isPaid,
-            referenceMonth: e.referenceMonth,
-            paymentDate: e.paymentDate,
-            bcvRateApplied: e.bcvRateApplied,
-            bcvRateDate: e.bcvRateDate,
-            paidByDisplayName: e.paidByDisplayName,
-            paidAt: e.paidAt,
-            paidByMemberId: e.paidByMemberId,
-          })),
-        );
+        this.ctx.setExpenses(s.expenses.map(toExpenseItem));
       },
       error: (err: unknown) => {
         globalThis.alert(formatApiHttpError(err));
@@ -262,15 +272,10 @@ export class ExpensesPageComponent implements OnInit {
 
   /** Al menos un seleccionado sigue pendiente → habilita “Pagar”. */
   hasPendingPaySelection(): boolean {
-    const sel = this.selectedExpenses();
-    const list = this.ctx.expenses();
-    for (const id of sel) {
-      const row = list.find((e) => e.id === id);
-      if (row && !row.isPaid) {
-        return true;
-      }
-    }
-    return false;
+    const expenses = this.ctx.expenses();
+    return [...this.selectedExpenses()].some(
+      (id) => expenses.some((e) => e.id === id && !e.isPaid),
+    );
   }
 
   /** Punto de entrada único: abre el selector de tipo de gasto. */
@@ -296,15 +301,31 @@ export class ExpensesPageComponent implements OnInit {
     this.imageUploadOpen.set(open);
   }
 
-  /** Callback cuando el OCR termina en el ImageUploadModal. */
-  onOcrDone(result: ParseInvoiceResult): void {
-    this.ocrPrefill.set(result);
-    this.modalOpen.set(true);
-  }
-
   onModalOpenChange(open: boolean): void {
     this.modalOpen.set(open);
     if (!open) this.ocrPrefill.set(null);
+  }
+
+  /** El ImageUploadModal guardó el gasto directamente (flujo rápido con imagen). */
+  onExpenseSavedFromReceipt(expense: MeExpense): void {
+    this.expensesPage.set(1);
+    this.ctx.setExpenses([toExpenseItem(expense), ...this.ctx.expenses()]);
+  }
+
+  /** El usuario eligió "Agregar más detalles" desde el ImageUploadModal. */
+  onSwitchToForm(ocrResult: ParseInvoiceResult | null): void {
+    this.ocrPrefill.set(ocrResult);
+    this.modalOpen.set(true);
+  }
+
+  openReceiptViewer(expenseId: string): void {
+    this.receiptExpenseId.set(expenseId);
+    this.receiptViewerOpen.set(true);
+  }
+
+  onReceiptViewerOpenChange(open: boolean): void {
+    this.receiptViewerOpen.set(open);
+    if (!open) this.receiptExpenseId.set(null);
   }
 
   onAddExpense(payload: {
@@ -325,26 +346,7 @@ export class ExpensesPageComponent implements OnInit {
       .subscribe({
         next: (row) => {
           this.expensesPage.set(1);
-          this.ctx.setExpenses([
-            {
-              id: row.id,
-              profileId: row.profileId,
-              profileName: row.profileName,
-              title: row.title,
-              description: row.description,
-              amount: row.amount,
-              category: row.category,
-              isPaid: row.isPaid,
-              referenceMonth: row.referenceMonth,
-              paymentDate: row.paymentDate,
-              bcvRateApplied: row.bcvRateApplied,
-              bcvRateDate: row.bcvRateDate,
-              paidByDisplayName: row.paidByDisplayName,
-              paidAt: row.paidAt,
-              paidByMemberId: row.paidByMemberId,
-            },
-            ...this.ctx.expenses(),
-          ]);
+          this.ctx.setExpenses([toExpenseItem(row), ...this.ctx.expenses()]);
         },
         error: (err: unknown) => {
           globalThis.alert(formatApiHttpError(err));

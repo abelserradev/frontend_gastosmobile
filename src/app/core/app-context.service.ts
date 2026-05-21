@@ -31,6 +31,7 @@ export interface ExpenseItem {
   paidByDisplayName?: string | null;
   paidAt?: string | null;
   paidByMemberId?: string | null;
+  hasReceipt?: boolean;
 }
 
 @Injectable({ providedIn: 'root' })
