@@ -30,6 +30,28 @@ const EXPENSES_PAGE_SIZE = 6;
 /* Solo chart-1…3 + destructive de la paleta fija */
 const COLORS = ['#ee8329', '#cd5241', '#084152', '#ef4444'];
 
+/** Mapeo canónico MeExpense → item de contexto; centralizado aquí para no repetirlo en cada acción. */
+function toExpenseItem(e: MeExpense) {
+  return {
+    id: e.id,
+    profileId: e.profileId,
+    profileName: e.profileName,
+    title: e.title,
+    description: e.description,
+    amount: e.amount,
+    category: e.category,
+    isPaid: e.isPaid,
+    referenceMonth: e.referenceMonth,
+    paymentDate: e.paymentDate,
+    bcvRateApplied: e.bcvRateApplied,
+    bcvRateDate: e.bcvRateDate,
+    paidByDisplayName: e.paidByDisplayName,
+    paidAt: e.paidAt,
+    paidByMemberId: e.paidByMemberId,
+    hasReceipt: e.hasReceipt ?? false,
+  };
+}
+
 @Component({
   selector: 'app-expenses-page',
   standalone: true,
@@ -232,26 +254,7 @@ export class ExpensesPageComponent implements OnInit {
           s.categories.map((c) => ({ id: c.id, name: c.name })),
         );
         this.ctx.setProfiles(s.profiles);
-        this.ctx.setExpenses(
-          s.expenses.map((e) => ({
-            id: e.id,
-            profileId: e.profileId,
-            profileName: e.profileName,
-            title: e.title,
-            description: e.description,
-            amount: e.amount,
-            category: e.category,
-            isPaid: e.isPaid,
-            referenceMonth: e.referenceMonth,
-            paymentDate: e.paymentDate,
-            bcvRateApplied: e.bcvRateApplied,
-            bcvRateDate: e.bcvRateDate,
-            paidByDisplayName: e.paidByDisplayName,
-            paidAt: e.paidAt,
-            paidByMemberId: e.paidByMemberId,
-            hasReceipt: e.hasReceipt ?? false,
-          })),
-        );
+        this.ctx.setExpenses(s.expenses.map(toExpenseItem));
       },
       error: (err: unknown) => {
         globalThis.alert(formatApiHttpError(err));
@@ -269,15 +272,10 @@ export class ExpensesPageComponent implements OnInit {
 
   /** Al menos un seleccionado sigue pendiente → habilita “Pagar”. */
   hasPendingPaySelection(): boolean {
-    const sel = this.selectedExpenses();
-    const list = this.ctx.expenses();
-    for (const id of sel) {
-      const row = list.find((e) => e.id === id);
-      if (row && !row.isPaid) {
-        return true;
-      }
-    }
-    return false;
+    const expenses = this.ctx.expenses();
+    return [...this.selectedExpenses()].some(
+      (id) => expenses.some((e) => e.id === id && !e.isPaid),
+    );
   }
 
   /** Punto de entrada único: abre el selector de tipo de gasto. */
@@ -311,27 +309,7 @@ export class ExpensesPageComponent implements OnInit {
   /** El ImageUploadModal guardó el gasto directamente (flujo rápido con imagen). */
   onExpenseSavedFromReceipt(expense: MeExpense): void {
     this.expensesPage.set(1);
-    this.ctx.setExpenses([
-      {
-        id: expense.id,
-        profileId: expense.profileId,
-        profileName: expense.profileName,
-        title: expense.title,
-        description: expense.description,
-        amount: expense.amount,
-        category: expense.category,
-        isPaid: expense.isPaid,
-        referenceMonth: expense.referenceMonth,
-        paymentDate: expense.paymentDate,
-        bcvRateApplied: expense.bcvRateApplied,
-        bcvRateDate: expense.bcvRateDate,
-        paidByDisplayName: expense.paidByDisplayName,
-        paidAt: expense.paidAt,
-        paidByMemberId: expense.paidByMemberId,
-        hasReceipt: expense.hasReceipt,
-      },
-      ...this.ctx.expenses(),
-    ]);
+    this.ctx.setExpenses([toExpenseItem(expense), ...this.ctx.expenses()]);
   }
 
   /** El usuario eligió "Agregar más detalles" desde el ImageUploadModal. */
@@ -368,27 +346,7 @@ export class ExpensesPageComponent implements OnInit {
       .subscribe({
         next: (row) => {
           this.expensesPage.set(1);
-          this.ctx.setExpenses([
-            {
-              id: row.id,
-              profileId: row.profileId,
-              profileName: row.profileName,
-              title: row.title,
-              description: row.description,
-              amount: row.amount,
-              category: row.category,
-              isPaid: row.isPaid,
-              referenceMonth: row.referenceMonth,
-              paymentDate: row.paymentDate,
-              bcvRateApplied: row.bcvRateApplied,
-              bcvRateDate: row.bcvRateDate,
-              paidByDisplayName: row.paidByDisplayName,
-              paidAt: row.paidAt,
-              paidByMemberId: row.paidByMemberId,
-              hasReceipt: row.hasReceipt ?? false,
-            },
-            ...this.ctx.expenses(),
-          ]);
+          this.ctx.setExpenses([toExpenseItem(row), ...this.ctx.expenses()]);
         },
         error: (err: unknown) => {
           globalThis.alert(formatApiHttpError(err));
