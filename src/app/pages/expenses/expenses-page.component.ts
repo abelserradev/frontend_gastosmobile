@@ -23,6 +23,7 @@ import { ExpenseModalComponent } from './expense-modal.component';
 import { ExpensePieChartComponent } from './expense-pie-chart.component';
 import { ExpenseTypeSelectorComponent, type ExpenseCreationMode } from './expense-type-selector.component';
 import { ImageUploadModalComponent, type ImageUploadMode } from './image-upload-modal.component';
+import { ReceiptViewerComponent } from './receipt-viewer.component';
 
 const EXPENSES_PAGE_SIZE = 6;
 
@@ -39,6 +40,7 @@ const COLORS = ['#ee8329', '#cd5241', '#084152', '#ef4444'];
     ExpensePieChartComponent,
     ExpenseTypeSelectorComponent,
     ImageUploadModalComponent,
+    ReceiptViewerComponent,
   ],
   templateUrl: './expenses-page.component.html',
   styleUrl: './expenses-page.component.scss',
@@ -79,6 +81,10 @@ export class ExpensesPageComponent implements OnInit {
   readonly modalOpen = signal(false);
   /** Datos del OCR que se pasan al formulario; null = sin prefill (gasto manual). */
   readonly ocrPrefill = signal<ParseInvoiceResult | null>(null);
+
+  // --- Visor de comprobantes ---
+  readonly receiptViewerOpen = signal(false);
+  readonly receiptExpenseId = signal<string | null>(null);
   readonly showChart = signal(false);
   /** YYYY-MM-01 del mes de control activo (API, calendario Caracas). */
   readonly activeReferenceMonth = signal('');
@@ -243,6 +249,7 @@ export class ExpensesPageComponent implements OnInit {
             paidByDisplayName: e.paidByDisplayName,
             paidAt: e.paidAt,
             paidByMemberId: e.paidByMemberId,
+            hasReceipt: e.hasReceipt ?? false,
           })),
         );
       },
@@ -296,15 +303,51 @@ export class ExpensesPageComponent implements OnInit {
     this.imageUploadOpen.set(open);
   }
 
-  /** Callback cuando el OCR termina en el ImageUploadModal. */
-  onOcrDone(result: ParseInvoiceResult): void {
-    this.ocrPrefill.set(result);
-    this.modalOpen.set(true);
-  }
-
   onModalOpenChange(open: boolean): void {
     this.modalOpen.set(open);
     if (!open) this.ocrPrefill.set(null);
+  }
+
+  /** El ImageUploadModal guardó el gasto directamente (flujo rápido con imagen). */
+  onExpenseSavedFromReceipt(expense: MeExpense): void {
+    this.expensesPage.set(1);
+    this.ctx.setExpenses([
+      {
+        id: expense.id,
+        profileId: expense.profileId,
+        profileName: expense.profileName,
+        title: expense.title,
+        description: expense.description,
+        amount: expense.amount,
+        category: expense.category,
+        isPaid: expense.isPaid,
+        referenceMonth: expense.referenceMonth,
+        paymentDate: expense.paymentDate,
+        bcvRateApplied: expense.bcvRateApplied,
+        bcvRateDate: expense.bcvRateDate,
+        paidByDisplayName: expense.paidByDisplayName,
+        paidAt: expense.paidAt,
+        paidByMemberId: expense.paidByMemberId,
+        hasReceipt: expense.hasReceipt,
+      },
+      ...this.ctx.expenses(),
+    ]);
+  }
+
+  /** El usuario eligió "Agregar más detalles" desde el ImageUploadModal. */
+  onSwitchToForm(ocrResult: ParseInvoiceResult | null): void {
+    this.ocrPrefill.set(ocrResult);
+    this.modalOpen.set(true);
+  }
+
+  openReceiptViewer(expenseId: string): void {
+    this.receiptExpenseId.set(expenseId);
+    this.receiptViewerOpen.set(true);
+  }
+
+  onReceiptViewerOpenChange(open: boolean): void {
+    this.receiptViewerOpen.set(open);
+    if (!open) this.receiptExpenseId.set(null);
   }
 
   onAddExpense(payload: {
@@ -342,6 +385,7 @@ export class ExpensesPageComponent implements OnInit {
               paidByDisplayName: row.paidByDisplayName,
               paidAt: row.paidAt,
               paidByMemberId: row.paidByMemberId,
+              hasReceipt: row.hasReceipt ?? false,
             },
             ...this.ctx.expenses(),
           ]);

@@ -13,31 +13,28 @@ import {
   ViewEncapsulation,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import type { CategoryDraft, CurrencyCode } from '../../core/app-context.service';
+import { todayYmdCaracas } from '../../core/caracas-date';
+import { MeApiService, type MeExpense } from '../../core/me-api.service';
 import { OcrApiService, type ParseInvoiceResult } from '../../core/ocr-api.service';
+import { formatApiHttpError } from '../../core/http-error.util';
 
 export type ImageUploadMode = 'invoice' | 'payment';
 
 const ALLOWED_MIME_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
-const MAX_SIZE_BYTES = 1 * 1024 * 1024; // 1 MB
+const MAX_SIZE_BYTES = 1 * 1024 * 1024; // 1 MB — seguridad contra payloads grandes
 
-const MODE_LABELS: Record<ImageUploadMode, { title: string; hint: string; action: string }> = {
-  invoice: {
-    title: 'Cargar factura',
-    hint: 'Sube la foto de tu factura o ticket de compra.',
-    action: 'Analizar factura',
-  },
-  payment: {
-    title: 'Comprobante de pago',
-    hint: 'Sube la captura de tu pago móvil o transferencia.',
-    action: 'Analizar comprobante',
-  },
-};
+const STEP_UPLOAD = 'upload';
+const STEP_CONFIRM = 'confirm';
+const STEP_SAVING = 'saving';
+type Step = typeof STEP_UPLOAD | typeof STEP_CONFIRM | typeof STEP_SAVING;
 
 @Component({
   selector: 'app-image-upload-modal',
   standalone: true,
   encapsulation: ViewEncapsulation.None,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './image-upload-modal.component.html',
   styles: [`
     dialog.image-upload-dialog::backdrop {
@@ -51,25 +48,42 @@ const MODE_LABELS: Record<ImageUploadMode, { title: string; hint: string; action
 export class ImageUploadModalComponent implements OnChanges {
   private readonly injector = inject(Injector);
   private readonly ocrApi = inject(OcrApiService);
+  private readonly meApi = inject(MeApiService);
 
   readonly dialog = viewChild<ElementRef<HTMLDialogElement>>('uploadDialog');
   readonly fileInput = viewChild<ElementRef<HTMLInputElement>>('fileInput');
 
   readonly open = input.required<boolean>();
   readonly mode = input.required<ImageUploadMode>();
-  readonly openChange = output<boolean>();
-  /** Emitido cuando el OCR termina; el caller abre el form con los datos pre-rellenados. */
-  readonly ocrDone = output<ParseInvoiceResult>();
+  readonly categories = input.required<CategoryDraft[]>();
+  readonly defaultCurrency = input<CurrencyCode>('USD');
 
+  readonly openChange = output<boolean>();
+  /** Emitido al guardar con éxito para que el padre actualice la lista. */
+  readonly expenseSaved = output<MeExpense>();
+  /**
+   * Emitido cuando el usuario elige "Ingresar detalles" (flujo completo).
+   * El padre abre ExpenseModalComponent con los datos OCR como prefill.
+   */
+  readonly switchToForm = output<ParseInvoiceResult | null>();
+
+  readonly step = signal<Step>(STEP_UPLOAD);
   readonly preview = signal<string | null>(null);
-  readonly processing = signal(false);
-  readonly error = signal<string | null>(null);
-  readonly result = signal<ParseInvoiceResult | null>(null);
+  readonly ocrProcessing = signal(false);
+  readonly ocrResult = signal<ParseInvoiceResult | null>(null);
+  readonly uploadError = signal<string | null>(null);
+  readonly saveError = signal<string | null>(null);
+
+  // Campos del formulario simplificado
+  confirmCategory = '';
+  confirmDate = '';
+  confirmAmountStr = '';
+  confirmCurrency: CurrencyCode = 'USD';
 
   private selectedFile: File | null = null;
 
-  get labels() {
-    return MODE_LABELS[this.mode()];
+  get modeLabel(): string {
+    return this.mode() === 'invoice' ? 'factura' : 'comprobante de pago';
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -77,7 +91,7 @@ export class ImageUploadModalComponent implements OnChanges {
       afterNextRender(() => this.syncDialog(), { injector: this.injector });
     }
     if (changes['open']?.currentValue === true) {
-      this.resetState();
+      this.resetAll();
     }
   }
 
@@ -91,12 +105,18 @@ export class ImageUploadModalComponent implements OnChanges {
     }
   }
 
-  private resetState(): void {
+  private resetAll(): void {
+    this.step.set(STEP_UPLOAD);
     this.preview.set(null);
-    this.processing.set(false);
-    this.error.set(null);
-    this.result.set(null);
+    this.ocrProcessing.set(false);
+    this.ocrResult.set(null);
+    this.uploadError.set(null);
+    this.saveError.set(null);
     this.selectedFile = null;
+    this.confirmCategory = '';
+    this.confirmDate = todayYmdCaracas();
+    this.confirmAmountStr = '';
+    this.confirmCurrency = this.defaultCurrency();
     const fi = this.fileInput()?.nativeElement;
     if (fi) fi.value = '';
   }
@@ -110,65 +130,127 @@ export class ImageUploadModalComponent implements OnChanges {
     const file = input.files?.[0];
     if (!file) return;
 
-    // Validación de tipo real por MIME (el navegador lo toma del archivo, no solo extensión)
     if (!ALLOWED_MIME_TYPES.includes(file.type)) {
-      this.error.set('Formato no permitido. Usa JPG, PNG o WebP.');
+      this.uploadError.set('Formato no permitido. Usa JPG, PNG o WebP.');
       return;
     }
-
     if (file.size > MAX_SIZE_BYTES) {
-      this.error.set(
-        `La imagen supera el límite de 1 MB (${(file.size / 1024 / 1024).toFixed(2)} MB).`,
+      this.uploadError.set(
+        `La imagen supera el límite de 1 MB (${(file.size / 1024 / 1024).toFixed(2)} MB). Comprime la imagen e inténtalo de nuevo.`,
       );
       return;
     }
 
-    this.error.set(null);
+    this.uploadError.set(null);
     this.selectedFile = file;
 
     const reader = new FileReader();
     reader.onload = () => {
       this.preview.set(reader.result as string);
+      this.runOcr();
     };
     reader.readAsDataURL(file);
   }
 
   clearImage(): void {
     this.preview.set(null);
-    this.result.set(null);
-    this.error.set(null);
+    this.ocrResult.set(null);
+    this.uploadError.set(null);
     this.selectedFile = null;
+    this.step.set(STEP_UPLOAD);
     const fi = this.fileInput()?.nativeElement;
     if (fi) fi.value = '';
   }
 
-  analyze(): void {
-    if (!this.selectedFile || this.processing()) return;
-    this.processing.set(true);
-    this.error.set(null);
-    this.result.set(null);
+  private runOcr(): void {
+    if (!this.selectedFile) return;
+    this.ocrProcessing.set(true);
 
     this.ocrApi.parseInvoice(this.selectedFile).subscribe({
       next: (r) => {
-        this.processing.set(false);
-        this.result.set(r);
+        this.ocrProcessing.set(false);
+        this.ocrResult.set(r);
+        this.prefillFromOcr(r);
+        this.step.set(STEP_CONFIRM);
       },
       error: () => {
-        this.processing.set(false);
-        this.error.set('No se pudo analizar la imagen. Intenta con una foto más nítida.');
+        // OCR falló — igual pasa al formulario simplificado sin prefill
+        this.ocrProcessing.set(false);
+        this.step.set(STEP_CONFIRM);
       },
     });
   }
 
-  continueWithResult(): void {
-    const r = this.result();
-    if (r) this.ocrDone.emit(r);
-    this.openChange.emit(false);
+  private prefillFromOcr(r: ParseInvoiceResult): void {
+    this.confirmDate = r.date ?? todayYmdCaracas();
+    this.confirmCurrency = (r.currency as CurrencyCode) ?? this.defaultCurrency();
+
+    if (r.amount != null && r.amount > 0) {
+      this.confirmAmountStr = String(r.amount);
+    }
+
+    if (r.merchant) {
+      const ml = r.merchant.toLowerCase();
+      const match = this.categories().find((c) =>
+        ml.includes(c.name.toLowerCase()),
+      );
+      if (match) this.confirmCategory = match.name;
+    }
   }
 
-  skipOcr(): void {
-    // Pasa resultado vacío para que el form abra sin prefill
-    this.ocrDone.emit({ rawText: '', confidence: 0, currency: 'USD' });
+  todayMax(): string {
+    return todayYmdCaracas();
+  }
+
+  get ocrConfidencePercent(): number {
+    return Math.round((this.ocrResult()?.confidence ?? 0) * 100);
+  }
+
+  /** Guarda directamente el gasto con la imagen adjunta. */
+  saveExpense(): void {
+    if (!this.selectedFile) return;
+
+    const amount = Number.parseFloat(this.confirmAmountStr);
+    if (Number.isNaN(amount) || amount < 0) {
+      this.saveError.set('El monto no es válido');
+      return;
+    }
+    if (!this.confirmCategory) {
+      this.saveError.set('Selecciona una categoría');
+      return;
+    }
+    if (!this.confirmDate) {
+      this.saveError.set('Selecciona la fecha del gasto');
+      return;
+    }
+
+    this.saveError.set(null);
+    this.step.set(STEP_SAVING);
+
+    const title = this.ocrResult()?.merchant?.trim() || undefined;
+
+    this.meApi.createExpenseWithReceipt({
+      file: this.selectedFile,
+      amount,
+      amountCurrency: this.confirmCurrency,
+      categoryName: this.confirmCategory,
+      paymentDate: this.confirmDate,
+      title,
+    }).subscribe({
+      next: (expense) => {
+        this.expenseSaved.emit(expense);
+        this.openChange.emit(false);
+      },
+      error: (err: unknown) => {
+        this.step.set(STEP_CONFIRM);
+        this.saveError.set(formatApiHttpError(err));
+      },
+    });
+  }
+
+  /** El usuario prefiere el formulario completo con todos los campos. */
+  openFullForm(): void {
+    this.switchToForm.emit(this.ocrResult());
     this.openChange.emit(false);
   }
 
@@ -191,7 +273,8 @@ export class ImageUploadModalComponent implements OnChanges {
     }
   }
 
-  get confidencePercent(): number {
-    return Math.round((this.result()?.confidence ?? 0) * 100);
-  }
+  // Exponer constantes de paso al template
+  readonly STEP_UPLOAD = STEP_UPLOAD;
+  readonly STEP_CONFIRM = STEP_CONFIRM;
+  readonly STEP_SAVING = STEP_SAVING;
 }
