@@ -233,7 +233,8 @@ export class ImageUploadModalComponent implements OnChanges {
     this.saveError.set(null);
     this.step.set(STEP_SAVING);
 
-    const title = this.ocrResult()?.merchant?.trim() || undefined;
+    // UX: nombre del gasto = categoría elegida (no OCR de beneficiario / ruido bancario)
+    const title = this.confirmCategory.trim();
 
     this.meApi.createExpenseWithReceipt({
       file: this.selectedFile,
