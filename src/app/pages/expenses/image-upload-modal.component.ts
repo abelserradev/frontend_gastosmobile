@@ -16,13 +16,19 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import type { CategoryDraft, CurrencyCode } from '../../core/app-context.service';
 import { todayYmdCaracas } from '../../core/caracas-date';
+import { guessOcrDocumentKind } from '../../core/ocr-document-kind.util';
 import { MeApiService, type MeExpense } from '../../core/me-api.service';
 import { OcrApiService, type ParseInvoiceResult } from '../../core/ocr-api.service';
 import { formatApiHttpError } from '../../core/http-error.util';
 
 export type ImageUploadMode = 'invoice' | 'payment';
 
-const ALLOWED_MIME_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+const ALLOWED_MIME_TYPES = new Set<string>([
+  'image/jpeg',
+  'image/jpg',
+  'image/png',
+  'image/webp',
+]);
 const MAX_SIZE_BYTES = 1 * 1024 * 1024; // 1 MB — seguridad contra payloads grandes
 
 const STEP_UPLOAD = 'upload';
@@ -130,7 +136,7 @@ export class ImageUploadModalComponent implements OnChanges {
     const file = input.files?.[0];
     if (!file) return;
 
-    if (!ALLOWED_MIME_TYPES.includes(file.type)) {
+    if (!ALLOWED_MIME_TYPES.has(file.type)) {
       this.uploadError.set('Formato no permitido. Usa JPG, PNG o WebP.');
       return;
     }
@@ -238,6 +244,34 @@ export class ImageUploadModalComponent implements OnChanges {
       title,
     }).subscribe({
       next: (expense) => {
+        const ocr = this.ocrResult();
+        const rt = (ocr?.rawText ?? '').trim();
+        if (ocr && rt.length >= 8) {
+          const guess = guessOcrDocumentKind(this.mode(), rt);
+          this.meApi
+            .submitOcrFeedback({
+              source: 'IMAGE_UPLOAD_FLOW',
+              submissionVariant: 'quick_confirm',
+              documentKindGuess: guess,
+              parseSnapshot: {
+                ...ocr,
+                rawText: rt.slice(0, 7900),
+              },
+              corrected: {
+                title: expense.title,
+                description: expense.description?.trim() ?? '',
+                amountUsd: expense.amount,
+                ...(expense.paymentDate
+                  ? { paymentDate: expense.paymentDate.slice(0, 10) }
+                  : {}),
+                currencyCapture:
+                  this.confirmCurrency === 'BS' ? 'BS' : 'USD',
+                categoryName: this.confirmCategory,
+              },
+              expenseId: expense.id,
+            })
+            .subscribe({ error: () => {} });
+        }
         this.expenseSaved.emit(expense);
         this.openChange.emit(false);
       },
