@@ -3,6 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import type { CurrencyCode, ProfileType } from './app-context.service';
+import type { ParseInvoiceResult } from './ocr-api.service';
 
 export interface MePreferences {
   defaultCurrency: CurrencyCode;
@@ -75,6 +76,32 @@ export interface MeState {
   /** Primer día del mes en curso (Caracas), YYYY-MM-DD. */
   activeReferenceMonth: string;
   needsMonthlyIncomeSetup: boolean;
+}
+
+export type OcrFeedbackSourceApi = 'IMAGE_UPLOAD_FLOW' | 'EDIT_EXPENSE';
+
+export type MeOcrDocumentKindGuessApi =
+  | 'payment_screenshot'
+  | 'physical_receipt'
+  | 'fiscal_or_formal_invoice'
+  | 'unknown';
+
+/** Body de POST /me/ocr-feedback (v1.3). parseSnapshot debe alinear con ParseInvoiceResult. */
+export interface SubmitOcrFeedbackBody {
+  source: OcrFeedbackSourceApi;
+  submissionVariant?: 'quick_confirm' | 'detail_form';
+  documentKindGuess?: MeOcrDocumentKindGuessApi;
+  parseSnapshot: ParseInvoiceResult;
+  corrected: {
+    title: string;
+    description?: string;
+    amountUsd: number;
+    paymentDate?: string;
+    currencyCapture?: 'USD' | 'BS';
+    categoryName?: string;
+    bankLabel?: string;
+  };
+  expenseId?: string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -243,6 +270,14 @@ export class MeApiService {
     return this.http.post<{ deleted: number }>(
       `${this.base}/me/expenses/delete-many`,
       { ids },
+    );
+  }
+
+  /** v1.3 — feedback OCR; no debe bloquear UI (llamar con subscribe errores ignorados si aplica). */
+  submitOcrFeedback(body: SubmitOcrFeedbackBody): Observable<{ id: string }> {
+    return this.http.post<{ id: string }>(
+      `${this.base}/me/ocr-feedback`,
+      body,
     );
   }
 }

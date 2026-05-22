@@ -1,6 +1,6 @@
 {
   "name": "gastos-frontend",
-  "version": "0.0.0",
+  "version": "1.3.0",
   "scripts": {
     "ng": "ng",
     "prebuild": "node scripts/write-firebase-api-key.mjs",

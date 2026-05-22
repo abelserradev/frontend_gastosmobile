@@ -19,6 +19,7 @@ import { AuthService } from '../../core/auth.service';
 import { formatApiHttpError } from '../../core/http-error.util';
 import { MeApiService, type MeExpense } from '../../core/me-api.service';
 import type { ParseInvoiceResult } from '../../core/ocr-api.service';
+import { guessOcrDocumentKind } from '../../core/ocr-document-kind.util';
 import { ExpenseModalComponent } from './expense-modal.component';
 import { ExpensePieChartComponent } from './expense-pie-chart.component';
 import { ExpenseTypeSelectorComponent, type ExpenseCreationMode } from './expense-type-selector.component';
@@ -103,6 +104,8 @@ export class ExpensesPageComponent implements OnInit {
   readonly modalOpen = signal(false);
   /** Datos del OCR que se pasan al formulario; null = sin prefill (gasto manual). */
   readonly ocrPrefill = signal<ParseInvoiceResult | null>(null);
+  /** Factura vs pago móvil: guía estadística tipo documento cuando hay OCR previo al formulario. */
+  readonly lastReceiptCaptureKind = signal<ImageUploadMode | null>(null);
 
   // --- Visor de comprobantes ---
   readonly receiptViewerOpen = signal(false);
@@ -285,9 +288,17 @@ export class ExpensesPageComponent implements OnInit {
 
   onSelectorOpenChange(open: boolean): void {
     this.selectorOpen.set(open);
+    if (open) {
+      this.lastReceiptCaptureKind.set(null);
+    }
   }
 
   onCreationModeSelected(mode: ExpenseCreationMode): void {
+    if (mode === 'invoice' || mode === 'payment') {
+      this.lastReceiptCaptureKind.set(mode);
+    } else {
+      this.lastReceiptCaptureKind.set(null);
+    }
     if (mode === 'manual') {
       this.ocrPrefill.set(null);
       this.modalOpen.set(true);
@@ -335,6 +346,8 @@ export class ExpensesPageComponent implements OnInit {
     category: string;
     paymentDate?: string;
   }): void {
+    const ocrSnapshot = this.ocrPrefill();
+    const flowKind = this.lastReceiptCaptureKind();
     this.meApi
       .createExpense({
         title: payload.title,
@@ -347,11 +360,59 @@ export class ExpensesPageComponent implements OnInit {
         next: (row) => {
           this.expensesPage.set(1);
           this.ctx.setExpenses([toExpenseItem(row), ...this.ctx.expenses()]);
+          const raw = (ocrSnapshot?.rawText ?? '').trim();
+          if (raw.length >= 8 && ocrSnapshot) {
+            this.enqueueOcrFeedbackAfterDetailForm(
+              row,
+              payload,
+              ocrSnapshot,
+              flowKind,
+            );
+          }
         },
         error: (err: unknown) => {
           globalThis.alert(formatApiHttpError(err));
         },
       });
+  }
+
+  /** Fire-and-forget opcional contra el servidor (v1.3). */
+  private enqueueOcrFeedbackAfterDetailForm(
+    expenseRow: MeExpense,
+    formPayload: {
+      title: string;
+      description: string;
+      amount: number;
+      category: string;
+      paymentDate?: string;
+    },
+    ocrSnapshot: ParseInvoiceResult,
+    receiptFlow: ImageUploadMode | null,
+  ): void {
+    const kind = guessOcrDocumentKind(receiptFlow ?? undefined, ocrSnapshot.rawText);
+    const parseSnapshot = {
+      ...ocrSnapshot,
+      rawText: (ocrSnapshot.rawText ?? '').slice(0, 7900),
+    };
+    const pay = expenseRow.paymentDate ?? formPayload.paymentDate?.trim();
+    this.meApi
+      .submitOcrFeedback({
+        source: 'IMAGE_UPLOAD_FLOW',
+        submissionVariant: 'detail_form',
+        documentKindGuess: kind,
+        parseSnapshot,
+        corrected: {
+          title: expenseRow.title,
+          description: expenseRow.description,
+          amountUsd: expenseRow.amount,
+          ...(pay ? { paymentDate: pay.slice(0, 10) } : {}),
+          currencyCapture:
+            this.ctx.currency() === 'BS' ? 'BS' : 'USD',
+          categoryName: expenseRow.category,
+        },
+        expenseId: expenseRow.id,
+      })
+      .subscribe({ error: () => {} });
   }
 
   toggleExpensePaid(id: string): void {
