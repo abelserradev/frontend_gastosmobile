@@ -1,141 +1,229 @@
-<div class="min-h-screen bg-linear-to-br from-muted to-background pb-8 relative">
-  <div
-    class="bg-linear-to-r from-primary to-secondary text-secondary-foreground p-6 rounded-b-3xl shadow-lg relative"
-  >
+<div class="expenses-shell pb-28 lg:pb-10">
+  <div class="ambient-orb ambient-orb--primary" aria-hidden="true"></div>
+  <div class="ambient-orb ambient-orb--accent" aria-hidden="true"></div>
 
-  <div class="max-w-md mx-auto">
-    <!-- Logo Mobile (arriba del todo, centrado) -->
-    <div class="md:hidden flex justify-center -mt-4 -mb-4 overflow-visible">
+  @if (sidebarOpen()) {
+    <button
+      type="button"
+      class="sidebar-backdrop lg:hidden"
+      (click)="closeSidebar()"
+      aria-label="Cerrar menú"
+    ></button>
+  }
+
+  <aside
+    class="expenses-sidebar glass-panel flex flex-col p-5"
+    [class.is-open]="sidebarOpen()"
+    aria-label="Navegación principal"
+  >
+    <div class="mb-8">
       <img
-        src="/titulo-remove.png"
+        src="/prueba-logo.png"
         alt="Finflow"
-        class="w-[95vw] h-auto object-contain drop-shadow-md brightness-0 invert pointer-events-none"
+        class="h-14 w-auto object-contain mx-auto"
       />
+      <p class="text-center text-[10px] uppercase tracking-[0.2em] text-muted-foreground mt-2">
+        Control financiero
+      </p>
     </div>
 
-    <div class="flex justify-between items-center mb-2 gap-2">
+    <nav class="flex-1 space-y-1">
+      <span
+        class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold bg-primary/12 text-primary border border-primary/25"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" /><rect x="3" y="14" width="7" height="7" rx="1" /><rect x="14" y="14" width="7" height="7" rx="1" />
+        </svg>
+        Gastos
+      </span>
       <button
         type="button"
-        (click)="goBack()"
-        class="inline-flex items-center text-xs font-medium text-secondary-foreground/90 hover:text-secondary-foreground transition-colors shrink-0"
-        aria-label="Volver atrás"
+        (click)="goProfiles()"
+        class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors"
       >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          aria-hidden="true"
-        >
-          <path d="M15 18l-6-6 6-6" />
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" />
         </svg>
-        </button>
-        <button
-          type="button"
-          (click)="goHistorial()"
-          class="text-xs font-medium text-secondary-foreground/90 hover:text-secondary-foreground transition-colors shrink-0"
-        >
-          Historial
-        </button>
-        <button
-          type="button"
-          (click)="handleLogout()"
-          class="text-xs font-medium text-secondary-foreground/90 hover:text-secondary-foreground transition-colors shrink-0"
-          aria-label="Cerrar sesión"
-        >
-          Cerrar sesión
-        </button>
+        Perfiles
+      </button>
+      <button
+        type="button"
+        (click)="goHistorial()"
+        class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path d="M3 3v18h18" /><path d="M7 16l4-8 4 5 5-7" />
+        </svg>
+        Historial
+      </button>
+    </nav>
+
+    <div class="pt-4 mt-4 border-t border-border/70">
+      <div class="flex items-center gap-3 px-2">
+        <div class="w-9 h-9 rounded-full bg-accent/15 text-accent flex items-center justify-center text-sm font-bold shrink-0">
+          {{ userInitial() }}
+        </div>
+        <div class="min-w-0 flex-1">
+          <p class="text-sm font-medium truncate text-foreground">
+            {{ auth.displayName() || 'Usuario' }}
+          </p>
+          <p class="text-[11px] truncate text-muted-foreground">{{ auth.email() }}</p>
+        </div>
       </div>
-      <p class="text-center text-secondary-foreground/90 text-sm mb-1">Ingreso Mensual</p>
-      @if (monthLabelActive()) {
-        <p class="text-center text-secondary-foreground/75 text-xs mb-2 capitalize">
-          Mes en curso · {{ monthLabelActive() }}
-        </p>
-      }
-      @if (ctx.incomeFixedBs() != null) {
-        <p class="text-center text-secondary-foreground/80 text-xs mb-1">
-          {{ ctx.incomeFixedBs() | number: '1.2-2' }} Bs. nominales
-        </p>
-      }
-      <p class="text-center text-secondary-foreground/75 text-xs mb-1">
-        Equivalente en USD (tasa vigente)
-        @if (ctx.bcvQuoteIsStale()) {
-          <span class="text-amber-200">· última tasa en caché</span>
-        }
-      </p>
-      <div class="text-center">
-        <p class="text-4xl font-bold">
-          $
-          {{ ctx.monthlyIncome().toFixed(2) }}
-        </p>
+      <button
+        type="button"
+        (click)="handleLogout()"
+        class="mt-3 w-full text-xs text-muted-foreground hover:text-destructive transition-colors text-left px-2"
+      >
+        Cerrar sesión
+      </button>
+    </div>
+  </aside>
+
+  <main class="expenses-main relative z-10 max-w-3xl mx-auto px-4 sm:px-6 pt-4 lg:pt-8">
+    <div class="flex items-center justify-between gap-3 mb-4 lg:hidden">
+      <button
+        type="button"
+        (click)="toggleSidebar()"
+        class="inline-flex items-center justify-center w-10 h-10 rounded-xl glass-panel text-foreground"
+        aria-label="Abrir menú"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path d="M4 6h16" /><path d="M4 12h16" /><path d="M4 18h16" />
+        </svg>
+      </button>
+      <img src="/titulo-remove.png" alt="Finflow" class="h-8 w-auto object-contain" />
+      <div class="w-10"></div>
+    </div>
+
+    @if (ctx.bsIncomeNarrative() || averageBcvRate() != null) {
+      <div class="glass-panel bcv-ticker rounded-xl px-3 py-2 mb-5 text-xs font-mono text-muted-foreground">
+        <div class="bcv-ticker__track">
+          <span class="inline-flex items-center gap-2 shrink-0">
+            <span class="text-primary font-bold">⚡ BCV</span>
+            @if (averageBcvRate() != null) {
+              <span class="text-foreground font-semibold">
+                Promedio mes: {{ averageBcvRate() | number: '1.2-2' }} Bs/USD
+              </span>
+            }
+            @if (ctx.bsIncomeNarrative()) {
+              <span>{{ ctx.bsIncomeNarrative() }}</span>
+            }
+            @if (ctx.bcvQuoteIsStale()) {
+              <span class="text-primary font-semibold">· última tasa en caché</span>
+            }
+          </span>
+          <span class="inline-flex items-center gap-2 shrink-0" aria-hidden="true">
+            <span class="text-primary font-bold">⚡ BCV</span>
+            @if (averageBcvRate() != null) {
+              <span class="text-foreground font-semibold">
+                Promedio mes: {{ averageBcvRate() | number: '1.2-2' }} Bs/USD
+              </span>
+            }
+            @if (ctx.bsIncomeNarrative()) {
+              <span>{{ ctx.bsIncomeNarrative() }}</span>
+            }
+          </span>
+        </div>
       </div>
-      @if (ctx.bsIncomeNarrative()) {
+    }
+
+    <section class="glass-panel rounded-2xl p-5 mb-6">
+      <div class="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <p class="text-xs uppercase tracking-wider text-muted-foreground font-medium">
+            Ingreso mensual
+          </p>
+          @if (monthLabelActive()) {
+            <p class="text-[11px] text-muted-foreground mt-0.5 capitalize">
+              {{ monthLabelActive() }}
+            </p>
+          }
+          <p class="text-4xl sm:text-5xl font-extrabold tracking-tight text-foreground mt-1 tabular-nums">
+            $ {{ ctx.monthlyIncome().toFixed(2) }}
+          </p>
+          @if (ctx.incomeFixedBs() != null) {
+            <p class="text-xs text-muted-foreground font-mono mt-1">
+              {{ ctx.incomeFixedBs() | number: '1.2-2' }} Bs. nominales
+            </p>
+          }
+        </div>
+        <div class="text-right text-xs text-muted-foreground max-w-[12rem]">
+          Equivalente USD · tasa vigente
+          @if (ctx.bcvQuoteIsStale()) {
+            <span class="block text-primary font-medium mt-0.5">última tasa en caché</span>
+          }
+        </div>
+      </div>
+    </section>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+      <div class="glass-panel glass-panel--metric rounded-2xl p-5">
+        <p class="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+          Disponible
+        </p>
         <p
-          class="text-center text-xs text-indigo-50/95 leading-snug mt-3 mx-auto max-w-sm px-2"
+          class="text-3xl font-extrabold tracking-tight mt-2 tabular-nums"
+          [class.text-foreground]="remaining() >= 0"
+          [class.text-destructive]="remaining() < 0"
         >
-          {{ ctx.bsIncomeNarrative() }}
+          $ {{ remaining().toFixed(2) }}
         </p>
-      }
-      <div class="mt-4 grid grid-cols-2 gap-3 text-sm">
-        <div class="bg-card/20 rounded-lg p-3 backdrop-blur-sm">
-          <p class="text-secondary-foreground/90">Total Gastado</p>
-          <p class="text-xl font-bold">
-            $ {{ totalExpenses().toFixed(2) }}
-          </p>
-        </div>
-        <div class="bg-card/20 rounded-lg p-3 backdrop-blur-sm">
-          <p class="text-secondary-foreground/90">Disponible</p>
-          <p
-            class="text-xl font-bold"
-            [class.text-destructive]="remaining() < 0"
+      </div>
+
+      <div class="glass-panel glass-panel--metric rounded-2xl p-5">
+        <div class="flex items-start justify-between gap-3">
+          <div>
+            <p class="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+              Total gastado
+            </p>
+            <p class="text-3xl font-extrabold tracking-tight text-secondary mt-2 tabular-nums">
+              $ {{ totalExpenses().toFixed(2) }}
+            </p>
+          </div>
+          <svg
+            class="shrink-0 text-secondary/80"
+            width="88"
+            height="32"
+            viewBox="0 0 88 32"
+            aria-hidden="true"
           >
-            $ {{ remaining().toFixed(2) }}
-          </p>
+            <polyline
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              [attr.points]="spendingSparklinePath()"
+            />
+          </svg>
         </div>
+        <p class="text-[10px] text-muted-foreground font-mono mt-2">últimos 7 días</p>
       </div>
     </div>
-  </div>
 
-  <div class="max-w-md mx-auto px-6 mt-6">
     <button
       type="button"
       (click)="toggleChart()"
-      class="w-full bg-card rounded-lg shadow-md p-4 mb-4 flex items-center justify-between hover:shadow-lg transition-shadow"
+      class="glass-panel w-full rounded-xl p-4 mb-4 flex items-center justify-between hover:shadow-md transition-all duration-200"
     >
       <div class="flex items-center gap-2">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          class="text-primary shrink-0"
-        >
-          <path
-            d="M21.21 15.89A10 10 0 1 1 8 2.83"
-          />
-          <path d="M22 12A10 10 0 0 0 12 2v10z" />
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-primary shrink-0" aria-hidden="true">
+          <path d="M21.21 15.89A10 10 0 1 1 8 2.83" /><path d="M22 12A10 10 0 0 0 12 2v10z" />
         </svg>
-        <span class="font-medium text-foreground">
-          {{ showChart() ? 'Ocultar' : 'Ver' }} Gráfico de Categorías
+        <span class="font-medium text-foreground text-sm">
+          {{ showChart() ? 'Ocultar' : 'Ver' }} gráfico de categorías
         </span>
       </div>
-      <span class="text-primary text-xl">{{ showChart() ? '−' : '+' }}</span>
+      <span class="text-primary text-lg">{{ showChart() ? '−' : '+' }}</span>
     </button>
 
     @if (showChart() && (pieChartData().labels?.length ?? 0) > 0) {
-      <div class="bg-card rounded-xl shadow-md p-4 mb-4">
-        <h3 class="text-lg font-bold text-card-foreground mb-4 text-center">
-          Gastos por Categoría
+      <div class="glass-panel rounded-2xl p-4 mb-6">
+        <h3 class="text-base font-bold text-card-foreground mb-4 text-center">
+          Gastos por categoría
         </h3>
-        <div class="h-[300px] w-full relative">
+        <div class="h-[280px] w-full relative">
           <app-expense-pie-chart
             [chartData]="pieChartData()"
             [chartOptions]="pieChartOptions()"
@@ -145,238 +233,200 @@
     }
 
     <div class="flex items-center justify-between mb-4">
-      <!-- Logo Desktop (absoluto a la izquierda de la pantalla, alineado con Mis Gastos) -->
-      <div class="hidden md:flex absolute -left-8 items-center mt-50">
-        <img
-          src="/prueba-logo.png"
-          alt="Finflow"
-          class="h-90 w-auto object-contain"
-        />
-      </div>
-      <h2 class="text-xl font-bold text-card-foreground">Mis Gastos</h2>
+      <h2 class="text-lg font-bold text-foreground tracking-tight">Mis gastos</h2>
       @if (selectedExpenses().size > 0) {
-        <span class="text-sm text-primary font-medium">
+        <span class="text-xs text-primary font-semibold px-2 py-1 rounded-full bg-primary/10">
           {{ selectedExpenses().size }} seleccionado(s)
         </span>
       }
     </div>
 
-    <div class="bg-card rounded-xl shadow-md p-4 mb-4">
+    <div class="mb-6 space-y-2">
       @if (ctx.expenses().length === 0) {
-        <div class="text-center py-8 text-muted-foreground">
-          <p>No hay gastos registrados</p>
-          <p class="text-sm mt-2">Agrega tu primer gasto usando el botón de abajo</p>
+        <div class="glass-panel text-center py-12 px-4 rounded-2xl text-muted-foreground">
+          <p class="font-medium text-foreground">No hay gastos registrados</p>
+          <p class="text-sm mt-2">Agrega tu primer gasto con el botón flotante</p>
         </div>
       } @else {
-        <div class="space-y-2">
-          @for (expense of expensesPageSlice(); track expense.id) {
-            <div
-              class="flex items-center gap-3 p-3 rounded-lg border-2 transition-all"
-              [ngClass]="{
-                'border-primary bg-muted ring-1 ring-ring/50':
-                  isSelected(expense.id) && !expense.isPaid,
-                'border-accent/50 bg-muted':
-                  expense.isPaid,
-                'border-border hover:border-input':
-                  !isSelected(expense.id) && !expense.isPaid,
-              }"
-            >
+        @for (expense of expensesPageSlice(); track expense.id) {
+          <article
+            class="expense-row glass-panel relative rounded-2xl p-3.5 sm:p-4"
+            [class.is-paid]="expense.isPaid"
+            [class.is-selected]="isSelected(expense.id) && !expense.isPaid"
+          >
+            @if (expense.isPaid) {
+              <span class="paid-corner" title="Pagado" aria-hidden="true">
+                <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                  <path d="M20 6 9 17l-5-5" />
+                </svg>
+              </span>
+            }
+
+            <div class="flex items-center gap-3 sm:gap-4">
               <button
                 type="button"
                 (click)="toggleExpensePaid(expense.id)"
-                class="shrink-0"
-                [attr.title]="
-                  expense.isPaid
-                    ? 'Marcar como pendiente'
-                    : 'Seleccionar para pagar con «Pagar»'
-                "
+                class="flex items-center justify-center w-11 h-11 sm:w-12 sm:h-12 rounded-xl shrink-0 border border-border/80 bg-muted/50 transition-colors"
+                [class.text-accent]="expense.isPaid"
+                [class.text-primary]="!expense.isPaid"
+                [attr.title]="expense.isPaid ? 'Marcar como pendiente' : 'Seleccionar para pagar'"
               >
-                @if (expense.isPaid) {
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    class="text-accent"
-                  >
-                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-                    <path d="m9 11 3 3L22 4" />
-                  </svg>
-                } @else {
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    class="text-muted-foreground"
-                  >
-                    <circle cx="12" cy="12" r="10" />
-                  </svg>
+                @switch (categoryIconKind(expense.category)) {
+                  @case ('food') {
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                      <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2" /><path d="M7 2v20" /><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7" />
+                    </svg>
+                  }
+                  @case ('transport') {
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                      <path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2" /><circle cx="7" cy="17" r="2" /><path d="M9 17h6" /><circle cx="17" cy="17" r="2" />
+                    </svg>
+                  }
+                  @case ('home') {
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                      <path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8" /><path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                    </svg>
+                  }
+                  @case ('health') {
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                      <path d="M11 2v2" /><path d="M5 2v2" /><path d="M5 3H4a2 2 0 0 0-2 2v4a6 6 0 0 0 6 6 6 6 0 0 0 6-6V5a2 2 0 0 0-2-2h-1" /><path d="M8 15a6 6 0 0 0 12 0v-3" />
+                    </svg>
+                  }
+                  @case ('entertainment') {
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                      <path d="M10 4 8 20" /><path d="M16 4l2 16" /><path d="M4 8h16" /><path d="M3 16h18" />
+                    </svg>
+                  }
+                  @case ('shopping') {
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                      <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" /><path d="M3 6h18" /><path d="M16 10a4 4 0 0 1-8 0" />
+                    </svg>
+                  }
+                  @default {
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                      <path d="M12 2v20" /><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+                    </svg>
+                  }
                 }
               </button>
 
-              <div class="flex-1 min-w-0">
-                <div class="flex items-start justify-between gap-2">
-                  <div>
-                    <p
-                      class="font-medium"
-                      [class.text-card-foreground]="expense.isPaid"
-                      [class.text-muted-foreground]="!expense.isPaid"
+              <div class="min-w-0 flex-1">
+                <div class="flex items-center gap-2 flex-wrap">
+                  <h3 class="font-bold text-sm sm:text-base text-foreground truncate">
+                    {{ expense.category }}
+                  </h3>
+                  @if (expense.hasReceipt) {
+                    <div
+                      class="relative"
+                      (mouseenter)="onReceiptHover(expense.id)"
+                      (mouseleave)="onReceiptHoverEnd()"
+                      (focusin)="onReceiptHover(expense.id)"
+                      (focusout)="onReceiptHoverEnd()"
                     >
-                      {{ expense.title }}
-                    </p>
-                    @if (expense.description) {
-                      <p class="text-sm text-muted-foreground mt-1">
-                        {{ expense.description }}
-                      </p>
-                    }
-                    <div class="flex items-center gap-2 mt-1">
-                      <p class="text-xs text-muted-foreground/90">{{ expense.category }}</p>
-                      @if (expense.hasReceipt) {
-                        <button
-                          type="button"
-                          (click)="openReceiptViewer(expense.id)"
-                          class="inline-flex items-center gap-1 text-xs text-primary hover:underline shrink-0"
-                          title="Ver imagen del comprobante"
-                        >
-                          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none"
-                            viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                            <circle cx="8.5" cy="8.5" r="1.5"/>
-                            <polyline points="21 15 16 10 5 21"/>
-                          </svg>
-                          Ver imagen
-                        </button>
+                      <button
+                        type="button"
+                        (click)="openReceiptViewer(expense.id)"
+                        class="inline-flex items-center justify-center w-7 h-7 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
+                        title="Ver comprobante OCR"
+                        aria-label="Ver comprobante"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                          <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" /><circle cx="12" cy="12" r="3" />
+                        </svg>
+                      </button>
+                      @if (hoveredReceiptId() === expense.id && receiptPreviewUrl(expense.id)) {
+                        <div class="receipt-popover glass-panel">
+                          <img [src]="receiptPreviewUrl(expense.id)" alt="Vista previa del recibo" />
+                        </div>
                       }
                     </div>
+                  }
+                </div>
+
+                <p
+                  class="text-xs text-muted-foreground truncate mt-0.5"
+                  [class.line-through]="expense.isPaid"
+                >
+                  {{ expense.title }}
+                </p>
+
+                <div class="flex items-center gap-2 mt-1 text-[10px] sm:text-[11px] font-mono text-muted-foreground/90 flex-wrap">
+                  @if (expense.bcvRateApplied != null) {
+                    <span>Tasa {{ expense.bcvRateApplied | number: '1.2-2' }}</span>
+                  }
+                  @if (expense.bcvRateDate ?? expense.paymentDate) {
                     @if (expense.bcvRateApplied != null) {
-                      <p class="text-xs text-primary mt-1">
-                        Tasa BCV {{ expense.bcvRateApplied.toFixed(4) }} Bs/USD
-                        @if (expense.bcvRateDate) {
-                          <span class="text-muted-foreground"
-                            >({{ expense.bcvRateDate }})</span
-                          >
-                        }
-                      </p>
+                      <span class="text-border">·</span>
                     }
-                  </div>
-                  <div class="text-right shrink-0">
-                    <p
-                      class="font-bold"
-                      [class.text-foreground]="expense.isPaid"
-                      [class.text-muted-foreground]="!expense.isPaid"
-                    >
-                      $ {{ expense.amount.toFixed(2) }}
-                    </p>
-                    <p
-                      class="text-xs mt-1 font-medium"
-                      [class.text-accent]="expense.isPaid"
-                      [class.text-primary]="!expense.isPaid"
-                    >
-                      {{ expense.isPaid ? 'Pagado' : 'Pendiente' }}
-                    </p>
-                  </div>
+                    <span>{{ expense.bcvRateDate ?? expense.paymentDate }}</span>
+                  }
                 </div>
               </div>
 
-              @if (!expense.isPaid) {
-                <label
-                  class="shrink-0 relative inline-flex w-11 h-11 cursor-pointer rounded-lg transition-colors ring-2 ring-transparent hover:border-ring/50 hover:bg-muted/80 has-focus-visible:outline-none has-focus-visible:ring-2 has-focus-visible:ring-ring"
-                  [attr.title]="
-                    isSelected(expense.id)
-                      ? 'Quitar de la selección'
-                      : 'Seleccionar para pagar o eliminar'
-                  "
-                >
-                  <input
-                    type="checkbox"
-                    class="peer sr-only"
-                    [checked]="isSelected(expense.id)"
-                    (change)="toggleExpenseSelection(expense.id)"
-                    [attr.aria-label]="
-                      isSelected(expense.id)
-                        ? 'Quitar gasto de la selección'
-                        : 'Seleccionar gasto para pagar o eliminar'
-                    "
-                  />
-                  <span
-                    class="pointer-events-none absolute inset-0 flex items-center justify-center rounded-lg border-2 border-border bg-card text-muted-foreground transition-colors peer-checked:border-primary peer-checked:bg-primary peer-checked:text-primary-foreground peer-checked:ring-ring peer-checked:ring-2"
+              <div class="flex items-center gap-2 shrink-0">
+                @if (!expense.isPaid) {
+                  <label
+                    class="relative inline-flex w-8 h-8 cursor-pointer rounded-lg"
+                    [attr.title]="isSelected(expense.id) ? 'Quitar selección' : 'Seleccionar'"
                   >
-                  @if (isSelected(expense.id)) {
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="22"
-                      height="22"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2.5"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      aria-hidden="true"
-                    >
-                      <path d="M20 6 9 17l-5-5" />
-                    </svg>
-                  } @else {
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="22"
-                      height="22"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2"
-                      class="opacity-40"
-                      aria-hidden="true"
-                    >
-                      <rect x="4" y="4" width="16" height="16" rx="2" ry="2" />
-                    </svg>
-                  }
+                    <input
+                      type="checkbox"
+                      class="peer sr-only"
+                      [checked]="isSelected(expense.id)"
+                      (change)="toggleExpenseSelection(expense.id)"
+                    />
+                    <span class="absolute inset-0 flex items-center justify-center rounded-lg border border-border bg-card/80 peer-checked:border-primary peer-checked:bg-primary peer-checked:text-primary-foreground transition-colors">
+                      @if (isSelected(expense.id)) {
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                          <path d="M20 6 9 17l-5-5" />
+                        </svg>
+                      }
+                    </span>
+                  </label>
+                }
+
+                <div class="text-right min-w-[5rem]">
+                  <p
+                    class="text-xl sm:text-2xl font-extrabold tracking-tight tabular-nums"
+                    [class.text-foreground]="expense.isPaid"
+                    [class.text-muted-foreground]="!expense.isPaid"
+                  >
+                    $ {{ expense.amount.toFixed(2) }}
+                  </p>
+                  <span
+                    class="inline-block mt-0.5 px-2 py-0.5 text-[10px] font-semibold rounded-full"
+                    [ngClass]="
+                      expense.isPaid
+                        ? 'bg-accent/15 text-accent'
+                        : 'bg-primary/15 text-primary'
+                    "
+                  >
+                    {{ expense.isPaid ? 'Pagado' : 'Pendiente' }}
                   </span>
-                </label>
-              }
+                </div>
+              </div>
             </div>
-          }
-        </div>
+          </article>
+        }
+
         @if (showExpensePagination()) {
-          <nav
-            class="flex items-center justify-between gap-3 pt-3 mt-1 border-t border-border"
-            aria-label="Paginación de gastos"
-          >
+          <nav class="flex items-center justify-between gap-3 pt-2" aria-label="Paginación de gastos">
             <button
               type="button"
               (click)="goPrevExpensePage()"
               [disabled]="expensesPage() <= 1"
-              class="px-3 py-2 rounded-lg text-sm font-medium transition-colors min-w-28"
-              [ngClass]="{
-                'bg-muted text-muted-foreground cursor-not-allowed':
-                  expensesPage() <= 1,
-                'bg-muted text-primary hover:opacity-90':
-                  expensesPage() > 1,
-              }"
+              class="px-3 py-2 rounded-lg text-sm font-medium glass-panel min-w-24 disabled:opacity-50"
             >
               Anterior
             </button>
-            <span class="text-sm text-muted-foreground shrink-0 tabular-nums">
+            <span class="text-sm text-muted-foreground tabular-nums">
               {{ expensesPage() }} / {{ expenseTotalPages() }}
             </span>
             <button
               type="button"
               (click)="goNextExpensePage()"
               [disabled]="expensesPage() >= expenseTotalPages()"
-              class="px-3 py-2 rounded-lg text-sm font-medium transition-colors min-w-28"
-              [ngClass]="{
-                'bg-muted text-muted-foreground cursor-not-allowed':
-                  expensesPage() >= expenseTotalPages(),
-                'bg-muted text-primary hover:opacity-90':
-                  expensesPage() < expenseTotalPages(),
-              }"
+              class="px-3 py-2 rounded-lg text-sm font-medium glass-panel min-w-24 disabled:opacity-50"
             >
               Siguiente
             </button>
@@ -384,95 +434,57 @@
         }
       }
     </div>
+  </main>
 
-    <div class="grid grid-cols-2 gap-3">
-      @if (selectedExpenses().size === 0) {
-        <button
-          type="button"
-          (click)="openTypeSelector()"
-          class="flex items-center justify-center gap-2 bg-primary text-primary-foreground py-3 rounded-lg font-medium hover:opacity-90 transition-colors shadow-md"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-          >
-            <path d="M5 12h14" />
-            <path d="M12 5v14" />
-          </svg>
-          Crear Gasto
-        </button>
-      } @else {
-        <button
-          type="button"
-          (click)="openBulkPaidByModal()"
-          [disabled]="!hasPendingPaySelection()"
-          class="flex items-center justify-center gap-2 py-3 rounded-lg font-medium transition-colors shadow-md"
-          [ngClass]="{
-            'bg-muted text-muted-foreground cursor-not-allowed':
-              !hasPendingPaySelection(),
-            'bg-accent text-accent-foreground hover:opacity-90':
-              hasPendingPaySelection(),
-          }"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-          >
-            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-            <path d="m9 11 3 3L22 4" />
-          </svg>
-          Pagar
-        </button>
-      }
+  <div class="floating-actions glass-panel flex items-center justify-center gap-2 sm:gap-3">
+    @if (selectedExpenses().size === 0) {
       <button
         type="button"
-        (click)="handleDeleteExpenses()"
-        [disabled]="selectedExpenses().size === 0"
-        class="flex items-center justify-center gap-2 py-3 rounded-lg font-medium transition-colors shadow-md"
+        (click)="openTypeSelector()"
+        class="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-bold rounded-xl bg-primary text-primary-foreground hover:opacity-90 transition-opacity shadow-sm"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+          <path d="M5 12h14" /><path d="M12 5v14" />
+        </svg>
+        Nuevo gasto
+      </button>
+    } @else {
+      <button
+        type="button"
+        (click)="openBulkPaidByModal()"
+        [disabled]="!hasPendingPaySelection()"
+        class="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-bold rounded-xl transition-opacity"
         [ngClass]="{
-          'bg-muted text-muted-foreground cursor-not-allowed':
-            selectedExpenses().size === 0,
-          'bg-destructive text-destructive-foreground hover:opacity-90': selectedExpenses().size > 0,
+          'bg-muted text-muted-foreground cursor-not-allowed': !hasPendingPaySelection(),
+          'bg-accent text-accent-foreground hover:opacity-90': hasPendingPaySelection(),
         }"
       >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="20"
-          height="20"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-        >
-          <path d="M3 6h18" />
-          <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
-          <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
-          <line x1="10" x2="10" y1="11" y2="17" />
-          <line x1="14" x2="14" y1="11" y2="17" />
-        </svg>
-        Eliminar
+        Pagar
       </button>
-    </div>
+    }
+    <button
+      type="button"
+      (click)="handleDeleteExpenses()"
+      [disabled]="selectedExpenses().size === 0"
+      class="flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-xl border border-border transition-colors"
+      [ngClass]="{
+        'bg-muted/50 text-muted-foreground cursor-not-allowed': selectedExpenses().size === 0,
+        'bg-muted text-destructive hover:bg-destructive/10': selectedExpenses().size > 0,
+      }"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <path d="M3 6h18" /><path d="m19 6-2 14H7L5 20" />
+      </svg>
+      <span class="hidden sm:inline">Eliminar</span>
+    </button>
   </div>
 
-  <!-- Paso 1: Selector de tipo de gasto -->
   <app-expense-type-selector
     [open]="selectorOpen()"
     (openChange)="onSelectorOpenChange($event)"
     (modeSelected)="onCreationModeSelected($event)"
   />
 
-  <!-- Paso 2 (opcional): subida de imagen + OCR -->
   <app-image-upload-modal
     [open]="imageUploadOpen()"
     [mode]="imageUploadMode()"
@@ -483,14 +495,12 @@
     (switchToForm)="onSwitchToForm($event)"
   />
 
-  <!-- Visor de comprobantes -->
   <app-receipt-viewer
     [open]="receiptViewerOpen()"
     [expenseId]="receiptExpenseId()"
     (openChange)="onReceiptViewerOpenChange($event)"
   />
 
-  <!-- Paso 3: formulario de gasto (con o sin prefill OCR) -->
   <app-expense-modal
     [open]="modalOpen()"
     (openChange)="onModalOpenChange($event)"
@@ -508,52 +518,44 @@
     aria-labelledby="paid-by-modal-title"
   >
     <div
-      class="relative bg-card rounded-2xl shadow-2xl w-full max-w-sm p-6 max-h-[85vh] overflow-y-auto"
+      class="relative glass-panel rounded-2xl w-full max-w-sm p-6 max-h-[85vh] overflow-y-auto"
       (click)="stopPaidByModalBubble($event)"
       (keydown)="onPaidByPanelKeydown($event)"
     >
-        <h3 id="paid-by-modal-title" class="text-lg font-bold text-card-foreground mb-2">
-          ¿Quién pagó?
-        </h3>
-        @if ((pendingPaidExpenseIds() ?? []).length > 0) {
-          <p class="text-sm text-foreground bg-muted border border-primary/35 rounded-lg px-3 py-2 mb-3">
-            @if ((pendingPaidExpenseIds() ?? []).length === 1) {
-              Al confirmar se enviará <strong>un correo</strong> con el detalle del gasto.
-            } @else {
-              Vas a marcar <strong>{{ (pendingPaidExpenseIds() ?? []).length }}</strong> gastos como pagados. Se enviará
-              <strong>un solo correo</strong> con el detalle de todos.
-            }
-          </p>
-        }
-        <p class="text-sm text-muted-foreground mb-3">
-          Elige el perfil que realizó el pago (los mismos que creas en Perfiles). Se usará en la notificación por correo.
-        </p>
-        <select
-          [ngModel]="paidByProfileId()"
-          (ngModelChange)="paidByProfileId.set($event)"
-          class="w-full border border-border rounded-lg px-3 py-2 focus:ring-2 focus:ring-ring focus:border-transparent"
-        >
-          <option value="" disabled>Selecciona un perfil…</option>
-          @for (p of ctx.profiles(); track p.id) {
-            <option [value]="p.id">{{ p.name }} ({{ p.type === 'familiar' ? 'Familiar' : 'Grupal' }})</option>
+      <h3 id="paid-by-modal-title" class="text-lg font-bold text-card-foreground mb-2">
+        ¿Quién pagó?
+      </h3>
+      @if ((pendingPaidExpenseIds() ?? []).length > 0) {
+        <p class="text-sm text-foreground bg-muted border border-primary/35 rounded-lg px-3 py-2 mb-3">
+          @if ((pendingPaidExpenseIds() ?? []).length === 1) {
+            Al confirmar se enviará <strong>un correo</strong> con el detalle del gasto.
+          } @else {
+            Vas a marcar <strong>{{ (pendingPaidExpenseIds() ?? []).length }}</strong> gastos como pagados. Se enviará
+            <strong>un solo correo</strong> con el detalle de todos.
           }
-        </select>
-        <div class="flex justify-end gap-2 mt-4">
-          <button
-            type="button"
-            (click)="closePaidByModal()"
-            class="px-3 py-2 text-muted-foreground hover:text-foreground transition-colors"
-          >
-            Cancelar
-          </button>
-          <button
-            type="button"
-            (click)="confirmPaidBy()"
-            class="px-3 py-2 bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition-colors"
-          >
-            Confirmar
-          </button>
-        </div>
+        </p>
+      }
+      <p class="text-sm text-muted-foreground mb-3">
+        Elige el perfil que realizó el pago (los mismos que creas en Perfiles). Se usará en la notificación por correo.
+      </p>
+      <select
+        [ngModel]="paidByProfileId()"
+        (ngModelChange)="paidByProfileId.set($event)"
+        class="w-full border border-border rounded-lg px-3 py-2 focus:ring-2 focus:ring-ring focus:border-transparent bg-card"
+      >
+        <option value="" disabled>Selecciona un perfil…</option>
+        @for (p of ctx.profiles(); track p.id) {
+          <option [value]="p.id">{{ p.name }} ({{ p.type === 'familiar' ? 'Familiar' : 'Grupal' }})</option>
+        }
+      </select>
+      <div class="flex justify-end gap-2 mt-4">
+        <button type="button" (click)="closePaidByModal()" class="px-3 py-2 text-muted-foreground hover:text-foreground transition-colors">
+          Cancelar
+        </button>
+        <button type="button" (click)="confirmPaidBy()" class="px-3 py-2 bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition-colors">
+          Confirmar
+        </button>
+      </div>
     </div>
   </dialog>
 </div>

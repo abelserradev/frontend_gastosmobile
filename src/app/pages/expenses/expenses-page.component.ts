@@ -7,6 +7,7 @@ import {
   ElementRef,
   inject,
   Injector,
+  OnDestroy,
   OnInit,
   signal,
   viewChild,
@@ -25,6 +26,11 @@ import { ExpensePieChartComponent } from './expense-pie-chart.component';
 import { ExpenseTypeSelectorComponent, type ExpenseCreationMode } from './expense-type-selector.component';
 import { ImageUploadModalComponent, type ImageUploadMode } from './image-upload-modal.component';
 import { ReceiptViewerComponent } from './receipt-viewer.component';
+import { resolveExpenseCategoryIcon, type ExpenseCategoryIconKind } from './expense-category-icon.util';
+import {
+  buildLastSevenDaySpending,
+  sparklinePolyline,
+} from './expense-sparkline.util';
 
 const EXPENSES_PAGE_SIZE = 6;
 
@@ -68,12 +74,16 @@ function toExpenseItem(e: MeExpense) {
   templateUrl: './expenses-page.component.html',
   styleUrl: './expenses-page.component.scss',
 })
-export class ExpensesPageComponent implements OnInit {
+export class ExpensesPageComponent implements OnInit, OnDestroy {
   readonly ctx = inject(AppContextService);
   private readonly meApi = inject(MeApiService);
-  private readonly auth = inject(AuthService);
+  readonly auth = inject(AuthService);
   private readonly router = inject(Router);
   private readonly injector = inject(Injector);
+
+  /** Miniaturas OCR en hover; se liberan al destruir la vista. */
+  private readonly receiptBlobCache = new Map<string, string>();
+  private receiptFetchInFlight = new Set<string>();
 
   readonly paidByDialog =
     viewChild<ElementRef<HTMLDialogElement>>('paidByDialog');
@@ -111,6 +121,10 @@ export class ExpensesPageComponent implements OnInit {
   readonly receiptViewerOpen = signal(false);
   readonly receiptExpenseId = signal<string | null>(null);
   readonly showChart = signal(false);
+  readonly sidebarOpen = signal(false);
+  readonly hoveredReceiptId = signal<string | null>(null);
+  /** Fuerza repaint cuando llega una miniatura de recibo en caché. */
+  readonly receiptPreviewTick = signal(0);
   /** YYYY-MM-01 del mes de control activo (API, calendario Caracas). */
   readonly activeReferenceMonth = signal('');
   readonly monthLabelActive = computed(() => {
@@ -142,6 +156,34 @@ export class ExpensesPageComponent implements OnInit {
 
   readonly remaining = computed(() => {
     return this.ctx.monthlyIncome() - this.totalExpenses();
+  });
+
+  readonly spendingSparklineValues = computed(() =>
+    buildLastSevenDaySpending(this.ctx.expenses()),
+  );
+
+  readonly spendingSparklinePath = computed(() =>
+    sparklinePolyline(this.spendingSparklineValues()),
+  );
+
+  readonly averageBcvRate = computed(() => {
+    const rows = this.ctx
+      .expenses()
+      .filter((e) => e.bcvRateApplied != null && e.isPaid);
+    if (rows.length === 0) {
+      return null;
+    }
+    const sum = rows.reduce((acc, e) => acc + (e.bcvRateApplied ?? 0), 0);
+    return sum / rows.length;
+  });
+
+  readonly userInitial = computed(() => {
+    const name = this.auth.displayName()?.trim();
+    if (name) {
+      return name.charAt(0).toUpperCase();
+    }
+    const mail = this.auth.email()?.trim();
+    return mail ? mail.charAt(0).toUpperCase() : '?';
   });
 
   readonly pieChartData = computed((): ChartData<'pie'> => {
@@ -611,6 +653,60 @@ export class ExpensesPageComponent implements OnInit {
 
   goHistorial(): void {
     void this.router.navigate(['/historial']);
+  }
+
+  goProfiles(): void {
+    void this.router.navigate(['/profiles']);
+  }
+
+  toggleSidebar(): void {
+    this.sidebarOpen.update((v) => !v);
+  }
+
+  closeSidebar(): void {
+    this.sidebarOpen.set(false);
+  }
+
+  categoryIconKind(category: string): ExpenseCategoryIconKind {
+    return resolveExpenseCategoryIcon(category);
+  }
+
+  receiptPreviewUrl(expenseId: string): string | null {
+    this.receiptPreviewTick();
+    return this.receiptBlobCache.get(expenseId) ?? null;
+  }
+
+  onReceiptHover(expenseId: string): void {
+    this.hoveredReceiptId.set(expenseId);
+    if (
+      this.receiptBlobCache.has(expenseId) ||
+      this.receiptFetchInFlight.has(expenseId)
+    ) {
+      return;
+    }
+    this.receiptFetchInFlight.add(expenseId);
+    this.meApi.getExpenseReceipt(expenseId).subscribe({
+      next: (blob) => {
+        const url = URL.createObjectURL(blob);
+        this.receiptBlobCache.set(expenseId, url);
+        this.receiptFetchInFlight.delete(expenseId);
+        this.receiptPreviewTick.update((n) => n + 1);
+      },
+      error: () => {
+        this.receiptFetchInFlight.delete(expenseId);
+      },
+    });
+  }
+
+  onReceiptHoverEnd(): void {
+    this.hoveredReceiptId.set(null);
+  }
+
+  ngOnDestroy(): void {
+    for (const url of this.receiptBlobCache.values()) {
+      URL.revokeObjectURL(url);
+    }
+    this.receiptBlobCache.clear();
   }
 
   goPrevExpensePage(): void {
