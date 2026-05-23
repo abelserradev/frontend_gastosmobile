@@ -103,20 +103,7 @@
   transform: translateX(0);
 }
 
-@media (min-width: 1024px) {
-  .expenses-sidebar {
-    transform: translateX(0);
-    width: 15rem;
-  }
-
-  /* El sidebar es fixed (fuera del flujo), así que ajustamos el ancho
-     del column explícitamente para que margin-inline: auto funcione bien. */
-  .expenses-column {
-    margin-left: 15rem;
-    width: calc(100vw - 15rem);
-  }
-}
-
+/* Base mobile-first — el @media desktop va DESPUÉS para ganar la cascada */
 .expenses-column {
   min-height: 100vh;
   min-width: 0;
@@ -129,9 +116,22 @@
   margin-inline: auto;
   padding-inline: 1rem;
   padding-bottom: 6.5rem;
+}
 
-  @media (min-width: 1024px) {
-    /* Con el column ya dimensionado correctamente, basta centrar con max-width. */
+@media (min-width: 1024px) {
+  .expenses-sidebar {
+    transform: translateX(0);
+    width: 15rem;
+  }
+
+  /* sidebar es fixed (fuera del flujo): reducimos el ancho explícitamente
+     para que margin-inline: auto en .expenses-column-inner centre bien. */
+  .expenses-column {
+    margin-left: 15rem;
+    width: calc(100vw - 15rem);
+  }
+
+  .expenses-column-inner {
     max-width: 52rem;
     padding-inline: 1.5rem;
   }
