@@ -1,4 +1,4 @@
-<div class="expenses-shell pb-28 lg:pb-10">
+<div class="expenses-shell">
   <div class="ambient-orb ambient-orb--primary" aria-hidden="true"></div>
   <div class="ambient-orb ambient-orb--accent" aria-hidden="true"></div>
 
@@ -80,20 +80,27 @@
     </div>
   </aside>
 
-  <main class="expenses-main relative z-10 max-w-3xl mx-auto px-4 sm:px-6 pt-4 lg:pt-8">
-    <div class="flex items-center justify-between gap-3 mb-4 lg:hidden">
+  <div class="expenses-column">
+    <div class="expenses-column-inner">
+  <main class="expenses-main relative z-10 pt-4 lg:pt-8">
+    <div class="grid grid-cols-[2.5rem_1fr] items-center gap-3 pt-1 mb-5 lg:hidden">
       <button
         type="button"
         (click)="toggleSidebar()"
-        class="inline-flex items-center justify-center w-10 h-10 rounded-xl glass-panel text-foreground"
+        class="inline-flex items-center justify-center w-10 h-10 rounded-xl glass-panel text-foreground shrink-0"
         aria-label="Abrir menú"
       >
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
           <path d="M4 6h16" /><path d="M4 12h16" /><path d="M4 18h16" />
         </svg>
       </button>
-      <img src="/titulo-remove.png" alt="Finflow" class="h-8 w-auto object-contain" />
-      <div class="w-10"></div>
+      <div class="flex items-center justify-center min-w-0 px-1">
+        <img
+          src="/titulo-remove.png"
+          alt="SpendSave"
+          class="w-[min(76vw,18rem)] h-auto object-contain drop-shadow-sm"
+        />
+      </div>
     </div>
 
     @if (ctx.bsIncomeNarrative() || averageBcvRate() != null) {
@@ -477,6 +484,8 @@
       </svg>
       <span class="hidden sm:inline">Eliminar</span>
     </button>
+  </div>
+    </div>
   </div>
 
   <app-expense-type-selector
