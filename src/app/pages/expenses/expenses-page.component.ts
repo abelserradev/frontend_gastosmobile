@@ -18,7 +18,7 @@ import { ChartData, ChartOptions } from 'chart.js';
 import { AppContextService } from '../../core/app-context.service';
 import { AuthService } from '../../core/auth.service';
 import { formatApiHttpError } from '../../core/http-error.util';
-import { MeApiService, type MeExpense } from '../../core/me-api.service';
+import { MeApiService, type MeExpense, type MeProfileMember } from '../../core/me-api.service';
 import type { ParseInvoiceResult } from '../../core/ocr-api.service';
 import { guessOcrDocumentKind } from '../../core/ocr-document-kind.util';
 import { ExpenseModalComponent } from './expense-modal.component';
@@ -148,6 +148,10 @@ export class ExpensesPageComponent implements OnInit, OnDestroy {
   readonly pendingPaidExpenseIds = signal<string[] | null>(null);
   /** Perfil (de la lista /profiles) que realizó el pago. */
   readonly paidByProfileId = signal<string>('');
+  /** Integrante específico dentro del perfil seleccionado (opcional). */
+  readonly paidByMemberId = signal<string>('');
+  readonly profileMembers = signal<MeProfileMember[]>([]);
+  readonly membersLoading = signal<boolean>(false);
 
   readonly totalExpenses = computed(() => {
     const ex = this.ctx.userData().expenses;
@@ -494,6 +498,9 @@ export class ExpensesPageComponent implements OnInit, OnDestroy {
     }
     this.pendingPaidExpenseIds.set(pendientes);
     this.paidByProfileId.set('');
+    this.paidByMemberId.set('');
+    this.profileMembers.set([]);
+    this.membersLoading.set(false);
     this.paidByModalOpen.set(true);
   }
 
@@ -501,6 +508,28 @@ export class ExpensesPageComponent implements OnInit, OnDestroy {
     this.paidByModalOpen.set(false);
     this.pendingPaidExpenseIds.set(null);
     this.paidByProfileId.set('');
+    this.paidByMemberId.set('');
+    this.profileMembers.set([]);
+    this.membersLoading.set(false);
+  }
+
+  /** Al cambiar el perfil seleccionado se cargan sus integrantes (si tiene). */
+  onProfileChange(profileId: string): void {
+    this.paidByProfileId.set(profileId);
+    this.paidByMemberId.set('');
+    this.profileMembers.set([]);
+    if (!profileId) return;
+    this.membersLoading.set(true);
+    this.meApi.listProfileMembers(profileId).subscribe({
+      next: (members) => {
+        this.membersLoading.set(false);
+        this.profileMembers.set(members);
+      },
+      error: () => {
+        // Fallo silencioso: el usuario puede pagar como perfil sin integrante
+        this.membersLoading.set(false);
+      },
+    });
   }
 
   confirmPaidBy(): void {
@@ -519,9 +548,16 @@ export class ExpensesPageComponent implements OnInit, OnDestroy {
       globalThis.alert('Perfil no válido; recarga la página e intenta de nuevo');
       return;
     }
+    const mid = this.paidByMemberId().trim();
+    // El backend construye "Mamá (Familia García)" si hay memberId; aquí solo
+    // mandamos el nombre del perfil como fallback por si la resolución falla.
     const nombrePagador = payer.name.trim();
     this.meApi
-      .markExpensesPaid({ ids, paidByDisplayName: nombrePagador })
+      .markExpensesPaid({
+        ids,
+        paidByDisplayName: nombrePagador,
+        ...(mid ? { paidByMemberId: mid } : {}),
+      })
       .subscribe({
         next: (rows) => {
           for (const row of rows) {

@@ -549,7 +549,7 @@
       </p>
       <select
         [ngModel]="paidByProfileId()"
-        (ngModelChange)="paidByProfileId.set($event)"
+        (ngModelChange)="onProfileChange($event)"
         class="w-full border border-border rounded-lg px-3 py-2 focus:ring-2 focus:ring-ring focus:border-transparent bg-card"
       >
         <option value="" disabled>Selecciona un perfil…</option>
@@ -557,6 +557,34 @@
           <option [value]="p.id">{{ p.name }} ({{ p.type === 'familiar' ? 'Familiar' : 'Grupal' }})</option>
         }
       </select>
+
+      @if (membersLoading()) {
+        <p class="text-xs text-muted-foreground mt-3 flex items-center gap-1.5">
+          <svg class="animate-spin h-3 w-3 shrink-0" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" stroke-dasharray="60" stroke-dashoffset="20"/>
+          </svg>
+          Cargando integrantes…
+        </p>
+      }
+      @if (!membersLoading() && profileMembers().length > 0) {
+        <div class="mt-3">
+          <label for="paid-by-member-select" class="block text-xs font-medium text-muted-foreground mb-1.5">
+            ¿Quién específicamente? <span class="font-normal">(opcional)</span>
+          </label>
+          <select
+            id="paid-by-member-select"
+            [ngModel]="paidByMemberId()"
+            (ngModelChange)="paidByMemberId.set($event)"
+            class="w-full border border-border rounded-lg px-3 py-2 focus:ring-2 focus:ring-ring focus:border-transparent bg-card text-sm"
+          >
+            <option value="">El perfil en general</option>
+            @for (m of profileMembers(); track m.id) {
+              <option [value]="m.id">{{ m.displayName }}</option>
+            }
+          </select>
+        </div>
+      }
+
       <div class="flex justify-end gap-2 mt-4">
         <button type="button" (click)="closePaidByModal()" class="px-3 py-2 text-muted-foreground hover:text-foreground transition-colors">
           Cancelar
