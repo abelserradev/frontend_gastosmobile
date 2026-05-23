@@ -109,8 +109,31 @@
     width: 15rem;
   }
 
-  .expenses-main {
+  /* El sidebar es fixed (fuera del flujo), así que ajustamos el ancho
+     del column explícitamente para que margin-inline: auto funcione bien. */
+  .expenses-column {
     margin-left: 15rem;
+    width: calc(100vw - 15rem);
+  }
+}
+
+.expenses-column {
+  min-height: 100vh;
+  min-width: 0;
+  width: 100%;
+}
+
+.expenses-column-inner {
+  width: 100%;
+  max-width: min(52rem, calc(100vw - 2rem));
+  margin-inline: auto;
+  padding-inline: 1rem;
+  padding-bottom: 6.5rem;
+
+  @media (min-width: 1024px) {
+    /* Con el column ya dimensionado correctamente, basta centrar con max-width. */
+    max-width: 52rem;
+    padding-inline: 1.5rem;
   }
 }
 
@@ -178,19 +201,18 @@
 
 .floating-actions {
   position: fixed;
-  left: 50%;
   bottom: 1.25rem;
+  left: 50%;
   transform: translateX(-50%);
   z-index: 35;
-  width: min(calc(100% - 2rem), 32rem);
+  width: min(52rem, calc(100vw - 2rem));
   padding: 0.55rem;
   border-radius: 1.1rem;
-}
 
-@media (min-width: 1024px) {
-  .floating-actions {
-    left: calc(15rem + 50%);
-    transform: translateX(calc(-50% - 7.5rem));
+  @media (min-width: 1024px) {
+    /* Centrado en el área útil igual que .expenses-column-inner */
+    left: calc(15rem + (100vw - 15rem) / 2);
+    width: min(52rem, calc(100vw - 15rem - 3rem));
   }
 }
 
