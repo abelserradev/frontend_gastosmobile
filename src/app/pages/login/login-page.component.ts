@@ -5,7 +5,7 @@ import { Router } from '@angular/router';
 import { AuthService } from '../../core/auth.service';
 import { FirebaseAuthService } from '../../core/firebase-auth.service';
 import { routePathForMeState } from '../../core/me-route.util';
-import { formatApiHttpError } from '../../core/http-error.util';
+import { formatApiHttpError, isAccountLockedError } from '../../core/http-error.util';
 import { switchMap } from 'rxjs';
 import { MeApiService, type MeState } from '../../core/me-api.service';
 
@@ -25,6 +25,11 @@ export class LoginPageComponent implements OnInit {
   readonly showPassword = signal(false);
   readonly forgotPasswordOpen = signal(false);
   readonly forgotSending = signal(false);
+  readonly accountLockedOpen = signal(false);
+  readonly unlockCodeSent = signal(false);
+  readonly unlockSending = signal(false);
+  readonly unlockVerifying = signal(false);
+  unlockCode = '';
 
   formData = {
     name: '',
@@ -73,16 +78,78 @@ export class LoginPageComponent implements OnInit {
   setMode(login: boolean): void {
     if (!login) {
       this.forgotPasswordOpen.set(false);
+      this.accountLockedOpen.set(false);
     }
     this.isLogin.set(login);
   }
 
   openForgotPassword(): void {
     this.forgotPasswordOpen.set(true);
+    this.accountLockedOpen.set(false);
   }
 
   cancelForgotPassword(): void {
     this.forgotPasswordOpen.set(false);
+  }
+
+  openAccountUnlock(): void {
+    this.forgotPasswordOpen.set(false);
+    this.accountLockedOpen.set(true);
+    this.unlockCodeSent.set(false);
+    this.unlockCode = '';
+  }
+
+  cancelAccountUnlock(): void {
+    this.accountLockedOpen.set(false);
+    this.unlockCodeSent.set(false);
+    this.unlockCode = '';
+  }
+
+  submitUnlockRequest(): void {
+    const email = this.formData.email.trim();
+    if (!email) {
+      globalThis.alert('Ingresá tu correo electrónico.');
+      return;
+    }
+    this.unlockSending.set(true);
+    this.auth.requestAccountUnlock(email).subscribe({
+      next: () => {
+        this.unlockSending.set(false);
+        this.unlockCodeSent.set(true);
+        globalThis.alert(
+          'Si tu cuenta está bloqueada, recibirás un código de verificación por correo.',
+        );
+      },
+      error: (err: unknown) => {
+        this.unlockSending.set(false);
+        globalThis.alert(formatApiHttpError(err));
+      },
+    });
+  }
+
+  submitUnlockVerify(): void {
+    const email = this.formData.email.trim();
+    const code = this.unlockCode.trim();
+    if (!email || code.length !== 6) {
+      globalThis.alert('Ingresá tu correo y el código de 6 dígitos.');
+      return;
+    }
+    this.unlockVerifying.set(true);
+    this.auth.verifyAccountUnlock(email, code).subscribe({
+      next: () => {
+        this.unlockVerifying.set(false);
+        this.accountLockedOpen.set(false);
+        this.unlockCodeSent.set(false);
+        this.unlockCode = '';
+        globalThis.alert(
+          'Cuenta desbloqueada. Ya podés iniciar sesión con tu contraseña.',
+        );
+      },
+      error: (err: unknown) => {
+        this.unlockVerifying.set(false);
+        globalThis.alert(formatApiHttpError(err));
+      },
+    });
   }
 
   submitForgotPassword(): void {
@@ -135,6 +202,10 @@ export class LoginPageComponent implements OnInit {
         this.navigateByOnBoardingState();
       },
       error: (err: unknown) => {
+        if (isAccountLockedError(err)) {
+          this.openAccountUnlock();
+          return;
+        }
         globalThis.alert(formatApiHttpError(err));
       },
     });
@@ -157,6 +228,10 @@ export class LoginPageComponent implements OnInit {
           this.navigateByOnBoardingState();
         },
         error: (err: unknown) => {
+          if (isAccountLockedError(err)) {
+            this.openAccountUnlock();
+            return;
+          }
           globalThis.alert(formatApiHttpError(err));
         },
       });
