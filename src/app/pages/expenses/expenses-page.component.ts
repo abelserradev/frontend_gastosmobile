@@ -18,6 +18,7 @@ import { ChartData, ChartOptions } from 'chart.js';
 import { AppContextService } from '../../core/app-context.service';
 import { AuthService } from '../../core/auth.service';
 import { formatApiHttpError } from '../../core/http-error.util';
+import { writeBcvRateCache } from '../../core/bcv-rate-cache.util';
 import { MeApiService, type MeExpense, type MeProfileMember } from '../../core/me-api.service';
 import type { ParseInvoiceResult } from '../../core/ocr-api.service';
 import { guessOcrDocumentKind } from '../../core/ocr-document-kind.util';
@@ -83,7 +84,7 @@ export class ExpensesPageComponent implements OnInit, OnDestroy {
 
   /** Miniaturas OCR en hover; se liberan al destruir la vista. */
   private readonly receiptBlobCache = new Map<string, string>();
-  private receiptFetchInFlight = new Set<string>();
+  private readonly receiptFetchInFlight = new Set<string>();
 
   readonly paidByDialog =
     viewChild<ElementRef<HTMLDialogElement>>('paidByDialog');
@@ -292,6 +293,17 @@ export class ExpensesPageComponent implements OnInit, OnDestroy {
             narrative: s.preferences.bsIncomeNarrative,
             stale: s.preferences.bcvQuoteIsStale,
           });
+          if (
+            s.preferences.bcvVesPerUsdNow != null &&
+            s.preferences.bcvRateDateNow
+          ) {
+            writeBcvRateCache({
+              vesPerUsd: s.preferences.bcvVesPerUsdNow,
+              date: s.preferences.bcvRateDateNow,
+              rateDate: s.preferences.bcvRateDateNow,
+              stale: s.preferences.bcvQuoteIsStale,
+            });
+          }
         } else {
           this.ctx.setBsIncomeContext({
             incomeFixedBs: null,
