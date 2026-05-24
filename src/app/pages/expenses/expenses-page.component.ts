@@ -695,6 +695,10 @@ export class ExpensesPageComponent implements OnInit, OnDestroy {
     void this.router.navigate(['/profiles']);
   }
 
+  goSetup(): void {
+    void this.router.navigate(['/setup']);
+  }
+
   toggleSidebar(): void {
     this.sidebarOpen.update((v) => !v);
   }
