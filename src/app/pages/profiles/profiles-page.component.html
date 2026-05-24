@@ -4,9 +4,9 @@
       <div class="grid grid-cols-3 items-center gap-2 mb-2">
         <button
           type="button"
-          (click)="goBackToIncomeSetup()"
+          (click)="goBack()"
           class="inline-flex items-center justify-self-start text-sm font-medium text-muted-foreground hover:text-foreground transition-colors shrink-0"
-          aria-label="Volver a ingreso mensual"
+          [attr.aria-label]="fromExpenses ? 'Volver a gastos' : 'Volver a ingreso mensual'"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -292,13 +292,15 @@
           </dialog>
         }
 
-        <button
-          type="button"
-          (click)="handleContinue()"
-          class="w-full bg-primary text-primary-foreground py-3 rounded-lg font-medium hover:opacity-90 transition-colors shadow-md mt-8"
-        >
-          Continuar
-        </button>
+        @if (!fromExpenses) {
+          <button
+            type="button"
+            (click)="handleContinue()"
+            class="w-full bg-primary text-primary-foreground py-3 rounded-lg font-medium hover:opacity-90 transition-colors shadow-md mt-8"
+          >
+            Continuar
+          </button>
+        }
       </div>
     </div>
   </div>

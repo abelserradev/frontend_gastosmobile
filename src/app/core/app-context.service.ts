@@ -1,4 +1,5 @@
 import { computed, Injectable, signal } from '@angular/core';
+import type { MePreferences } from './me-api.service';
 
 export type CurrencyCode = 'BS' | 'USD';
 
@@ -72,6 +73,16 @@ export class AppContextService {
     this.incomeFixedBs.set(p.incomeFixedBs);
     this.bsIncomeNarrative.set(p.narrative);
     this.bcvQuoteIsStale.set(p.stale);
+  }
+
+  syncFromMePreferences(pref: MePreferences): void {
+    this.setCurrency(pref.defaultCurrency);
+    this.setMonthlyIncome(pref.monthlyIncome);
+    this.setBsIncomeContext({
+      incomeFixedBs: pref.incomeFixedBs,
+      narrative: pref.bsIncomeNarrative,
+      stale: pref.bcvQuoteIsStale,
+    });
   }
 
   setCategories(list: CategoryDraft[]): void {

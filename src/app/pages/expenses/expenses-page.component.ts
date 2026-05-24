@@ -16,6 +16,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ChartData, ChartOptions } from 'chart.js';
 import { AppContextService } from '../../core/app-context.service';
+import { navigateFromExpensesMenu } from '../../core/app-navigation.util';
 import { AuthService } from '../../core/auth.service';
 import { formatApiHttpError } from '../../core/http-error.util';
 import { writeBcvRateCache } from '../../core/bcv-rate-cache.util';
@@ -700,15 +701,16 @@ export class ExpensesPageComponent implements OnInit, OnDestroy {
   }
 
   goHistorial(): void {
+    this.closeSidebar();
     void this.router.navigate(['/historial']);
   }
 
   goProfiles(): void {
-    void this.router.navigate(['/profiles']);
+    navigateFromExpensesMenu(this.router, '/profiles', () => this.closeSidebar());
   }
 
   goSetup(): void {
-    void this.router.navigate(['/setup']);
+    navigateFromExpensesMenu(this.router, '/setup', () => this.closeSidebar());
   }
 
   toggleSidebar(): void {
