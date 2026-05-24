@@ -157,8 +157,13 @@
             </p>
           }
           <p class="text-4xl sm:text-5xl font-extrabold tracking-tight text-foreground mt-1 tabular-nums">
-            $ {{ ctx.monthlyIncome().toFixed(2) }}
+            $ {{ ctx.effectiveMonthlyIncome().toFixed(2) }}
           </p>
+          @if (ctx.carryoverUsd() > 0) {
+            <p class="text-xs text-primary font-medium mt-1">
+              Incluye ${{ ctx.carryoverUsd().toFixed(2) }} arrastrados del mes anterior
+            </p>
+          }
           @if (ctx.incomeFixedBs() != null) {
             <p class="text-xs text-muted-foreground font-mono mt-1">
               {{ ctx.incomeFixedBs() | number: '1.2-2' }} Bs. nominales

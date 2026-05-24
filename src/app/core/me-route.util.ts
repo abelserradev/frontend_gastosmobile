@@ -2,15 +2,20 @@ import type { MeState } from './me-api.service';
 
 /** Post-login / post-password: ingreso del mes vigente primero; luego perfiles → gastos. */
 export function routePathForMeState(s: MeState): string {
-  if (s.needsMonthlyIncomeSetup) {
+  if (!s.preferences) {
     return '/setup';
   }
-  const hasPrefs = s.preferences != null;
+  if (
+    s.needsMonthlyIncomeSetup &&
+    s.monthRenewal?.requiresSurplusPrompt
+  ) {
+    return '/setup';
+  }
   const hasProfiles = s.profiles.length > 0;
-  if (hasPrefs && hasProfiles) {
+  if (hasProfiles) {
     return '/expenses';
   }
-  if (hasPrefs && !hasProfiles) {
+  if (s.preferences != null) {
     return '/profiles';
   }
   return '/setup';

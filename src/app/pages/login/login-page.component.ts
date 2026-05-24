@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { AuthService } from '../../core/auth.service';
 import { FirebaseAuthService } from '../../core/firebase-auth.service';
 import { routePathForMeState } from '../../core/me-route.util';
+import { getStateWithAutoRollover } from '../../core/month-renewal.util';
 import { formatApiHttpError, isAccountLockedError } from '../../core/http-error.util';
 import { switchMap } from 'rxjs';
 import { MeApiService, type MeState } from '../../core/me-api.service';
@@ -63,7 +64,7 @@ export class LoginPageComponent implements OnInit {
       this.router.navigate(['/setup-password']).catch(() => undefined);
       return;
     }
-    this.meApi.getState().subscribe({
+    getStateWithAutoRollover(this.meApi).subscribe({
       next: (s: MeState) => {
         const path = routePathForMeState(s);
         this.router.navigate([path]).catch(() => undefined);

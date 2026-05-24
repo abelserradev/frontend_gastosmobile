@@ -39,6 +39,8 @@ export interface ExpenseItem {
 export class AppContextService {
   readonly currency = signal<CurrencyCode>('USD');
   readonly monthlyIncome = signal<number>(0);
+  readonly carryoverUsd = signal<number>(0);
+  readonly effectiveMonthlyIncome = signal<number>(0);
   /** Monto en Bs. fijado por el usuario cuando controla en bolívares. */
   readonly incomeFixedBs = signal<number | null>(null);
   readonly bsIncomeNarrative = signal<string | null>(null);
@@ -78,6 +80,10 @@ export class AppContextService {
   syncFromMePreferences(pref: MePreferences): void {
     this.setCurrency(pref.defaultCurrency);
     this.setMonthlyIncome(pref.monthlyIncome);
+    this.carryoverUsd.set(pref.carryoverUsd ?? 0);
+    this.effectiveMonthlyIncome.set(
+      pref.effectiveMonthlyIncomeUsd ?? pref.monthlyIncome,
+    );
     this.setBsIncomeContext({
       incomeFixedBs: pref.incomeFixedBs,
       narrative: pref.bsIncomeNarrative,
