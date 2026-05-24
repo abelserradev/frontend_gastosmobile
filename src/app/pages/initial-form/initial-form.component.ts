@@ -33,6 +33,7 @@ export class InitialFormComponent implements OnInit {
   bcvRateDisplayDate = '';
   bcvLoading = false;
   bcvError: string | null = null;
+  bcvStale = false;
   categories: string[] = [
     'Comida',
     'Mantenimiento Vehicular',
@@ -128,16 +129,26 @@ export class InitialFormComponent implements OnInit {
   private loadBcvRate(after?: () => void): void {
     this.bcvLoading = true;
     this.bcvError = null;
-    this.meApi.getBcvOfficialRate().subscribe({
+    this.bcvStale = false;
+    this.meApi.getBcvOfficialRateResilient().subscribe({
       next: (r) => {
         this.bcvVesPerUsd = r.vesPerUsd;
         this.bcvRateDisplayDate = r.date;
+        this.bcvStale = r.stale || r.fromLocalCache;
         this.bcvLoading = false;
+        if (r.fromLocalCache) {
+          this.bcvError =
+            'Mostrando la última tasa guardada en este dispositivo (servidor no disponible).';
+        } else if (r.stale) {
+          this.bcvError =
+            'Tasa de respaldo: DolarApi no respondió; se usa la última cotización conocida.';
+        }
         after?.();
       },
       error: () => {
         this.bcvLoading = false;
         this.bcvVesPerUsd = null;
+        this.bcvStale = false;
         this.bcvError =
           'No se pudo cargar la tasa BCV. Revisa la conexión o intenta más tarde.';
       },

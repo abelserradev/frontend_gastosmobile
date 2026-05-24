@@ -1,9 +1,21 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, catchError, map, of, tap, throwError } from 'rxjs';
 import { environment } from '../../environments/environment';
+import {
+  readBcvRateCacheOrLatest,
+  writeBcvRateCache,
+} from './bcv-rate-cache.util';
 import type { CurrencyCode, ProfileType } from './app-context.service';
 import type { ParseInvoiceResult } from './ocr-api.service';
+
+export interface BcvOfficialRateResponse {
+  date: string;
+  vesPerUsd: number;
+  rateDate: string;
+  stale: boolean;
+  fromLocalCache: boolean;
+}
 
 export interface MePreferences {
   defaultCurrency: CurrencyCode;
@@ -220,7 +232,51 @@ export class MeApiService {
     });
   }
 
-  /** Tasa dólar oficial (Bs/USD) para un día; sin fecha = hoy Caracas. */
+  /**
+   * Tasa BCV con caché en localStorage: si el backend/DolarApi falla, usa la última tasa guardada.
+   */
+  getBcvOfficialRateResilient(date?: string): Observable<BcvOfficialRateResponse> {
+    const q = date ? `?date=${encodeURIComponent(date)}` : '';
+    return this.http
+      .get<{
+        date: string;
+        vesPerUsd: number;
+        rateDate: string;
+        stale?: boolean;
+      }>(`${this.base}/bcv/oficial-por-dia${q}`)
+      .pipe(
+        tap((r) => {
+          writeBcvRateCache({
+            vesPerUsd: r.vesPerUsd,
+            date: r.date,
+            rateDate: r.rateDate,
+            stale: r.stale ?? false,
+          });
+        }),
+        map((r) => ({
+          date: r.date,
+          vesPerUsd: r.vesPerUsd,
+          rateDate: r.rateDate,
+          stale: r.stale ?? false,
+          fromLocalCache: false,
+        })),
+        catchError((err: unknown) => {
+          const cached = readBcvRateCacheOrLatest(date);
+          if (cached) {
+            return of({
+              date: cached.date,
+              vesPerUsd: cached.vesPerUsd,
+              rateDate: cached.rateDate,
+              stale: true,
+              fromLocalCache: true,
+            });
+          }
+          return throwError(() => err);
+        }),
+      );
+  }
+
+  /** @deprecated Preferir getBcvOfficialRateResilient (caché local + flag stale). */
   getBcvOfficialRate(date?: string): Observable<{
     date: string;
     vesPerUsd: number;
