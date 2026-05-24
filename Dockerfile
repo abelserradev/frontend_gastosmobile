@@ -6,8 +6,10 @@ WORKDIR /app
 # Si el orquestador inyecta NODE_ENV=production, npm omitiría devDependencies y fallaría ng build.
 ENV NODE_ENV=development
 
-COPY package.json package-lock.json ./
-RUN npm ci --include=dev
+RUN npm install -g pnpm
+
+COPY package.json pnpm-lock.yaml .npmrc ./
+RUN pnpm install --frozen-lockfile
 
 COPY . .
 
@@ -15,7 +17,7 @@ COPY . .
 ARG FIREBASE_WEB_API_KEY
 ENV FIREBASE_WEB_API_KEY=${FIREBASE_WEB_API_KEY}
 
-RUN npm run build
+RUN pnpm run build
 
 FROM nginx:1.27-alpine
 
