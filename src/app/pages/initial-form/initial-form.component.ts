@@ -1,8 +1,12 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { forkJoin } from 'rxjs';
+import {
+  cameFromExpenses,
+  subpageBackTarget,
+} from '../../core/app-navigation.util';
 import {
   AppContextService,
   CurrencyCode,
@@ -21,6 +25,7 @@ import { routePathForMeState } from '../../core/me-route.util';
 })
 export class InitialFormComponent implements OnInit {
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
   private readonly appContext = inject(AppContextService);
   private readonly meApi = inject(MeApiService);
   private readonly auth = inject(AuthService);
@@ -43,6 +48,15 @@ export class InitialFormComponent implements OnInit {
 
   /** True cuando ya hay preferencias pero hay que revalidar ingreso por mes nuevo (Caracas). */
   monthlyRenewal = false;
+
+  get fromExpenses(): boolean {
+    return cameFromExpenses(this.route);
+  }
+
+  /** Solo actualiza ingreso (renovación mensual o edición desde gastos). */
+  get preferencesOnly(): boolean {
+    return this.monthlyRenewal || this.fromExpenses;
+  }
 
   ngOnInit(): void {
     if (!this.auth.hasSession()) {
@@ -170,7 +184,7 @@ export class InitialFormComponent implements OnInit {
   }
 
   handleSubmit(): void {
-    if (!this.income || (!this.monthlyRenewal && this.categories.length === 0)) {
+    if (!this.income || (!this.preferencesOnly && this.categories.length === 0)) {
       globalThis.alert('Por favor completa todos los campos requeridos');
       return;
     }
@@ -189,28 +203,20 @@ export class InitialFormComponent implements OnInit {
       }
       putBody = { defaultCurrency: 'USD', monthlyIncome: raw };
     }
-    if (this.monthlyRenewal) {
+    if (this.preferencesOnly) {
       this.meApi.updatePreferences(putBody).subscribe({
         next: (pref) => {
-          this.appContext.setCurrency(pref.defaultCurrency);
-          this.appContext.setMonthlyIncome(pref.monthlyIncome);
-          this.appContext.setBsIncomeContext({
-            incomeFixedBs: pref.incomeFixedBs,
-            narrative: pref.bsIncomeNarrative,
-            stale: pref.bcvQuoteIsStale,
-          });
+          this.appContext.syncFromMePreferences(pref);
+          if (this.fromExpenses) {
+            void this.router.navigate(['/expenses']);
+            return;
+          }
           this.meApi.getState().subscribe({
-            next: (st) => {
-              void this.router.navigate([routePathForMeState(st)]);
-            },
-            error: (err: unknown) => {
-              globalThis.alert(formatApiHttpError(err));
-            },
+            next: (st) => void this.router.navigate([routePathForMeState(st)]),
+            error: (err: unknown) => globalThis.alert(formatApiHttpError(err)),
           });
         },
-        error: (err: unknown) => {
-          globalThis.alert(formatApiHttpError(err));
-        },
+        error: (err: unknown) => globalThis.alert(formatApiHttpError(err)),
       });
       return;
     }
@@ -219,21 +225,17 @@ export class InitialFormComponent implements OnInit {
       this.meApi.replaceCategories(this.categories),
     ]).subscribe({
       next: ([pref, cats]) => {
-        this.appContext.setCurrency(pref.defaultCurrency);
-        this.appContext.setMonthlyIncome(pref.monthlyIncome);
-        this.appContext.setBsIncomeContext({
-          incomeFixedBs: pref.incomeFixedBs,
-          narrative: pref.bsIncomeNarrative,
-          stale: pref.bcvQuoteIsStale,
-        });
+        this.appContext.syncFromMePreferences(pref);
         this.appContext.setCategories(
           cats.map((c) => ({ id: c.id, name: c.name })),
         );
         void this.router.navigate(['/profiles']);
       },
-      error: (err: unknown) => {
-        globalThis.alert(formatApiHttpError(err));
-      },
+      error: (err: unknown) => globalThis.alert(formatApiHttpError(err)),
     });
+  }
+
+  goBack(): void {
+    void this.router.navigate([subpageBackTarget(this.fromExpenses)]);
   }
 }

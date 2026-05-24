@@ -3,15 +3,39 @@
 
     <div class="bg-card text-card-foreground rounded-2xl border border-border shadow-xl p-6 md:p-8">
 
+      @if (fromExpenses) {
+        <div class="mb-4">
+          <button
+            type="button"
+            (click)="goBack()"
+            class="inline-flex items-center gap-1 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+            aria-label="Volver a gastos"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M15 18l-6-6 6-6" />
+            </svg>
+            Volver a gastos
+          </button>
+        </div>
+      }
+
       <!-- Encabezado -->
       <div class="text-center mb-8">
         <h1 class="text-2xl md:text-3xl font-extrabold tracking-tight text-foreground">
-          Control de Gastos
+          @if (fromExpenses) {
+            Ingreso mensual
+          } @else {
+            Control de Gastos
+          }
         </h1>
         @if (monthlyRenewal) {
           <p class="text-sm text-muted-foreground mt-2 max-w-sm mx-auto">
             Nuevo mes: confirma tu ingreso para seguir registrando gastos.
             El historial de meses anteriores no se pierde.
+          </p>
+        } @else if (fromExpenses) {
+          <p class="text-sm text-muted-foreground mt-2 max-w-sm mx-auto">
+            Actualiza tu monto o moneda principal. Los demás datos no se modifican.
           </p>
         } @else {
           <p class="text-sm text-muted-foreground mt-1">
@@ -153,7 +177,7 @@
         </div>
 
         <!-- Categorías de gastos (solo en primera configuración) -->
-        @if (!monthlyRenewal) {
+        @if (!preferencesOnly) {
           <div class="space-y-3">
             <label
               for="category-input"
@@ -232,7 +256,7 @@
           type="submit"
           class="w-full mt-2 py-3.5 bg-primary text-primary-foreground font-bold rounded-xl shadow-lg shadow-primary/20 hover:opacity-95 active:scale-[0.99] transition-all tracking-wide"
         >
-          {{ monthlyRenewal ? 'Guardar ingreso del mes' : 'Guardar y Continuar' }}
+          {{ preferencesOnly ? (fromExpenses ? 'Guardar cambios' : 'Guardar ingreso del mes') : 'Guardar y Continuar' }}
         </button>
 
       </form>

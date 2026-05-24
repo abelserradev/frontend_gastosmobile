@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import {
   AppContextService,
   ProfileType,
@@ -9,6 +9,10 @@ import {
 } from '../../core/app-context.service';
 import { AuthService } from '../../core/auth.service';
 import { formatApiHttpError } from '../../core/http-error.util';
+import {
+  cameFromExpenses,
+  subpageBackTarget,
+} from '../../core/app-navigation.util';
 import { MeApiService, type MeProfileMember } from '../../core/me-api.service';
 
 @Component({
@@ -20,6 +24,7 @@ import { MeApiService, type MeProfileMember } from '../../core/me-api.service';
 })
 export class ProfilesPageComponent implements OnInit {
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
   private readonly appContext = inject(AppContextService);
   private readonly meApi = inject(MeApiService);
   private readonly auth = inject(AuthService);
@@ -35,6 +40,10 @@ export class ProfilesPageComponent implements OnInit {
   membersLoading = false;
   members: MeProfileMember[] = [];
   memberName = '';
+
+  get fromExpenses(): boolean {
+    return cameFromExpenses(this.route);
+  }
 
   ngOnInit(): void {
     if (!this.auth.hasSession()) {
@@ -193,8 +202,7 @@ export class ProfilesPageComponent implements OnInit {
     });
   }
 
-  /** Volver al ingreso inicial por si cambió el sueldo / disponibilidad mensual. */
-  goBackToIncomeSetup(): void {
-    void this.router.navigate(['/setup']);
+  goBack(): void {
+    void this.router.navigate([subpageBackTarget(this.fromExpenses)]);
   }
 }
