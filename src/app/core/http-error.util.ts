@@ -13,3 +13,15 @@ export function formatApiHttpError(err: unknown): string {
   }
   return 'Error de red';
 }
+
+export function getApiErrorCode(err: unknown): string | null {
+  if (err instanceof HttpErrorResponse) {
+    const body = err.error as { code?: string } | undefined;
+    return body?.code ?? null;
+  }
+  return null;
+}
+
+export function isAccountLockedError(err: unknown): boolean {
+  return getApiErrorCode(err) === 'ACCOUNT_LOCKED';
+}

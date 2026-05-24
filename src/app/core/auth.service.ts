@@ -97,6 +97,20 @@ export class AuthService {
     );
   }
 
+  requestAccountUnlock(email: string): Observable<{ ok: true }> {
+    return this.http.post<{ ok: true }>(
+      `${environment.apiUrl}/auth/unlock/request`,
+      { email },
+    );
+  }
+
+  verifyAccountUnlock(email: string, code: string): Observable<{ ok: true }> {
+    return this.http.post<{ ok: true }>(
+      `${environment.apiUrl}/auth/unlock/verify`,
+      { email, code },
+    );
+  }
+
   resetPassword(token: string, password: string): Observable<{ ok: true }> {
     return this.http.post<{ ok: true }>(
       `${environment.apiUrl}/auth/reset-password`,
