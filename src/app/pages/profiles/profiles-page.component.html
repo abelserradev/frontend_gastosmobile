@@ -1,11 +1,11 @@
-<div class="min-h-screen bg-gradient-to-br from-muted to-background p-6">
+<div class="min-h-screen bg-linear-to-br from-muted to-background p-6">
   <div class="max-w-md mx-auto">
     <div class="bg-card rounded-2xl shadow-xl p-6 mt-8">
-      <div class="flex justify-between items-center gap-2 mb-2">
+      <div class="grid grid-cols-3 items-center gap-2 mb-2">
         <button
           type="button"
           (click)="goBackToIncomeSetup()"
-          class="inline-flex items-center text-sm font-medium text-muted-foreground hover:text-foreground transition-colors shrink-0"
+          class="inline-flex items-center justify-self-start text-sm font-medium text-muted-foreground hover:text-foreground transition-colors shrink-0"
           aria-label="Volver a ingreso mensual"
         >
           <svg
@@ -25,13 +25,14 @@
         </button>
         <a
           routerLink="/historial"
-          class="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors shrink-0"
-          >Historial</a
+          class="justify-self-center text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
         >
+          Historial
+        </a>
         <button
           type="button"
           (click)="handleLogout()"
-          class="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors shrink-0 ml-auto"
+          class="justify-self-end text-sm font-medium text-muted-foreground hover:text-foreground transition-colors shrink-0"
           aria-label="Cerrar sesión"
         >
           Cerrar sesión
@@ -175,7 +176,7 @@
             <div class="space-y-2">
               @for (profile of profiles; track profile.id) {
                 <div
-                  class="flex items-center justify-between bg-gradient-to-r from-muted to-muted px-4 py-3 rounded-lg border border-border"
+                  class="flex items-center justify-between bg-linear-to-r from-muted to-muted px-4 py-3 rounded-lg border border-border"
                 >
                   <div>
                     <p class="font-medium text-card-foreground">{{ profile.name }}</p>
