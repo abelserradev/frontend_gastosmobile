@@ -14,6 +14,10 @@ import {
   subpageBackTarget,
 } from '../../core/app-navigation.util';
 import { MeApiService, type MeProfileMember } from '../../core/me-api.service';
+import {
+  getStateWithAutoRollover,
+  needsSetupScreen,
+} from '../../core/month-renewal.util';
 
 @Component({
   selector: 'app-profiles-page',
@@ -50,9 +54,9 @@ export class ProfilesPageComponent implements OnInit {
       void this.router.navigate(['/login']);
       return;
     }
-    this.meApi.getState().subscribe({
+    getStateWithAutoRollover(this.meApi).subscribe({
       next: (s) => {
-        if (s.needsMonthlyIncomeSetup) {
+        if (needsSetupScreen(s)) {
           void this.router.navigate(['/setup']);
           return;
         }

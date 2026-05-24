@@ -30,8 +30,13 @@
         </h1>
         @if (monthlyRenewal) {
           <p class="text-sm text-muted-foreground mt-2 max-w-sm mx-auto">
-            Nuevo mes: confirma tu ingreso para seguir registrando gastos.
-            El historial de meses anteriores no se pierde.
+            @if (hasSurplusPrompt) {
+              Te sobraron <strong>${{ surplusUsd | number: '1.2-2' }}</strong> del mes anterior.
+              Confirma tu ingreso y decide si sumarlos al mes que comienza.
+            } @else {
+              Nuevo mes: confirma tu ingreso para seguir registrando gastos.
+              El historial de meses anteriores no se pierde.
+            }
           </p>
         } @else if (fromExpenses) {
           <p class="text-sm text-muted-foreground mt-2 max-w-sm mx-auto">
@@ -175,6 +180,41 @@
             </div>
           }
         </div>
+
+        @if (hasSurplusPrompt) {
+          <fieldset class="border border-border rounded-xl p-4 space-y-3">
+            <legend class="text-xs font-bold uppercase tracking-wider text-muted-foreground px-1">
+              Saldo sobrante
+            </legend>
+            <p class="text-sm text-muted-foreground">
+              ¿Deseas sumar <strong>${{ surplusUsd | number: '1.2-2' }}</strong> a tu presupuesto del mes entrante?
+            </p>
+            <div class="grid grid-cols-2 gap-3">
+              <button
+                type="button"
+                (click)="setApplySurplus(true)"
+                [ngClass]="{
+                  'bg-primary text-primary-foreground border-primary': applySurplus === true,
+                  'bg-card text-muted-foreground border-border': applySurplus !== true
+                }"
+                class="py-2.5 rounded-lg border text-sm font-semibold transition-all"
+              >
+                Sí, sumarlo
+              </button>
+              <button
+                type="button"
+                (click)="setApplySurplus(false)"
+                [ngClass]="{
+                  'bg-primary text-primary-foreground border-primary': applySurplus === false,
+                  'bg-card text-muted-foreground border-border': applySurplus !== false
+                }"
+                class="py-2.5 rounded-lg border text-sm font-semibold transition-all"
+              >
+                No, gracias
+              </button>
+            </div>
+          </fieldset>
+        }
 
         <!-- Categorías de gastos (solo en primera configuración) -->
         @if (!preferencesOnly) {

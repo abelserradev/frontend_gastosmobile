@@ -31,11 +31,20 @@ export interface MePreferences {
   usdEquivalentDelta: number | null;
   bsIncomeNarrative: string | null;
   bcvQuoteIsStale: boolean;
+  carryoverUsd: number;
+  effectiveMonthlyIncomeUsd: number;
 }
 
-export type MePreferencesPut =
+export type MePreferencesPut = (
   | { defaultCurrency: 'USD'; monthlyIncome: number }
-  | { defaultCurrency: 'BS'; monthlyIncomeBs: number };
+  | { defaultCurrency: 'BS'; monthlyIncomeBs: number }
+) & { applySurplus?: boolean };
+
+export interface MeMonthRenewal {
+  closingMonthYmd: string;
+  surplusUsd: number;
+  requiresSurplusPrompt: boolean;
+}
 
 export interface MeCategory {
   id: string;
@@ -88,6 +97,7 @@ export interface MeState {
   /** Primer día del mes en curso (Caracas), YYYY-MM-DD. */
   activeReferenceMonth: string;
   needsMonthlyIncomeSetup: boolean;
+  monthRenewal: MeMonthRenewal | null;
 }
 
 export type OcrFeedbackSourceApi = 'IMAGE_UPLOAD_FLOW' | 'EDIT_EXPENSE';
@@ -127,6 +137,10 @@ export class MeApiService {
 
   updatePreferences(body: MePreferencesPut): Observable<MePreferences> {
     return this.http.put<MePreferences>(`${this.base}/me/preferences`, body);
+  }
+
+  rolloverMonth(body: { applySurplus?: boolean }): Observable<MePreferences> {
+    return this.http.post<MePreferences>(`${this.base}/me/month-rollover`, body);
   }
 
   replaceCategories(names: string[]): Observable<MeCategory[]> {

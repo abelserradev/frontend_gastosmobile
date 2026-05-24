@@ -15,6 +15,10 @@ import { AuthService } from '../../core/auth.service';
 import { formatApiHttpError } from '../../core/http-error.util';
 import { MeApiService, type MePreferencesPut } from '../../core/me-api.service';
 import { routePathForMeState } from '../../core/me-route.util';
+import {
+  getStateWithAutoRollover,
+  needsSetupScreen,
+} from '../../core/month-renewal.util';
 
 @Component({
   selector: 'app-initial-form',
@@ -48,6 +52,8 @@ export class InitialFormComponent implements OnInit {
 
   /** True cuando ya hay preferencias pero hay que revalidar ingreso por mes nuevo (Caracas). */
   monthlyRenewal = false;
+  surplusUsd = 0;
+  applySurplus: boolean | null = null;
 
   get fromExpenses(): boolean {
     return cameFromExpenses(this.route);
@@ -58,25 +64,29 @@ export class InitialFormComponent implements OnInit {
     return this.monthlyRenewal || this.fromExpenses;
   }
 
+  get hasSurplusPrompt(): boolean {
+    return this.monthlyRenewal && this.surplusUsd > 0;
+  }
+
   ngOnInit(): void {
     if (!this.auth.hasSession()) {
       void this.router.navigate(['/login']);
       return;
     }
-    this.meApi.getState().subscribe({
+    getStateWithAutoRollover(this.meApi).subscribe({
       next: (s) => {
+        if (!needsSetupScreen(s) && !this.fromExpenses) {
+          void this.router.navigate([routePathForMeState(s)]);
+          return;
+        }
         this.monthlyRenewal =
-          s.preferences != null && s.needsMonthlyIncomeSetup;
+          s.preferences != null &&
+          Boolean(s.monthRenewal?.requiresSurplusPrompt);
+        this.surplusUsd = s.monthRenewal?.surplusUsd ?? 0;
         if (s.preferences) {
           this.currency = s.preferences.defaultCurrency;
-          this.appContext.setCurrency(s.preferences.defaultCurrency);
+          this.appContext.syncFromMePreferences(s.preferences);
           const incomeUsd = s.preferences.monthlyIncome;
-          this.appContext.setMonthlyIncome(incomeUsd);
-          this.appContext.setBsIncomeContext({
-            incomeFixedBs: s.preferences.incomeFixedBs,
-            narrative: s.preferences.bsIncomeNarrative,
-            stale: s.preferences.bcvQuoteIsStale,
-          });
           if (this.currency === 'BS') {
             const storedNominalBs = s.preferences.incomeFixedBs;
             if (storedNominalBs === null) {
@@ -188,6 +198,10 @@ export class InitialFormComponent implements OnInit {
       globalThis.alert('Por favor completa todos los campos requeridos');
       return;
     }
+    if (this.hasSurplusPrompt && this.applySurplus === null) {
+      globalThis.alert('Indica si deseas sumar el saldo sobrante al mes entrante');
+      return;
+    }
     let putBody: MePreferencesPut;
     if (this.currency === 'BS') {
       if (this.bcvVesPerUsd == null || this.bcvVesPerUsd <= 0) {
@@ -202,6 +216,9 @@ export class InitialFormComponent implements OnInit {
         return;
       }
       putBody = { defaultCurrency: 'USD', monthlyIncome: raw };
+    }
+    if (this.hasSurplusPrompt && this.applySurplus !== null) {
+      putBody = { ...putBody, applySurplus: this.applySurplus };
     }
     if (this.preferencesOnly) {
       this.meApi.updatePreferences(putBody).subscribe({
@@ -237,5 +254,9 @@ export class InitialFormComponent implements OnInit {
 
   goBack(): void {
     void this.router.navigate([subpageBackTarget(this.fromExpenses)]);
+  }
+
+  setApplySurplus(value: boolean): void {
+    this.applySurplus = value;
   }
 }

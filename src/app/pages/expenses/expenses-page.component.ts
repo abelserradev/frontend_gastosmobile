@@ -21,6 +21,10 @@ import { AuthService } from '../../core/auth.service';
 import { formatApiHttpError } from '../../core/http-error.util';
 import { writeBcvRateCache } from '../../core/bcv-rate-cache.util';
 import { MeApiService, type MeExpense, type MeProfileMember } from '../../core/me-api.service';
+import {
+  getStateWithAutoRollover,
+  needsSetupScreen,
+} from '../../core/month-renewal.util';
 import type { ParseInvoiceResult } from '../../core/ocr-api.service';
 import { guessOcrDocumentKind } from '../../core/ocr-document-kind.util';
 import { ExpenseModalComponent } from './expense-modal.component';
@@ -161,7 +165,7 @@ export class ExpensesPageComponent implements OnInit, OnDestroy {
   });
 
   readonly remaining = computed(() => {
-    return this.ctx.monthlyIncome() - this.totalExpenses();
+    return this.ctx.effectiveMonthlyIncome() - this.totalExpenses();
   });
 
   readonly spendingSparklineValues = computed(() =>
@@ -279,21 +283,15 @@ export class ExpensesPageComponent implements OnInit, OnDestroy {
       void this.router.navigate(['/login']);
       return;
     }
-    this.meApi.getState().subscribe({
+    getStateWithAutoRollover(this.meApi).subscribe({
       next: (s) => {
-        if (s.needsMonthlyIncomeSetup) {
+        if (needsSetupScreen(s)) {
           void this.router.navigate(['/setup']);
           return;
         }
         this.activeReferenceMonth.set(s.activeReferenceMonth);
         if (s.preferences) {
-          this.ctx.setCurrency(s.preferences.defaultCurrency);
-          this.ctx.setMonthlyIncome(s.preferences.monthlyIncome);
-          this.ctx.setBsIncomeContext({
-            incomeFixedBs: s.preferences.incomeFixedBs,
-            narrative: s.preferences.bsIncomeNarrative,
-            stale: s.preferences.bcvQuoteIsStale,
-          });
+          this.ctx.syncFromMePreferences(s.preferences);
           if (
             s.preferences.bcvVesPerUsdNow != null &&
             s.preferences.bcvRateDateNow
