@@ -25,7 +25,6 @@ import {
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './initial-form.component.html',
-  styleUrl: './initial-form.component.scss',
 })
 export class InitialFormComponent implements OnInit {
   private readonly router = inject(Router);

@@ -15,7 +15,6 @@ import { MeApiService, type MeState } from '../../core/me-api.service';
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './login-page.component.html',
-  styleUrl: './login-page.component.scss',
 })
 export class LoginPageComponent implements OnInit {
   private readonly router = inject(Router);
