@@ -24,7 +24,6 @@ import {
   standalone: true,
   imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './profiles-page.component.html',
-  styleUrl: './profiles-page.component.scss',
 })
 export class ProfilesPageComponent implements OnInit {
   private readonly router = inject(Router);
