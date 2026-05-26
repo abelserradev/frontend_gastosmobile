@@ -34,7 +34,7 @@
             <button
               type="button"
               [disabled]="unlockSending()"
-              class="w-full bg-gradient-to-r from-primary to-secondary text-secondary-foreground py-3 rounded-lg font-medium hover:opacity-90 disabled:opacity-60"
+              class="w-full bg-linear-to-r from-primary to-secondary text-secondary-foreground py-3 rounded-lg font-medium hover:opacity-90 disabled:opacity-60"
               (click)="submitUnlockRequest()"
             >
               {{ unlockSending() ? 'Enviando…' : 'Enviar código por correo' }}
@@ -60,7 +60,7 @@
             <button
               type="button"
               [disabled]="unlockVerifying()"
-              class="w-full bg-gradient-to-r from-primary to-secondary text-secondary-foreground py-3 rounded-lg font-medium hover:opacity-90 disabled:opacity-60"
+              class="w-full bg-linear-to-r from-primary to-secondary text-secondary-foreground py-3 rounded-lg font-medium hover:opacity-90 disabled:opacity-60"
               (click)="submitUnlockVerify()"
             >
               {{ unlockVerifying() ? 'Verificando…' : 'Desbloquear cuenta' }}
@@ -106,7 +106,7 @@
           <button
             type="button"
             [disabled]="forgotSending()"
-            class="w-full bg-gradient-to-r from-primary to-secondary text-secondary-foreground py-3 rounded-lg font-medium hover:opacity-90 disabled:opacity-60"
+            class="w-full bg-linear-to-r from-primary to-secondary text-secondary-foreground py-3 rounded-lg font-medium hover:opacity-90 disabled:opacity-60"
             (click)="submitForgotPassword()"
           >
             {{ forgotSending() ? 'Enviando…' : 'Enviar enlace' }}
@@ -336,7 +336,7 @@
 
         <button
           type="submit"
-          class="w-full bg-gradient-to-r from-primary to-secondary text-secondary-foreground py-3 rounded-lg font-medium hover:opacity-90 transition-all shadow-lg hover:shadow-xl mt-6"
+          class="w-full bg-linear-to-r from-primary to-secondary text-secondary-foreground py-3 rounded-lg font-medium hover:opacity-90 transition-all shadow-lg hover:shadow-xl mt-6"
         >
           {{ isLogin() ? 'Iniciar Sesión' : 'Crear Cuenta' }}
         </button>
