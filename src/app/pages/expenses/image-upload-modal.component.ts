@@ -29,7 +29,7 @@ const ALLOWED_MIME_TYPES = new Set<string>([
   'image/png',
   'image/webp',
 ]);
-const MAX_SIZE_BYTES = 1 * 1024 * 1024; // 1 MB — seguridad contra payloads grandes
+const MAX_SIZE_BYTES = 5 * 1024 * 1024; // 5 MB — seguridad contra payloads grandes
 
 const STEP_UPLOAD = 'upload';
 const STEP_CONFIRM = 'confirm';
@@ -142,7 +142,7 @@ export class ImageUploadModalComponent implements OnChanges {
     }
     if (file.size > MAX_SIZE_BYTES) {
       this.uploadError.set(
-        `La imagen supera el límite de 1 MB (${(file.size / 1024 / 1024).toFixed(2)} MB). Comprime la imagen e inténtalo de nuevo.`,
+        `La imagen supera el límite de 5 MB (${(file.size / 1024 / 1024).toFixed(2)} MB). Comprime la imagen e inténtalo de nuevo.`,
       );
       return;
     }
@@ -295,10 +295,6 @@ export class ImageUploadModalComponent implements OnChanges {
 
   onBackdropClick(e: MouseEvent): void {
     if (e.target === this.dialog()?.nativeElement) this.cancel();
-  }
-
-  stopBubble(e: Event): void {
-    e.stopPropagation();
   }
 
   onKeydown(e: KeyboardEvent): void {
