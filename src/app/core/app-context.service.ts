@@ -6,7 +6,7 @@ export type CurrencyCode = 'BS' | 'USD';
 /** Re-exportar tipos de ciclo presupuestario para conveniencia */
 export type { ActivePeriod, BudgetCycle };
 
-export type ProfileType = 'familiar' | 'grupal';
+export type ProfileType = 'familiar' | 'grupal' | 'comercio';
 
 export interface CategoryDraft {
   id: string;
