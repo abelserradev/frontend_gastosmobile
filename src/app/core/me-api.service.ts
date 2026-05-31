@@ -17,6 +17,26 @@ export interface BcvOfficialRateResponse {
   fromLocalCache: boolean;
 }
 
+/** Configuración del ciclo presupuestario (FEAT-001). */
+export interface BudgetCycle {
+  mode: 'calendar_month' | 'monthly_cutoff';
+  cutoffDay: number;
+}
+
+/** Periodo presupuestario activo (FEAT-001). */
+export interface ActivePeriod {
+  /** YYYY-MM-DD del inicio del periodo (día después del corte anterior). */
+  periodStart: string;
+  /** YYYY-MM-DD de la fecha de corte (fin del periodo). */
+  cutoffDate: string;
+  /** YYYY-MM-DD del inicio del siguiente periodo (día después del corte). */
+  nextPeriodStart: string;
+  /** Etiqueta legible para UI (ej: "16 May - 15 Jun"). */
+  label: string;
+  /** Si hoy es día de corte (mostrar renovación). */
+  isCutoffToday: boolean;
+}
+
 export interface MePreferences {
   defaultCurrency: CurrencyCode;
   monthlyIncome: number;
@@ -33,12 +53,18 @@ export interface MePreferences {
   bcvQuoteIsStale: boolean;
   carryoverUsd: number;
   effectiveMonthlyIncomeUsd: number;
+  /** Configuración del ciclo presupuestario (FEAT-001). */
+  budgetCycle: BudgetCycle;
 }
 
 export type MePreferencesPut = (
   | { defaultCurrency: 'USD'; monthlyIncome: number }
   | { defaultCurrency: 'BS'; monthlyIncomeBs: number }
-) & { applySurplus?: boolean };
+) & {
+  applySurplus?: boolean;
+  /** Configuración del ciclo presupuestario (FEAT-001). */
+  budgetCycle?: BudgetCycle;
+};
 
 export interface MeMonthRenewal {
   closingMonthYmd: string;
@@ -94,8 +120,10 @@ export interface MeState {
   categories: MeCategory[];
   profiles: MeProfile[];
   expenses: MeExpense[];
-  /** Primer día del mes en curso (Caracas), YYYY-MM-DD. */
+  /** Primer día del mes/periodo en curso (Caracas), YYYY-MM-DD. */
   activeReferenceMonth: string;
+  /** Periodo presupuestario activo calculado (FEAT-001). */
+  activePeriod: ActivePeriod;
   needsMonthlyIncomeSetup: boolean;
   monthRenewal: MeMonthRenewal | null;
 }
