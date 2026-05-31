@@ -133,7 +133,19 @@ export class ExpensesPageComponent implements OnInit, OnDestroy {
   readonly receiptPreviewTick = signal(0);
   /** YYYY-MM-01 del mes de control activo (API, calendario Caracas). */
   readonly activeReferenceMonth = signal('');
+  /**
+   * FEAT-001: Label del periodo activo.
+   * Usa el label del backend si está disponible (ej: "16 May - 15 Jun"),
+   * fallback al label del mes calendario si no.
+   */
   readonly monthLabelActive = computed(() => {
+    // FEAT-001: Primero intentar usar el label del periodo activo del contexto
+    const periodLabel = this.ctx.activePeriodLabel();
+    if (periodLabel) {
+      return periodLabel;
+    }
+
+    // Fallback legacy: calcular desde activeReferenceMonth
     const ymd = this.activeReferenceMonth();
     if (!ymd || ymd.length < 7) {
       return '';
@@ -290,6 +302,8 @@ export class ExpensesPageComponent implements OnInit, OnDestroy {
           return;
         }
         this.activeReferenceMonth.set(s.activeReferenceMonth);
+        // FEAT-001: Sincronizar periodo activo
+        this.ctx.syncActivePeriod(s.activePeriod ?? null);
         if (s.preferences) {
           this.ctx.syncFromMePreferences(s.preferences);
           if (

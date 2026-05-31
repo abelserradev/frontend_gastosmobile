@@ -1,7 +1,10 @@
 import { computed, Injectable, signal } from '@angular/core';
-import type { MePreferences } from './me-api.service';
+import type { ActivePeriod, BudgetCycle, MePreferences } from './me-api.service';
 
 export type CurrencyCode = 'BS' | 'USD';
+
+/** Re-exportar tipos de ciclo presupuestario para conveniencia */
+export type { ActivePeriod, BudgetCycle };
 
 export type ProfileType = 'familiar' | 'grupal';
 
@@ -49,6 +52,13 @@ export class AppContextService {
   readonly profiles = signal<UserProfile[]>([]);
   readonly expenses = signal<ExpenseItem[]>([]);
 
+  /** FEAT-001: Periodo presupuestario activo calculado por el backend. */
+  readonly activePeriod = signal<ActivePeriod | null>(null);
+  /** FEAT-001: Etiqueta legible del periodo (ej: "16 May - 15 Jun"). */
+  readonly activePeriodLabel = computed(() => this.activePeriod()?.label ?? '');
+  /** FEAT-001: Configuración del ciclo presupuestario. */
+  readonly budgetCycle = signal<BudgetCycle>({ mode: 'calendar_month', cutoffDay: 1 });
+
   readonly userData = computed(() => ({
     currency: this.currency(),
     monthlyIncome: this.monthlyIncome(),
@@ -89,6 +99,16 @@ export class AppContextService {
       narrative: pref.bsIncomeNarrative,
       stale: pref.bcvQuoteIsStale,
     });
+    // FEAT-001: Sincronizar configuración del ciclo presupuestario
+    this.budgetCycle.set(pref.budgetCycle ?? { mode: 'calendar_month', cutoffDay: 1 });
+  }
+
+  /**
+   * FEAT-001: Actualiza el periodo activo desde la respuesta del backend.
+   * Usar después de sincronizar preferencias.
+   */
+  syncActivePeriod(period: ActivePeriod | null): void {
+    this.activePeriod.set(period);
   }
 
   setCategories(list: CategoryDraft[]): void {

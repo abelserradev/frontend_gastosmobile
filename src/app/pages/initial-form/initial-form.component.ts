@@ -54,6 +54,11 @@ export class InitialFormComponent implements OnInit {
   surplusUsd = 0;
   applySurplus: boolean | null = null;
 
+  /** FEAT-001: Opciones de días de corte (1-28, evitando 29-31 por inconsistencias de mes). */
+  readonly cutoffDayOptions = Array.from({ length: 28 }, (_, i) => i + 1);
+  /** FEAT-001: Día de corte seleccionado (default 1 = comportamiento calendario). */
+  cutoffDay = 1;
+
   get fromExpenses(): boolean {
     return cameFromExpenses(this.route);
   }
@@ -82,9 +87,14 @@ export class InitialFormComponent implements OnInit {
           s.preferences != null &&
           Boolean(s.monthRenewal?.requiresSurplusPrompt);
         this.surplusUsd = s.monthRenewal?.surplusUsd ?? 0;
+        // FEAT-001: Sincronizar periodo activo y preferencias
+        this.appContext.syncActivePeriod(s.activePeriod ?? null);
+
         if (s.preferences) {
           this.currency = s.preferences.defaultCurrency;
           this.appContext.syncFromMePreferences(s.preferences);
+          // FEAT-001: Cargar día de corte configurado (default 1)
+          this.cutoffDay = s.preferences.budgetCycle?.cutoffDay ?? 1;
           const incomeUsd = s.preferences.monthlyIncome;
           if (this.currency === 'BS') {
             const storedNominalBs = s.preferences.incomeFixedBs;
@@ -219,6 +229,15 @@ export class InitialFormComponent implements OnInit {
     if (this.hasSurplusPrompt && this.applySurplus !== null) {
       putBody = { ...putBody, applySurplus: this.applySurplus };
     }
+    // FEAT-001: Incluir configuración de ciclo presupuestario (solo si es corte personalizado)
+    // Con cutoffDay=1 usamos modo calendario (legacy), con cualquier otro valor usamos monthly_cutoff
+    putBody = {
+      ...putBody,
+      budgetCycle: {
+        mode: this.cutoffDay === 1 ? 'calendar_month' : 'monthly_cutoff',
+        cutoffDay: this.cutoffDay,
+      },
+    };
     if (this.preferencesOnly) {
       this.meApi.updatePreferences(putBody).subscribe({
         next: (pref) => {
