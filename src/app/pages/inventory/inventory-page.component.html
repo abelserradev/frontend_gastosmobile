@@ -1,0 +1,177 @@
+<div class="min-h-screen bg-gray-50">
+  <!-- Header -->
+  <header class="bg-white border-b border-gray-200 sticky top-0 z-10">
+    <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <button (click)="goBack()" class="p-2 -ml-2 text-gray-600 hover:bg-gray-100 rounded-full">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+          </svg>
+        </button>
+        <div>
+          <h1 class="text-lg font-semibold text-gray-900">Inventario</h1>
+          <p class="text-sm text-gray-500">{{ profileName() || 'Cargando...' }}</p>
+        </div>
+      </div>
+      <button (click)="handleLogout()" class="p-2 text-gray-600 hover:bg-gray-100 rounded-full">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- Summary Cards -->
+  @if (summary(); as s) {
+    <div class="max-w-4xl mx-auto px-4 py-4 grid grid-cols-3 gap-3">
+      <div class="bg-white rounded-lg p-3 border border-gray-200">
+        <p class="text-xs text-gray-500 uppercase">Productos</p>
+        <p class="text-xl font-bold text-gray-900">{{ s.totalItems }}</p>
+      </div>
+      <div class="bg-white rounded-lg p-3 border border-gray-200" [class.border-red-200]="s.lowStockCount > 0" [class.bg-red-50]="s.lowStockCount > 0">
+        <p class="text-xs text-gray-500 uppercase" [class.text-red-600]="s.lowStockCount > 0">Stock Bajo</p>
+        <p class="text-xl font-bold" [class.text-red-600]="s.lowStockCount > 0" [class.text-gray-900]="s.lowStockCount === 0">{{ s.lowStockCount }}</p>
+      </div>
+      <div class="bg-white rounded-lg p-3 border border-gray-200">
+        <p class="text-xs text-gray-500 uppercase">Último Mov.</p>
+        <p class="text-sm font-medium text-gray-900">
+          {{ s.lastMovementAt ? (s.lastMovementAt | date:'shortDate') : 'Sin movimientos' }}
+        </p>
+      </div>
+    </div>
+  }
+
+  <!-- Filters & Actions -->
+  <div class="max-w-4xl mx-auto px-4 pb-4">
+    <div class="flex flex-col gap-3">
+      <!-- Search -->
+      <div class="relative">
+        <input
+          type="text"
+          [(ngModel)]="searchQuery"
+          (keyup.enter)="onSearch()"
+          placeholder="Buscar por nombre o SKU..."
+          class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        />
+        <svg class="w-5 h-5 text-gray-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+        </svg>
+        @if (searchQuery()) {
+          <button (click)="searchQuery.set(''); onSearch()" class="absolute right-3 top-2.5 text-gray-400 hover:text-gray-600">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        }
+      </div>
+
+      <!-- View Modes & Add -->
+      <div class="flex items-center justify-between gap-2">
+        <div class="flex bg-gray-100 rounded-lg p-1">
+          <button
+            (click)="setViewMode('all')"
+            [class.bg-white]="viewMode() === 'all'"
+            [class.shadow-sm]="viewMode() === 'all'"
+            class="px-3 py-1.5 text-sm rounded-md transition-all"
+          >
+            Todos
+          </button>
+          <button
+            (click)="setViewMode('low-stock')"
+            [class.bg-white]="viewMode() === 'low-stock'"
+            [class.shadow-sm]="viewMode() === 'low-stock'"
+            [class.text-red-600]="viewMode() === 'low-stock'"
+            class="px-3 py-1.5 text-sm rounded-md transition-all"
+          >
+            Stock Bajo
+          </button>
+        </div>
+        <button
+          (click)="openNewItemModal()"
+          class="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+          </svg>
+          <span>Producto</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Error Message -->
+  @if (error(); as errMsg) {
+    <div class="max-w-4xl mx-auto px-4 mb-4">
+      <div class="bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3">
+        <svg class="w-5 h-5 text-red-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+        <div>
+          <p class="text-sm font-medium text-red-800">Error al cargar inventario</p>
+          <p class="text-sm text-red-600">{{ errMsg }}</p>
+          <button (click)="loadData()" class="mt-2 text-sm text-red-700 underline hover:no-underline">Reintentar</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Stock List -->
+  <div class="max-w-4xl mx-auto px-4 pb-24">
+    <app-stock-list
+      [items]="filteredItems()"
+      [loading]="loading()"
+      (onEdit)="openEditItemModal($event)"
+      (onDelete)="handleItemDelete($event)"
+      (onSale)="openMovementModal($event, 'SALE')"
+      (onPurchase)="openMovementModal($event, 'PURCHASE')"
+      (onAdjust)="openMovementModal($event, 'ADJUSTMENT')"
+      (onHistory)="openMovementsHistory($event)"
+    />
+  </div>
+
+  <!-- Empty State -->
+  @if (!loading() && filteredItems().length === 0 && !error()) {
+    <div class="max-w-4xl mx-auto px-4 py-12 text-center">
+      <div class="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
+        <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+        </svg>
+      </div>
+      <h3 class="text-lg font-medium text-gray-900 mb-1">Sin productos</h3>
+      <p class="text-gray-500 mb-4">
+        {{ viewMode() === 'low-stock' ? 'No hay productos con stock bajo' : 'Comienza agregando tu primer producto' }}
+      </p>
+      @if (viewMode() !== 'low-stock') {
+        <button
+          (click)="openNewItemModal()"
+          class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+        >
+          Agregar producto
+        </button>
+      }
+    </div>
+  }
+
+  <!-- Loading State -->
+  @if (loading()) {
+    <div class="max-w-4xl mx-auto px-4 py-12 text-center">
+      <div class="w-8 h-8 mx-auto border-4 border-gray-200 border-t-blue-600 rounded-full animate-spin"></div>
+      <p class="mt-4 text-sm text-gray-500">Cargando inventario...</p>
+    </div>
+  }
+</div>
+
+<!-- Modals -->
+<app-item-form-modal
+  [isOpen]="itemModalOpen()"
+  [itemToEdit]="itemToEdit()"
+  (onClose)="closeItemModal()"
+  (onSave)="handleItemSave($event)"
+/>
+
+<app-movement-form-modal
+  [isOpen]="movementModalOpen()"
+  [item]="itemForMovement()"
+  (onClose)="closeMovementModal()"
+  (onSave)="handleMovementSave($event)"
+/>
