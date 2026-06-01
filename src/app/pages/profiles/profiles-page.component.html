@@ -226,7 +226,7 @@
         @if (membersModalOpen) {
           <dialog
             open
-            class="rounded-2xl shadow-xl w-full max-w-md p-0 backdrop:bg-foreground/40"
+            class="rounded-2xl shadow-xl w-full max-w-md p-0 backdrop:bg-foreground/40 lg:fixed lg:left-1/2 lg:top-1/2 lg:-translate-x-1/2 lg:-translate-y-1/2 lg:m-0"
             (click)="onMembersDialogClick($event)"
             (keydown.escape)="closeMembers()"
           >
