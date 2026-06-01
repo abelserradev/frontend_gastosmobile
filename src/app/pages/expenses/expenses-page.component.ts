@@ -13,7 +13,7 @@ import {
   viewChild,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { ChartData, ChartOptions } from 'chart.js';
 import { AppContextService } from '../../core/app-context.service';
 import { navigateFromExpensesMenu } from '../../core/app-navigation.util';
@@ -71,6 +71,7 @@ function toExpenseItem(e: MeExpense) {
   imports: [
     CommonModule,
     FormsModule,
+    RouterLink,
     ExpenseModalComponent,
     ExpensePieChartComponent,
     ExpenseTypeSelectorComponent,
