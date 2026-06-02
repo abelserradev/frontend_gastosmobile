@@ -1,6 +1,5 @@
 import { CommonModule } from '@angular/common';
 import { Component, input, output } from '@angular/core';
-import { RouterLink } from '@angular/router';
 import type { InventoryItem, MovementType } from '../../core/inventory-api.service';
 
 @Component({
