@@ -43,14 +43,31 @@
 
       <!-- Form -->
       <div class="p-4 space-y-4">
+        @if (showExitCategory()) {
+          <div>
+            <label class="block text-sm font-medium text-foreground mb-1">
+              Tipo de salida
+            </label>
+            <select
+              [ngModel]="exitCategory()"
+              (ngModelChange)="exitCategory.set($event)"
+              class="w-full px-3 py-2 bg-card border border-input rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+            >
+              <option value="sale">Venta</option>
+              <option value="transfer_store">Traslado a otra tienda</option>
+              <option value="transfer_warehouse">Envío a almacén</option>
+            </select>
+          </div>
+        }
+
         <!-- Cantidad -->
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">
+          <label class="block text-sm font-medium text-foreground mb-1">
             Cantidad
             @if (isNegativeMovement()) {
-              <span class="text-gray-500">(a descontar)</span>
+              <span class="text-muted-foreground">(a descontar)</span>
             } @else {
-              <span class="text-gray-500">(a agregar)</span>
+              <span class="text-muted-foreground">(a agregar)</span>
             }
           </label>
           <div class="flex items-center gap-2">
@@ -85,11 +102,19 @@
 
         <!-- Preview -->
         @if (item(); as it) {
-          <div class="p-3 rounded-lg" [class.bg-blue-50]="!isNegativeMovement()" [class.bg-red-50]="isNegativeMovement()">
-            <p class="text-sm text-gray-600">
-              {{ isNegativeMovement() ? 'Después de la venta:' : 'Después de la compra:' }}
-            </p>
-            <p class="text-lg font-semibold" [class.text-blue-700]="!isNegativeMovement()" [class.text-red-700]="isNegativeMovement()">
+          <div
+            class="p-3 rounded-xl border"
+            [class.bg-accent/10]="!isNegativeMovement()"
+            [class.border-accent/30]="!isNegativeMovement()"
+            [class.bg-secondary/10]="isNegativeMovement()"
+            [class.border-secondary/30]="isNegativeMovement()"
+          >
+            <p class="text-sm text-muted-foreground">{{ previewLabel() }}</p>
+            <p
+              class="text-lg font-semibold"
+              [class.text-accent]="!isNegativeMovement()"
+              [class.text-secondary]="isNegativeMovement()"
+            >
               {{ isNegativeMovement() ? it.currentStock - formData().quantity : it.currentStock + formData().quantity }}
               {{ it.unit }}
             </p>
@@ -98,14 +123,14 @@
 
         <!-- Motivo/Nota -->
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">
-            Nota / Motivo (opcional)
+          <label class="block text-sm font-medium text-foreground mb-1">
+            Detalle / Nota
           </label>
           <input
             type="text"
             [(ngModel)]="formData().reason"
-            [placeholder]="isNegativeMovement() ? 'Ej: Venta cliente #123' : 'Ej: Compra proveedor XYZ'"
-            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            [placeholder]="reasonPlaceholder()"
+            class="w-full px-3 py-2 bg-card border border-input rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-ring"
           />
         </div>
       </div>

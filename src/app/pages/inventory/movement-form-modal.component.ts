@@ -11,6 +11,9 @@ interface MovementFormData {
   reason: string;
 }
 
+/** Motivos de salida visibles al usuario; se mapean a tipos del backend. */
+type ExitCategory = 'sale' | 'transfer_store' | 'transfer_warehouse';
+
 @Component({
   selector: 'app-movement-form-modal',
   standalone: true,
@@ -34,15 +37,21 @@ export class MovementFormModalComponent {
     reason: '',
   });
 
+  readonly exitCategory = signal<ExitCategory>('sale');
   readonly errors = signal<Record<string, string>>({});
 
   readonly movementType = computed(() => this.item()?.movementType ?? 'SALE');
+
+  readonly showExitCategory = computed(
+    () => this.movementType() === 'SALE' || this.movementType() === 'TRANSFER_OUT'
+  );
 
   readonly modalTitle = computed(() => {
     const type = this.movementType();
     switch (type) {
       case 'SALE':
-        return 'Registrar Venta';
+      case 'TRANSFER_OUT':
+        return 'Registrar Salida';
       case 'PURCHASE':
         return 'Registrar Compra';
       case 'ADJUSTMENT':
@@ -56,18 +65,35 @@ export class MovementFormModalComponent {
 
   readonly isNegativeMovement = computed(() => {
     const type = this.movementType();
+    if (type === 'ADJUSTMENT') return false;
     return type === 'SALE' || type === 'TRANSFER_OUT';
   });
+
+  readonly reasonPlaceholder = computed(() => {
+    if (!this.isNegativeMovement()) {
+      return 'Ej: Compra proveedor XYZ';
+    }
+    switch (this.exitCategory()) {
+      case 'transfer_store':
+        return 'Ej: Tienda Chacao → Centro';
+      case 'transfer_warehouse':
+        return 'Ej: Almacén principal';
+      default:
+        return 'Ej: Venta cliente #123';
+    }
+  });
+
+  readonly previewLabel = computed(() =>
+    this.isNegativeMovement() ? 'Stock después de la salida:' : 'Stock después de la entrada:'
+  );
 
   ngOnChanges(): void {
     this.resetForm();
   }
 
   resetForm(): void {
-    this.formData.set({
-      quantity: 1,
-      reason: '',
-    });
+    this.formData.set({ quantity: 1, reason: '' });
+    this.exitCategory.set('sale');
     this.errors.set({});
   }
 
@@ -89,7 +115,6 @@ export class MovementFormModalComponent {
       errs['quantity'] = 'La cantidad debe ser un número entero';
     }
 
-    // Validar stock suficiente para salidas
     if (item && this.isNegativeMovement()) {
       if (data.quantity > item.currentStock) {
         errs['quantity'] = `Stock insuficiente. Disponible: ${item.currentStock}`;
@@ -100,6 +125,35 @@ export class MovementFormModalComponent {
     return Object.keys(errs).length === 0;
   }
 
+  resolveMovementType(): MovementType {
+    const base = this.movementType();
+    if (base !== 'SALE' && base !== 'TRANSFER_OUT') {
+      return base;
+    }
+    switch (this.exitCategory()) {
+      case 'transfer_store':
+      case 'transfer_warehouse':
+        return 'TRANSFER_OUT';
+      default:
+        return 'SALE';
+    }
+  }
+
+  buildReason(): string | undefined {
+    const note = this.formData().reason.trim();
+    if (!this.showExitCategory()) {
+      return note || undefined;
+    }
+    switch (this.exitCategory()) {
+      case 'transfer_store':
+        return note ? `Traslado: ${note}` : 'Traslado a otra tienda';
+      case 'transfer_warehouse':
+        return note ? `Almacén: ${note}` : 'Envío a almacén';
+      default:
+        return note || undefined;
+    }
+  }
+
   save(): void {
     if (!this.validate()) return;
 
@@ -107,13 +161,12 @@ export class MovementFormModalComponent {
     if (!item) return;
 
     const data = this.formData();
-    const type = this.movementType();
 
     this.onSave.emit({
       itemId: item.id,
-      type,
+      type: this.resolveMovementType(),
       quantity: data.quantity,
-      reason: data.reason.trim() || undefined,
+      reason: this.buildReason(),
     });
   }
 
@@ -124,10 +177,10 @@ export class MovementFormModalComponent {
   }
 
   incrementQuantity(): void {
-    this.formData.update(d => ({ ...d, quantity: d.quantity + 1 }));
+    this.formData.update((d) => ({ ...d, quantity: d.quantity + 1 }));
   }
 
   decrementQuantity(): void {
-    this.formData.update(d => ({ ...d, quantity: Math.max(1, d.quantity - 1) }));
+    this.formData.update((d) => ({ ...d, quantity: Math.max(1, d.quantity - 1) }));
   }
 }

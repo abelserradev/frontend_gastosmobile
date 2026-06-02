@@ -85,11 +85,12 @@
               (click)="registerSale(item, $event)"
               [disabled]="item.currentStock === 0"
               class="flex-1 sm:flex-none border border-secondary text-secondary hover:bg-secondary hover:text-secondary-foreground font-medium text-xs px-4 py-2 rounded-lg flex items-center justify-center gap-1.5 transition-all disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-secondary"
+              title="Registrar salida de stock"
             >
               <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path>
               </svg>
-              Venta
+              Salida
             </button>
             <button
               type="button"
@@ -100,6 +101,17 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
               </svg>
               Compra
+            </button>
+            <button
+              type="button"
+              (click)="viewHistory(item, $event)"
+              class="text-muted-foreground hover:text-accent p-2 rounded-lg hover:bg-muted transition-colors shrink-0"
+              aria-label="Ver historial"
+              title="Historial"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
             </button>
             <button
               type="button"
