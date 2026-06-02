@@ -109,6 +109,23 @@ export interface MeExpense {
   hasReceipt: boolean;
 }
 
+export interface MeIncomeSource {
+  id: string;
+  name: string;
+}
+
+export interface MeIncome {
+  id: string;
+  title: string;
+  description: string;
+  amount: number;
+  source: string;
+  referenceMonth: string;
+  receivedDate: string | null;
+  bcvRateApplied: number | null;
+  bcvRateDate: string | null;
+}
+
 export interface MeHistoryMonthSummary {
   month: string;
   expenseCount: number;
@@ -120,6 +137,8 @@ export interface MeState {
   categories: MeCategory[];
   profiles: MeProfile[];
   expenses: MeExpense[];
+  incomeSources: MeIncomeSource[];
+  incomes: MeIncome[];
   /** Primer día del mes/periodo en curso (Caracas), YYYY-MM-DD. */
   activeReferenceMonth: string;
   /** Periodo presupuestario activo calculado (FEAT-001). */
@@ -367,6 +386,31 @@ export class MeApiService {
   deleteExpenses(ids: string[]): Observable<{ deleted: number }> {
     return this.http.post<{ deleted: number }>(
       `${this.base}/me/expenses/delete-many`,
+      { ids },
+    );
+  }
+
+  listIncomeSources(): Observable<MeIncomeSource[]> {
+    return this.http.get<MeIncomeSource[]>(`${this.base}/me/income-sources`);
+  }
+
+  listIncomes(): Observable<MeIncome[]> {
+    return this.http.get<MeIncome[]>(`${this.base}/me/incomes`);
+  }
+
+  createIncome(body: {
+    title: string;
+    description?: string;
+    amount: number;
+    sourceName: string;
+    receivedDate?: string;
+  }): Observable<MeIncome> {
+    return this.http.post<MeIncome>(`${this.base}/me/incomes`, body);
+  }
+
+  deleteIncomes(ids: string[]): Observable<{ deleted: number }> {
+    return this.http.post<{ deleted: number }>(
+      `${this.base}/me/incomes/delete-many`,
       { ids },
     );
   }

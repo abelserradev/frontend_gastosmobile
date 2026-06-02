@@ -182,6 +182,11 @@
               Incluye ${{ ctx.carryoverUsd().toFixed(2) }} arrastrados del mes anterior
             </p>
           }
+          @if (totalLoggedIncome() > 0) {
+            <p class="text-xs text-emerald-600 font-medium mt-1">
+              + ${{ totalLoggedIncome().toFixed(2) }} en ingresos registrados
+            </p>
+          }
           @if (ctx.incomeFixedBs() != null) {
             <p class="text-xs text-muted-foreground font-mono mt-1">
               {{ ctx.incomeFixedBs() | number: '1.2-2' }} Bs. nominales
@@ -272,6 +277,34 @@
       </div>
     }
 
+    <div class="flex gap-2 mb-4">
+      <button
+        type="button"
+        (click)="boardTab.set('expenses')"
+        class="flex-1 px-4 py-2 text-sm font-semibold rounded-xl border transition-colors"
+        [class.bg-primary]="boardTab() === 'expenses'"
+        [class.text-primary-foreground]="boardTab() === 'expenses'"
+        [class.border-primary]="boardTab() === 'expenses'"
+        [class.border-border]="boardTab() !== 'expenses'"
+        [class.text-muted-foreground]="boardTab() !== 'expenses'"
+      >
+        Gastos
+      </button>
+      <button
+        type="button"
+        (click)="boardTab.set('incomes')"
+        class="flex-1 px-4 py-2 text-sm font-semibold rounded-xl border transition-colors"
+        [class.bg-primary]="boardTab() === 'incomes'"
+        [class.text-primary-foreground]="boardTab() === 'incomes'"
+        [class.border-primary]="boardTab() === 'incomes'"
+        [class.border-border]="boardTab() !== 'incomes'"
+        [class.text-muted-foreground]="boardTab() !== 'incomes'"
+      >
+        Ingresos
+      </button>
+    </div>
+
+    @if (boardTab() === 'expenses') {
     <div class="flex items-center justify-between mb-4">
       <h2 class="text-lg font-bold text-foreground tracking-tight">Mis gastos</h2>
       @if (selectedExpenses().size > 0) {
@@ -474,9 +507,59 @@
         }
       }
     </div>
+    } @else {
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-lg font-bold text-foreground tracking-tight">Mis ingresos</h2>
+        @if (selectedIncomes().size > 0) {
+          <span class="text-xs text-primary font-semibold px-2 py-1 rounded-full bg-primary/10">
+            {{ selectedIncomes().size }} seleccionado(s)
+          </span>
+        }
+      </div>
+
+      <div class="mb-6 space-y-2">
+        @if (ctx.incomes().length === 0) {
+          <div class="glass-panel text-center py-12 px-4 rounded-2xl text-muted-foreground">
+            <p class="font-medium text-foreground">No hay ingresos en este periodo</p>
+            <p class="text-sm mt-2">Registra entradas extra con el botón «Nuevo ingreso»</p>
+          </div>
+        } @else {
+          @for (income of ctx.incomes(); track income.id) {
+            <article
+              class="expense-row glass-panel relative rounded-2xl p-3.5 sm:p-4"
+              [class.is-selected]="isIncomeSelected(income.id)"
+            >
+              <div class="flex items-center gap-3 sm:gap-4">
+                <button
+                  type="button"
+                  (click)="toggleIncomeSelection(income.id)"
+                  class="flex items-center justify-center w-11 h-11 sm:w-12 sm:h-12 rounded-xl shrink-0 border border-border/80 bg-emerald-500/10 text-emerald-600 transition-colors"
+                  [attr.title]="isIncomeSelected(income.id) ? 'Quitar selección' : 'Seleccionar'"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <path d="M12 2v20" /><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+                  </svg>
+                </button>
+                <div class="min-w-0 flex-1">
+                  <p class="font-semibold text-foreground truncate">{{ income.title }}</p>
+                  <p class="text-xs text-muted-foreground mt-0.5">{{ income.source }}</p>
+                  @if (income.receivedDate) {
+                    <p class="text-[10px] text-muted-foreground font-mono mt-0.5">{{ income.receivedDate }}</p>
+                  }
+                </div>
+                <p class="text-lg font-bold text-emerald-600 tabular-nums shrink-0">
+                  +${{ income.amount | number: '1.2-2' }}
+                </p>
+              </div>
+            </article>
+          }
+        }
+      </div>
+    }
   </main>
 
   <div class="floating-actions glass-panel flex items-center justify-center gap-2 sm:gap-3">
+    @if (boardTab() === 'expenses') {
     @if (selectedExpenses().size === 0) {
       <button
         type="button"
@@ -517,6 +600,33 @@
       </svg>
       <span class="hidden sm:inline">Eliminar</span>
     </button>
+    } @else {
+      <button
+        type="button"
+        (click)="openIncomeModal()"
+        class="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-bold rounded-xl bg-emerald-600 text-white hover:opacity-90 transition-opacity shadow-sm"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+          <path d="M5 12h14" /><path d="M12 5v14" />
+        </svg>
+        Nuevo ingreso
+      </button>
+      <button
+        type="button"
+        (click)="handleDeleteIncomes()"
+        [disabled]="selectedIncomes().size === 0"
+        class="flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-xl border border-border transition-colors"
+        [ngClass]="{
+          'bg-muted/50 text-muted-foreground cursor-not-allowed': selectedIncomes().size === 0,
+          'bg-muted text-destructive hover:bg-destructive/10': selectedIncomes().size > 0,
+        }"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path d="M3 6h18" /><path d="m19 6-2 14H7L5 20" />
+        </svg>
+        <span class="hidden sm:inline">Eliminar</span>
+      </button>
+    }
   </div>
     </div>
   </div>
@@ -550,6 +660,14 @@
     [defaultCurrency]="ctx.currency()"
     [ocrPrefill]="ocrPrefill()"
     (addExpense)="onAddExpense($event)"
+  />
+
+  <app-income-modal
+    [open]="incomeModalOpen()"
+    (openChange)="onIncomeModalOpenChange($event)"
+    [sources]="ctx.incomeSources()"
+    [defaultCurrency]="ctx.currency()"
+    (addIncome)="onAddIncome($event)"
   />
 
   <dialog
