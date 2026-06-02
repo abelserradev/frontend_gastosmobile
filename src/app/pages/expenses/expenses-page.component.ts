@@ -382,10 +382,6 @@ export class ExpensesPageComponent implements OnInit, OnDestroy {
     );
   }
 
-  openIncomeModal(): void {
-    this.incomeModalOpen.set(true);
-  }
-
   onIncomeModalOpenChange(open: boolean): void {
     this.incomeModalOpen.set(open);
   }
@@ -408,6 +404,7 @@ export class ExpensesPageComponent implements OnInit, OnDestroy {
       .subscribe({
       next: (row) => {
         this.ctx.setIncomes([toIncomeItem(row), ...this.ctx.incomes()]);
+        this.boardTab.set('incomes');
       },
       error: (err: unknown) => {
         globalThis.alert(formatApiHttpError(err));
@@ -450,7 +447,7 @@ export class ExpensesPageComponent implements OnInit, OnDestroy {
     });
   }
 
-  /** Punto de entrada único: abre el selector de tipo de gasto. */
+  /** Punto de entrada único: gasto manual, OCR o ingreso del periodo. */
   openTypeSelector(): void {
     this.selectorOpen.set(true);
   }
@@ -463,6 +460,11 @@ export class ExpensesPageComponent implements OnInit, OnDestroy {
   }
 
   onCreationModeSelected(mode: ExpenseCreationMode): void {
+    if (mode === 'income') {
+      this.lastReceiptCaptureKind.set(null);
+      this.incomeModalOpen.set(true);
+      return;
+    }
     if (mode === 'invoice' || mode === 'payment') {
       this.lastReceiptCaptureKind.set(mode);
     } else {

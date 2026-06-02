@@ -318,7 +318,7 @@
       @if (ctx.expenses().length === 0) {
         <div class="glass-panel text-center py-12 px-4 rounded-2xl text-muted-foreground">
           <p class="font-medium text-foreground">No hay gastos registrados</p>
-          <p class="text-sm mt-2">Agrega tu primer gasto con el botón flotante</p>
+          <p class="text-sm mt-2">Agrega tu primer registro con el botón «Nuevo cuadro»</p>
         </div>
       } @else {
         @for (expense of expensesPageSlice(); track expense.id) {
@@ -521,7 +521,7 @@
         @if (ctx.incomes().length === 0) {
           <div class="glass-panel text-center py-12 px-4 rounded-2xl text-muted-foreground">
             <p class="font-medium text-foreground">No hay ingresos en este periodo</p>
-            <p class="text-sm mt-2">Registra entradas extra con el botón «Nuevo ingreso»</p>
+            <p class="text-sm mt-2">Registra entradas extra con «Nuevo cuadro» → Ingreso nuevo</p>
           </div>
         } @else {
           @for (income of ctx.incomes(); track income.id) {
@@ -569,7 +569,7 @@
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
           <path d="M5 12h14" /><path d="M12 5v14" />
         </svg>
-        Nuevo gasto
+        Nuevo cuadro
       </button>
     } @else {
       <button
@@ -601,16 +601,18 @@
       <span class="hidden sm:inline">Eliminar</span>
     </button>
     } @else {
-      <button
-        type="button"
-        (click)="openIncomeModal()"
-        class="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-bold rounded-xl bg-emerald-600 text-white hover:opacity-90 transition-opacity shadow-sm"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
-          <path d="M5 12h14" /><path d="M12 5v14" />
-        </svg>
-        Nuevo ingreso
-      </button>
+      @if (selectedIncomes().size === 0) {
+        <button
+          type="button"
+          (click)="openTypeSelector()"
+          class="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-bold rounded-xl bg-primary text-primary-foreground hover:opacity-90 transition-opacity shadow-sm"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+            <path d="M5 12h14" /><path d="M12 5v14" />
+          </svg>
+          Nuevo cuadro
+        </button>
+      }
       <button
         type="button"
         (click)="handleDeleteIncomes()"

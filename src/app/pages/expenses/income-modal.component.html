@@ -7,25 +7,30 @@
 >
   <div
     class="relative bg-card rounded-2xl p-6 w-full max-w-md shadow-2xl max-h-[90vh] overflow-y-auto"
+    (keydown)="onIncomePanelKeydown($event)"
   >
     <div class="flex items-center justify-between mb-4">
       <h2 id="income-modal-title" class="text-2xl font-bold text-foreground">
-        Agregar ingreso
+        Ingreso nuevo
       </h2>
+      <span class="text-xs font-medium text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full border border-emerald-200">
+        Suma al periodo
+      </span>
     </div>
 
     <p class="text-xs text-muted-foreground bg-muted/60 rounded-lg px-3 py-2 mb-4">
-      Registra entradas extra del periodo (freelance, ventas, bonos). Si ya incluiste tu salario en
+      Este monto se suma a tu ingreso del periodo y aumenta el disponible. Si ya cargaste tu salario en
       «Ingreso mensual», no lo repitas aquí.
     </p>
 
     <form (ngSubmit)="handleSubmit()" class="space-y-4">
       <div>
-        <label class="block text-sm font-medium text-foreground mb-1" for="income-title">
-          Título *
-        </label>
+        <label
+          class="block text-sm font-medium text-foreground mb-1"
+          for="income-title-input"
+        >Título *</label>
         <input
-          id="income-title"
+          id="income-title-input"
           type="text"
           name="title"
           [(ngModel)]="title"
@@ -36,25 +41,27 @@
       </div>
 
       <div>
-        <label class="block text-sm font-medium text-foreground mb-1" for="income-description">
-          Descripción
-        </label>
+        <label
+          class="block text-sm font-medium text-foreground mb-1"
+          for="income-description-input"
+        >Descripción</label>
         <textarea
-          id="income-description"
+          id="income-description-input"
           name="description"
           [(ngModel)]="description"
-          placeholder="Detalles opcionales"
-          rows="2"
+          placeholder="Detalles adicionales (opcional)"
+          rows="3"
           class="w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent resize-none"
         ></textarea>
       </div>
 
       <div>
-        <label class="block text-sm font-medium text-foreground mb-1" for="income-source">
-          Fuente *
-        </label>
+        <label
+          class="block text-sm font-medium text-foreground mb-1"
+          for="income-source-select"
+        >Fuente *</label>
         <select
-          id="income-source"
+          id="income-source-select"
           name="source"
           [(ngModel)]="source"
           class="w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent"
@@ -68,9 +75,10 @@
       </div>
 
       <div>
-        <label class="block text-sm font-medium text-foreground mb-1" for="income-received-date">
-          Fecha del ingreso *
-        </label>
+        <label
+          class="block text-sm font-medium text-foreground mb-1"
+          for="income-received-date"
+        >Fecha del ingreso *</label>
         <input
           id="income-received-date"
           type="date"
@@ -81,18 +89,21 @@
           class="w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent"
           required
         />
-        @if (defaultCurrency() === 'BS') {
-          <p class="text-xs text-muted-foreground mt-1">
+        <p class="text-xs text-muted-foreground mt-1">
+          @if (defaultCurrency() === 'BS') {
             La tasa BCV aplicada será la de esta fecha.
-          </p>
-        }
+          } @else {
+            Opcional para registro; afecta la tasa si conviertes después.
+          }
+        </p>
       </div>
 
       @if (defaultCurrency() === 'BS') {
         <div>
-          <label class="block text-sm font-medium text-foreground mb-1" for="income-amount-bs">
-            Monto en Bs. *
-          </label>
+          <label
+            class="block text-sm font-medium text-foreground mb-1"
+            for="income-amount-bs"
+          >Monto en Bs. *</label>
           <input
             id="income-amount-bs"
             type="number"
@@ -107,25 +118,34 @@
         </div>
         <div class="rounded-xl border border-border bg-muted/90 px-4 py-3">
           <p class="text-xs text-muted-foreground uppercase tracking-wide mb-1">
-            Monto en USD (según tasa del día)
+            Monto en USD (según tasa del día elegido)
           </p>
           @if (previewLoading) {
             <p class="text-sm text-muted-foreground">Calculando…</p>
           } @else if (usdPreview != null) {
-            <p class="text-lg font-semibold text-foreground tabular-nums">
-              ${{ usdPreview | number: '1.2-2' }} USD
+            <p class="text-lg font-semibold text-emerald-600 tabular-nums">
+              +${{ usdPreview | number: '1.2-2' }} USD
+            </p>
+            <p class="text-xs text-muted-foreground mt-1">
+              Se sumará este monto al ingreso del periodo.
             </p>
           } @else {
-            <p class="text-sm text-muted-foreground">Ingresa un monto en Bs.</p>
+            <p class="text-sm text-muted-foreground">
+              Ingresa un monto en Bs. para ver el equivalente.
+            </p>
           }
         </div>
       } @else {
         <div>
-          <label class="block text-sm font-medium text-foreground mb-1" for="income-amount-usd">
-            Monto en USD *
-          </label>
+          <label
+            class="block text-sm font-medium text-foreground mb-1"
+            for="income-amount-usd"
+          >Monto en USD *</label>
           <div class="relative">
-            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
+            <span
+              class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+              aria-hidden="true"
+            >$</span>
             <input
               id="income-amount-usd"
               type="number"
@@ -150,9 +170,9 @@
         </button>
         <button
           type="submit"
-          class="flex-1 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition-colors font-medium"
+          class="flex-1 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:opacity-90 transition-colors font-medium"
         >
-          Guardar
+          Aceptar
         </button>
       </div>
     </form>
