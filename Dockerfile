@@ -1,14 +1,14 @@
-# Angular 20.3+ exige Node >=20.19 o >=22.12; fijamos 22.12 para no depender de Nixpacks.
-FROM node:22.12.0-alpine AS build
+# Angular 20.3+ exige Node >=20.19 o >=22.12; pnpm 11.3+ exige Node >=22.13.
+FROM node:22.14.0-alpine AS build
 
 WORKDIR /app
 
-# Si el orquestador inyecta NODE_ENV=production, npm omitiría devDependencies y fallaría ng build.
+# Si el orquestador inyecta NODE_ENV=production, pnpm omitiría devDependencies y fallaría ng build.
 ENV NODE_ENV=development
 
-RUN npm install -g pnpm
+RUN corepack enable
 
-COPY package.json pnpm-lock.yaml .npmrc ./
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc ./
 RUN pnpm install --frozen-lockfile
 
 COPY . .
