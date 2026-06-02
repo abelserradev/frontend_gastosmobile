@@ -50,7 +50,10 @@ export const apiUnauthorizedInterceptor: HttpInterceptorFn = (req, next) => {
 
 export const apiKeyInterceptor: HttpInterceptorFn = (req, next) => {
   const base = environment.apiUrl;
-  const apikey = (environment as { apikey?: string}).apikey?.trim() ?? '';
+  const apikey = (environment as { apikey?: string }).apikey?.trim() ?? '';
+  if (!apikey && !environment.production) {
+    console.warn('[apiKeyInterceptor] Falta credenciales.');
+  }
   if (!apikey) {
     return next(req);
   }
