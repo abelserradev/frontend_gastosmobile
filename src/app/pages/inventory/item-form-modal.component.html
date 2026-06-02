@@ -3,15 +3,15 @@
     class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
     (click)="onBackdropClick($event)"
   >
-    <div class="bg-white rounded-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+    <div class="bg-card text-card-foreground rounded-xl w-full max-w-md max-h-[90vh] overflow-y-auto border border-border shadow-xl">
       <!-- Header -->
-      <div class="flex items-center justify-between px-4 py-3 border-b border-gray-200">
-        <h2 class="text-lg font-semibold text-gray-900">
+      <div class="flex items-center justify-between px-4 py-3 border-b border-border">
+        <h2 class="text-lg font-semibold">
           {{ itemToEdit() ? 'Editar Producto' : 'Nuevo Producto' }}
         </h2>
         <button
           (click)="close()"
-          class="p-1 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100"
+          class="p-1 text-muted-foreground hover:text-foreground rounded-full hover:bg-muted"
         >
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -122,7 +122,7 @@
         </button>
         <button
           (click)="save()"
-          class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          class="px-4 py-2 bg-primary text-primary-foreground font-semibold rounded-xl hover:opacity-90 transition-all"
         >
           {{ itemToEdit() ? 'Guardar Cambios' : 'Crear Producto' }}
         </button>
