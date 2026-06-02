@@ -38,6 +38,18 @@ export interface ExpenseItem {
   hasReceipt?: boolean;
 }
 
+export interface IncomeItem {
+  id: string;
+  title: string;
+  description: string;
+  amount: number;
+  source: string;
+  referenceMonth?: string;
+  receivedDate?: string | null;
+  bcvRateApplied?: number | null;
+  bcvRateDate?: string | null;
+}
+
 @Injectable({ providedIn: 'root' })
 export class AppContextService {
   readonly currency = signal<CurrencyCode>('USD');
@@ -51,6 +63,8 @@ export class AppContextService {
   readonly categories = signal<CategoryDraft[]>([]);
   readonly profiles = signal<UserProfile[]>([]);
   readonly expenses = signal<ExpenseItem[]>([]);
+  readonly incomeSources = signal<{ id: string; name: string }[]>([]);
+  readonly incomes = signal<IncomeItem[]>([]);
 
   /** FEAT-001: Periodo presupuestario activo calculado por el backend. */
   readonly activePeriod = signal<ActivePeriod | null>(null);
@@ -121,6 +135,14 @@ export class AppContextService {
 
   setExpenses(list: ExpenseItem[]): void {
     this.expenses.set(list);
+  }
+
+  setIncomeSources(list: { id: string; name: string }[]): void {
+    this.incomeSources.set(list);
+  }
+
+  setIncomes(list: IncomeItem[]): void {
+    this.incomes.set(list);
   }
 
   addProfile(profile: UserProfile): void {

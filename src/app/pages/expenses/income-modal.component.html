@@ -1,0 +1,160 @@
+<dialog
+  #incomeDialog
+  class="expense-modal-dialog fixed inset-0 z-50 flex items-center justify-center p-4 m-0 w-full max-w-none h-full max-h-none bg-transparent border-0 shadow-none open:flex"
+  (click)="onBackdropClick($event)"
+  (keydown)="onDialogKeydown($event)"
+  aria-labelledby="income-modal-title"
+>
+  <div
+    class="relative bg-card rounded-2xl p-6 w-full max-w-md shadow-2xl max-h-[90vh] overflow-y-auto"
+  >
+    <div class="flex items-center justify-between mb-4">
+      <h2 id="income-modal-title" class="text-2xl font-bold text-foreground">
+        Agregar ingreso
+      </h2>
+    </div>
+
+    <p class="text-xs text-muted-foreground bg-muted/60 rounded-lg px-3 py-2 mb-4">
+      Registra entradas extra del periodo (freelance, ventas, bonos). Si ya incluiste tu salario en
+      «Ingreso mensual», no lo repitas aquí.
+    </p>
+
+    <form (ngSubmit)="handleSubmit()" class="space-y-4">
+      <div>
+        <label class="block text-sm font-medium text-foreground mb-1" for="income-title">
+          Título *
+        </label>
+        <input
+          id="income-title"
+          type="text"
+          name="title"
+          [(ngModel)]="title"
+          placeholder="Ej: Proyecto freelance, Venta..."
+          class="w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent"
+          required
+        />
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-foreground mb-1" for="income-description">
+          Descripción
+        </label>
+        <textarea
+          id="income-description"
+          name="description"
+          [(ngModel)]="description"
+          placeholder="Detalles opcionales"
+          rows="2"
+          class="w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent resize-none"
+        ></textarea>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-foreground mb-1" for="income-source">
+          Fuente *
+        </label>
+        <select
+          id="income-source"
+          name="source"
+          [(ngModel)]="source"
+          class="w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent"
+          required
+        >
+          <option value="">Selecciona una fuente</option>
+          @for (src of sources(); track src.id) {
+            <option [value]="src.name">{{ src.name }}</option>
+          }
+        </select>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-foreground mb-1" for="income-received-date">
+          Fecha del ingreso *
+        </label>
+        <input
+          id="income-received-date"
+          type="date"
+          name="receivedDate"
+          [(ngModel)]="receivedDate"
+          (ngModelChange)="scheduleBsPreview()"
+          [max]="receivedDateMaxYmd()"
+          class="w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent"
+          required
+        />
+        @if (defaultCurrency() === 'BS') {
+          <p class="text-xs text-muted-foreground mt-1">
+            La tasa BCV aplicada será la de esta fecha.
+          </p>
+        }
+      </div>
+
+      @if (defaultCurrency() === 'BS') {
+        <div>
+          <label class="block text-sm font-medium text-foreground mb-1" for="income-amount-bs">
+            Monto en Bs. *
+          </label>
+          <input
+            id="income-amount-bs"
+            type="number"
+            name="amountBs"
+            step="0.01"
+            [(ngModel)]="amountBs"
+            (ngModelChange)="scheduleBsPreview()"
+            placeholder="0.00"
+            class="w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent"
+            required
+          />
+        </div>
+        <div class="rounded-xl border border-border bg-muted/90 px-4 py-3">
+          <p class="text-xs text-muted-foreground uppercase tracking-wide mb-1">
+            Monto en USD (según tasa del día)
+          </p>
+          @if (previewLoading) {
+            <p class="text-sm text-muted-foreground">Calculando…</p>
+          } @else if (usdPreview != null) {
+            <p class="text-lg font-semibold text-foreground tabular-nums">
+              ${{ usdPreview | number: '1.2-2' }} USD
+            </p>
+          } @else {
+            <p class="text-sm text-muted-foreground">Ingresa un monto en Bs.</p>
+          }
+        </div>
+      } @else {
+        <div>
+          <label class="block text-sm font-medium text-foreground mb-1" for="income-amount-usd">
+            Monto en USD *
+          </label>
+          <div class="relative">
+            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
+            <input
+              id="income-amount-usd"
+              type="number"
+              name="amountUsd"
+              step="0.01"
+              [(ngModel)]="amountUsd"
+              placeholder="0.00"
+              class="w-full pl-8 pr-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent"
+              required
+            />
+          </div>
+        </div>
+      }
+
+      <div class="flex gap-3 mt-6">
+        <button
+          type="button"
+          (click)="handleCancel()"
+          class="flex-1 px-4 py-2 border border-border text-foreground rounded-lg hover:bg-muted transition-colors font-medium"
+        >
+          Cancelar
+        </button>
+        <button
+          type="submit"
+          class="flex-1 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition-colors font-medium"
+        >
+          Guardar
+        </button>
+      </div>
+    </form>
+  </div>
+</dialog>

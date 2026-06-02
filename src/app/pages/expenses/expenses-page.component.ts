@@ -20,7 +20,7 @@ import { navigateFromExpensesMenu } from '../../core/app-navigation.util';
 import { AuthService } from '../../core/auth.service';
 import { formatApiHttpError } from '../../core/http-error.util';
 import { writeBcvRateCache } from '../../core/bcv-rate-cache.util';
-import { MeApiService, type MeExpense, type MeProfileMember } from '../../core/me-api.service';
+import { MeApiService, type MeExpense, type MeIncome, type MeProfileMember } from '../../core/me-api.service';
 import {
   getStateWithAutoRollover,
   needsSetupScreen,
@@ -28,6 +28,7 @@ import {
 import type { ParseInvoiceResult } from '../../core/ocr-api.service';
 import { guessOcrDocumentKind } from '../../core/ocr-document-kind.util';
 import { ExpenseModalComponent } from './expense-modal.component';
+import { IncomeModalComponent } from './income-modal.component';
 import { ExpensePieChartComponent } from './expense-pie-chart.component';
 import { ExpenseTypeSelectorComponent, type ExpenseCreationMode } from './expense-type-selector.component';
 import { ImageUploadModalComponent, type ImageUploadMode } from './image-upload-modal.component';
@@ -65,6 +66,20 @@ function toExpenseItem(e: MeExpense) {
   };
 }
 
+function toIncomeItem(i: MeIncome) {
+  return {
+    id: i.id,
+    title: i.title,
+    description: i.description,
+    amount: i.amount,
+    source: i.source,
+    referenceMonth: i.referenceMonth,
+    receivedDate: i.receivedDate,
+    bcvRateApplied: i.bcvRateApplied,
+    bcvRateDate: i.bcvRateDate,
+  };
+}
+
 @Component({
   selector: 'app-expenses-page',
   standalone: true,
@@ -73,6 +88,7 @@ function toExpenseItem(e: MeExpense) {
     FormsModule,
     RouterLink,
     ExpenseModalComponent,
+    IncomeModalComponent,
     ExpensePieChartComponent,
     ExpenseTypeSelectorComponent,
     ImageUploadModalComponent,
@@ -119,6 +135,8 @@ export class ExpensesPageComponent implements OnInit, OnDestroy {
   readonly imageUploadOpen = signal(false);
   readonly imageUploadMode = signal<ImageUploadMode>('invoice');
   readonly modalOpen = signal(false);
+  readonly incomeModalOpen = signal(false);
+  readonly boardTab = signal<'expenses' | 'incomes'>('expenses');
   /** Datos del OCR que se pasan al formulario; null = sin prefill (gasto manual). */
   readonly ocrPrefill = signal<ParseInvoiceResult | null>(null);
   /** Factura vs pago móvil: guía estadística tipo documento cuando hay OCR previo al formulario. */
@@ -162,6 +180,7 @@ export class ExpensesPageComponent implements OnInit, OnDestroy {
     });
   });
   readonly selectedExpenses = signal<Set<string>>(new Set());
+  readonly selectedIncomes = signal<Set<string>>(new Set());
   readonly paidByModalOpen = signal(false);
   /** Gastos a marcar como pagados al confirmar el modal (uno o varios). */
   readonly pendingPaidExpenseIds = signal<string[] | null>(null);
@@ -177,9 +196,17 @@ export class ExpensesPageComponent implements OnInit, OnDestroy {
     return ex.filter((e) => e.isPaid).reduce((sum, e) => sum + e.amount, 0);
   });
 
-  readonly remaining = computed(() => {
-    return this.ctx.effectiveMonthlyIncome() - this.totalExpenses();
-  });
+  readonly totalLoggedIncome = computed(() =>
+    this.ctx.incomes().reduce((sum, i) => sum + i.amount, 0),
+  );
+
+  readonly totalPeriodIncome = computed(
+    () => this.ctx.effectiveMonthlyIncome() + this.totalLoggedIncome(),
+  );
+
+  readonly remaining = computed(
+    () => this.totalPeriodIncome() - this.totalExpenses(),
+  );
 
   readonly spendingSparklineValues = computed(() =>
     buildLastSevenDaySpending(this.ctx.expenses()),
@@ -330,6 +357,8 @@ export class ExpensesPageComponent implements OnInit, OnDestroy {
         );
         this.ctx.setProfiles(s.profiles);
         this.ctx.setExpenses(s.expenses.map(toExpenseItem));
+        this.ctx.setIncomeSources(s.incomeSources ?? []);
+        this.ctx.setIncomes((s.incomes ?? []).map(toIncomeItem));
       },
       error: (err: unknown) => {
         globalThis.alert(formatApiHttpError(err));
@@ -351,6 +380,74 @@ export class ExpensesPageComponent implements OnInit, OnDestroy {
     return [...this.selectedExpenses()].some(
       (id) => expenses.some((e) => e.id === id && !e.isPaid),
     );
+  }
+
+  openIncomeModal(): void {
+    this.incomeModalOpen.set(true);
+  }
+
+  onIncomeModalOpenChange(open: boolean): void {
+    this.incomeModalOpen.set(open);
+  }
+
+  onAddIncome(payload: {
+    title: string;
+    description: string;
+    amount: number;
+    source: string;
+    receivedDate?: string;
+  }): void {
+    this.meApi
+      .createIncome({
+        title: payload.title,
+        description: payload.description,
+        amount: payload.amount,
+        sourceName: payload.source,
+        receivedDate: payload.receivedDate,
+      })
+      .subscribe({
+      next: (row) => {
+        this.ctx.setIncomes([toIncomeItem(row), ...this.ctx.incomes()]);
+      },
+      error: (err: unknown) => {
+        globalThis.alert(formatApiHttpError(err));
+      },
+    });
+  }
+
+  isIncomeSelected(id: string): boolean {
+    return this.selectedIncomes().has(id);
+  }
+
+  toggleIncomeSelection(id: string): void {
+    const next = new Set(this.selectedIncomes());
+    if (next.has(id)) {
+      next.delete(id);
+    } else {
+      next.add(id);
+    }
+    this.selectedIncomes.set(next);
+  }
+
+  handleDeleteIncomes(): void {
+    const sel = this.selectedIncomes();
+    if (sel.size === 0) {
+      globalThis.alert('Selecciona al menos un ingreso para eliminar');
+      return;
+    }
+    if (!globalThis.confirm(`¿Eliminar ${sel.size} ingreso(s)?`)) {
+      return;
+    }
+    const ids = [...sel];
+    this.meApi.deleteIncomes(ids).subscribe({
+      next: () => {
+        this.ctx.setIncomes(this.ctx.incomes().filter((i) => !ids.includes(i.id)));
+        this.selectedIncomes.set(new Set());
+      },
+      error: (err: unknown) => {
+        globalThis.alert(formatApiHttpError(err));
+      },
+    });
   }
 
   /** Punto de entrada único: abre el selector de tipo de gasto. */
