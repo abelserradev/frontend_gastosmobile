@@ -15,6 +15,7 @@ import {
 import { StockListComponent } from './stock-list.component';
 import { ItemFormModalComponent } from './item-form-modal.component';
 import { MovementFormModalComponent } from './movement-form-modal.component';
+import { MovementsHistoryModalComponent } from './movements-history-modal.component';
 
 type ViewMode = 'all' | 'low-stock' | 'movements';
 
@@ -27,6 +28,7 @@ type ViewMode = 'all' | 'low-stock' | 'movements';
     StockListComponent,
     ItemFormModalComponent,
     MovementFormModalComponent,
+    MovementsHistoryModalComponent,
   ],
   templateUrl: './inventory-page.component.html',
 })
@@ -141,6 +143,17 @@ export class InventoryPageComponent implements OnInit {
     this.viewMode.set(mode);
     if (mode === 'low-stock') {
       this.loadLowStock();
+    } else if (mode === 'all') {
+      this.loadData();
+    }
+  }
+
+  /** Recarga según el filtro activo para no dejar listas inconsistentes. */
+  private reloadItems(): void {
+    if (this.viewMode() === 'low-stock') {
+      this.loadLowStock();
+    } else {
+      this.loadData();
     }
   }
 
@@ -187,7 +200,7 @@ export class InventoryPageComponent implements OnInit {
       this.api.updateItem(pid, editing.id, body).subscribe({
         next: () => {
           this.closeItemModal();
-          this.loadData();
+          this.reloadItems();
         },
         error: (err: unknown) => {
           globalThis.alert(formatApiHttpError(err));
@@ -198,7 +211,7 @@ export class InventoryPageComponent implements OnInit {
       this.api.createItem(pid, body).subscribe({
         next: () => {
           this.closeItemModal();
-          this.loadData();
+          this.reloadItems();
         },
         error: (err: unknown) => {
           globalThis.alert(formatApiHttpError(err));
@@ -247,7 +260,7 @@ export class InventoryPageComponent implements OnInit {
     this.api.createMovement(pid, data).subscribe({
       next: () => {
         this.closeMovementModal();
-        this.loadData();
+        this.reloadItems();
       },
       error: (err: unknown) => {
         globalThis.alert(formatApiHttpError(err));

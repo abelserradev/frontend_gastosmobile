@@ -226,3 +226,10 @@
   (onClose)="closeMovementModal()"
   (onSave)="handleMovementSave($event)"
 />
+
+<app-movements-history-modal
+  [isOpen]="itemMovementsOpen()"
+  [profileId]="profileId()"
+  [item]="selectedItem()"
+  (onClose)="closeMovementsHistory()"
+/>
