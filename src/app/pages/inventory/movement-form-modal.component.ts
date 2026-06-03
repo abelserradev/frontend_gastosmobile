@@ -10,7 +10,8 @@ import type {
 interface MovementFormData {
   quantity: number;
   reason: string;
-  unitPrice: string;
+  /** ngModel con type="number" puede devolver number en runtime. */
+  unitPrice: string | number;
 }
 
 /** Motivos de salida visibles al usuario; se mapean a tipos del backend. */
@@ -184,7 +185,7 @@ export class MovementFormModalComponent implements OnChanges {
     }
 
     if (this.showUnitPriceField()) {
-      const raw = data.unitPrice.trim();
+      const raw = this.asPriceText(data.unitPrice);
       if (raw !== '') {
         const parsed = Number(raw);
         if (Number.isNaN(parsed) || parsed < 0) {
@@ -255,7 +256,7 @@ export class MovementFormModalComponent implements OnChanges {
     }
 
     if (this.showUnitPriceField()) {
-      const raw = data.unitPrice.trim();
+      const raw = this.asPriceText(data.unitPrice);
       if (raw !== '') {
         payload.unitPrice = Number(raw);
       }
@@ -276,5 +277,13 @@ export class MovementFormModalComponent implements OnChanges {
 
   decrementQuantity(): void {
     this.formData.update((d) => ({ ...d, quantity: Math.max(1, d.quantity - 1) }));
+  }
+
+  /** type="number" en el template no garantiza string — evita .trim() directo. */
+  private asPriceText(value: string | number | null | undefined): string {
+    if (value == null || value === '') {
+      return '';
+    }
+    return String(value).trim();
   }
 }
