@@ -13,7 +13,11 @@ import {
   cameFromExpenses,
   subpageBackTarget,
 } from '../../core/app-navigation.util';
-import { MeApiService, type MeProfileMember } from '../../core/me-api.service';
+import {
+  MeApiService,
+  type MeProfileMember,
+  type ProfileCollaborator,
+} from '../../core/me-api.service';
 import {
   getStateWithAutoRollover,
   needsSetupScreen,
@@ -43,6 +47,25 @@ export class ProfilesPageComponent implements OnInit {
   membersLoading = false;
   members: MeProfileMember[] = [];
   memberName = '';
+
+  teamModalOpen = false;
+  teamProfileId: string | null = null;
+  teamProfileName: string | null = null;
+  teamLoading = false;
+  collaborators: ProfileCollaborator[] = [];
+  inviteEmail = '';
+
+  get ownedProfiles(): UserProfile[] {
+    return this.profiles.filter((p) => (p.access ?? 'owner') === 'owner');
+  }
+
+  get sharedProfiles(): UserProfile[] {
+    return this.profiles.filter((p) => p.access === 'collaborator');
+  }
+
+  isProfileOwner(profile: UserProfile): boolean {
+    return (profile.access ?? 'owner') === 'owner';
+  }
 
   get fromExpenses(): boolean {
     return cameFromExpenses(this.route);
@@ -195,6 +218,88 @@ export class ProfilesPageComponent implements OnInit {
         globalThis.alert(formatApiHttpError(err));
       },
     });
+  }
+
+  openTeam(profile: UserProfile): void {
+    this.teamModalOpen = true;
+    this.teamProfileId = profile.id;
+    this.teamProfileName = profile.name;
+    this.inviteEmail = '';
+    this.collaborators = [];
+    this.loadCollaborators();
+  }
+
+  closeTeam(): void {
+    this.teamModalOpen = false;
+    this.teamProfileId = null;
+    this.teamProfileName = null;
+    this.inviteEmail = '';
+    this.collaborators = [];
+    this.teamLoading = false;
+  }
+
+  onTeamDialogClick(event: MouseEvent): void {
+    if (event.target === event.currentTarget) {
+      this.closeTeam();
+    }
+  }
+
+  loadCollaborators(): void {
+    if (!this.teamProfileId || this.teamLoading) return;
+    this.teamLoading = true;
+    this.meApi.listCollaborators(this.teamProfileId).subscribe({
+      next: (list) => {
+        this.teamLoading = false;
+        this.collaborators = list;
+      },
+      error: (err: unknown) => {
+        this.teamLoading = false;
+        globalThis.alert(formatApiHttpError(err));
+      },
+    });
+  }
+
+  sendInvite(): void {
+    if (!this.teamProfileId) return;
+    const email = this.inviteEmail.trim();
+    if (!email) {
+      globalThis.alert('Indica el email del usuario registrado');
+      return;
+    }
+    this.meApi.inviteCollaborator(this.teamProfileId, email).subscribe({
+      next: (row) => {
+        const idx = this.collaborators.findIndex((c) => c.userId === row.userId);
+        if (idx >= 0) {
+          this.collaborators = this.collaborators.map((c, i) =>
+            i === idx ? row : c,
+          );
+        } else {
+          this.collaborators = [...this.collaborators, row];
+        }
+        this.inviteEmail = '';
+      },
+      error: (err: unknown) => globalThis.alert(formatApiHttpError(err)),
+    });
+  }
+
+  revokeCollaborator(userId: string): void {
+    if (!this.teamProfileId) return;
+    this.meApi.revokeCollaborator(this.teamProfileId, userId).subscribe({
+      next: () => {
+        this.collaborators = this.collaborators.filter((c) => c.userId !== userId);
+      },
+      error: (err: unknown) => globalThis.alert(formatApiHttpError(err)),
+    });
+  }
+
+  collaboratorStatusLabel(status: ProfileCollaborator['status']): string {
+    const labels: Record<ProfileCollaborator['status'], string> = {
+      pending: 'Pendiente',
+      accepted: 'Activo',
+      rejected: 'Rechazado',
+      revoked: 'Revocado',
+    };
+    return labels[status] ?? status;
   }
 
   handleLogout(): void {

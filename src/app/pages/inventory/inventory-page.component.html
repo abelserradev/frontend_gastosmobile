@@ -15,7 +15,13 @@
         </button>
         <div>
           <h1 class="text-xl font-bold tracking-tight">Inventario</h1>
-          <p class="text-xs text-muted-foreground">{{ profileName() || 'Cargando...' }}</p>
+          @if (isSharedProfile()) {
+            <p class="text-xs text-muted-foreground">
+              Compartido · de {{ profileOwnerName() || 'otro usuario' }}
+            </p>
+          } @else {
+            <p class="text-xs text-muted-foreground">{{ profileName() || 'Cargando...' }}</p>
+          }
         </div>
       </div>
       <button
@@ -109,6 +115,68 @@
       </button>
     </div>
 
+    <!-- Sucursales (Fase B) -->
+    <div class="mb-6 bg-card border border-border rounded-xl overflow-hidden">
+      <button
+        type="button"
+        (click)="toggleBranchesPanel()"
+        class="w-full flex items-center justify-between px-4 py-3 text-sm font-medium hover:bg-muted/40 transition-colors"
+      >
+        <span>Sucursales ({{ branches().length }})</span>
+        <svg
+          class="w-4 h-4 transition-transform"
+          [class.rotate-180]="branchesPanelOpen()"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+          aria-hidden="true"
+        >
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+      @if (branchesPanelOpen()) {
+        <div class="px-4 pb-4 border-t border-border pt-3 space-y-3">
+          <p class="text-xs text-muted-foreground">
+            Registra locales o almacenes para traslados entre sucursales.
+          </p>
+          <div class="flex gap-2">
+            <input
+              type="text"
+              [ngModel]="branchNameDraft()"
+              (ngModelChange)="branchNameDraft.set($event)"
+              placeholder="Nombre sucursal"
+              class="flex-1 px-3 py-2 bg-background border border-input rounded-lg text-sm"
+            />
+            <button
+              type="button"
+              (click)="addBranch()"
+              class="px-3 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium"
+            >
+              Agregar
+            </button>
+          </div>
+          @if (branches().length === 0) {
+            <p class="text-sm text-muted-foreground">Sin sucursales aún.</p>
+          } @else {
+            <ul class="space-y-2">
+              @for (b of branches(); track b.id) {
+                <li class="flex items-center justify-between px-3 py-2 rounded-lg bg-muted/50 border border-border">
+                  <span class="text-sm">{{ b.name }}</span>
+                  <button
+                    type="button"
+                    (click)="removeBranch(b.id)"
+                    class="text-xs text-destructive hover:underline"
+                  >
+                    Eliminar
+                  </button>
+                </li>
+              }
+            </ul>
+          }
+        </div>
+      }
+    </div>
+
     <!-- Filtros de estado -->
     <div class="flex gap-2 mb-6">
       <button
@@ -151,15 +219,27 @@
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
         </svg>
         <div>
-          <p class="text-sm font-medium text-destructive">Error al cargar inventario</p>
+          <p class="text-sm font-medium text-destructive">
+            {{ accessDenied() ? 'Acceso revocado' : 'Error al cargar inventario' }}
+          </p>
           <p class="text-sm text-destructive/80">{{ errMsg }}</p>
-          <button
-            type="button"
-            (click)="loadData()"
-            class="mt-2 text-sm text-destructive underline hover:no-underline"
-          >
-            Reintentar
-          </button>
+          @if (accessDenied()) {
+            <button
+              type="button"
+              (click)="goToProfiles()"
+              class="mt-2 text-sm text-destructive underline hover:no-underline"
+            >
+              Volver a perfiles
+            </button>
+          } @else {
+            <button
+              type="button"
+              (click)="loadData()"
+              class="mt-2 text-sm text-destructive underline hover:no-underline"
+            >
+              Reintentar
+            </button>
+          }
         </div>
       </div>
     }
@@ -223,6 +303,7 @@
 <app-movement-form-modal
   [isOpen]="movementModalOpen()"
   [item]="itemForMovement()"
+  [branches]="branches()"
   (onClose)="closeMovementModal()"
   (onSave)="handleMovementSave($event)"
 />

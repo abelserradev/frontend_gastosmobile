@@ -81,6 +81,31 @@ export interface MeProfile {
   id: string;
   name: string;
   type: ProfileType;
+  access?: 'owner' | 'collaborator';
+  ownerName?: string | null;
+}
+
+export interface ProfileCollaborator {
+  id: string;
+  profileId: string;
+  profileName: string;
+  userId: string;
+  userEmail: string;
+  userName: string;
+  invitedById: string;
+  status: 'pending' | 'accepted' | 'rejected' | 'revoked';
+  role: 'editor' | 'viewer';
+  createdAt: string;
+  acceptedAt: string | null;
+}
+
+export interface ProfileInvitation {
+  id: string;
+  profileId: string;
+  profileName: string;
+  invitedByName: string;
+  role: 'editor' | 'viewer';
+  createdAt: string;
 }
 
 export interface MeProfileMember {
@@ -231,6 +256,43 @@ export class MeApiService {
     return this.http.delete<void>(
       `${this.base}/me/profiles/${profileId}/members/${memberId}`,
     );
+  }
+
+  listCollaborators(profileId: string): Observable<ProfileCollaborator[]> {
+    return this.http.get<ProfileCollaborator[]>(
+      `${this.base}/me/profiles/${profileId}/collaborators`,
+    );
+  }
+
+  inviteCollaborator(
+    profileId: string,
+    email: string,
+  ): Observable<ProfileCollaborator> {
+    return this.http.post<ProfileCollaborator>(
+      `${this.base}/me/profiles/${profileId}/collaborators`,
+      { email },
+    );
+  }
+
+  revokeCollaborator(profileId: string, userId: string): Observable<void> {
+    return this.http.delete<void>(
+      `${this.base}/me/profiles/${profileId}/collaborators/${userId}`,
+    );
+  }
+
+  listInvitations(): Observable<ProfileInvitation[]> {
+    return this.http.get<ProfileInvitation[]>(`${this.base}/me/invitations`);
+  }
+
+  acceptInvitation(id: string): Observable<ProfileCollaborator> {
+    return this.http.post<ProfileCollaborator>(
+      `${this.base}/me/invitations/${id}/accept`,
+      {},
+    );
+  }
+
+  rejectInvitation(id: string): Observable<void> {
+    return this.http.post<void>(`${this.base}/me/invitations/${id}/reject`, {});
   }
 
   listExpenses(): Observable<MeExpense[]> {

@@ -17,6 +17,8 @@ export interface UserProfile {
   id: string;
   name: string;
   type: ProfileType;
+  access?: 'owner' | 'collaborator';
+  ownerName?: string | null;
 }
 
 export interface ExpenseItem {

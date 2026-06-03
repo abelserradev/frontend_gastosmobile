@@ -147,6 +147,13 @@ export class ExpensesPageComponent implements OnInit, OnDestroy {
   readonly receiptExpenseId = signal<string | null>(null);
   readonly showChart = signal(false);
   readonly sidebarOpen = signal(false);
+  /** Invitaciones pendientes a perfiles comercio compartidos. */
+  readonly pendingInvitationsCount = signal(0);
+
+  /** Perfiles propios — excluye colaboraciones compartidas del flujo de gastos. */
+  readonly expenseProfiles = computed(() =>
+    this.ctx.profiles().filter((p) => (p.access ?? 'owner') === 'owner'),
+  );
   readonly hoveredReceiptId = signal<string | null>(null);
   /** Fuerza repaint cuando llega una miniatura de recibo en caché. */
   readonly receiptPreviewTick = signal(0);
@@ -359,6 +366,7 @@ export class ExpensesPageComponent implements OnInit, OnDestroy {
         this.ctx.setExpenses(s.expenses.map(toExpenseItem));
         this.ctx.setIncomeSources(s.incomeSources ?? []);
         this.ctx.setIncomes((s.incomes ?? []).map(toIncomeItem));
+        this.loadPendingInvitationsCount();
       },
       error: (err: unknown) => {
         globalThis.alert(formatApiHttpError(err));
@@ -615,7 +623,7 @@ export class ExpensesPageComponent implements OnInit, OnDestroy {
       );
       return;
     }
-    if (this.ctx.profiles().length === 0) {
+    if (this.expenseProfiles().length === 0) {
       globalThis.alert(
         'No hay perfiles. Ve a Perfiles, crea al menos uno y vuelve para indicar quién pagó.',
       );
@@ -668,7 +676,7 @@ export class ExpensesPageComponent implements OnInit, OnDestroy {
       globalThis.alert('Selecciona qué perfil realizó el pago');
       return;
     }
-    const payer = this.ctx.profiles().find((p) => p.id === pid);
+    const payer = this.expenseProfiles().find((p) => p.id === pid);
     if (!payer) {
       globalThis.alert('Perfil no válido; recarga la página e intenta de nuevo');
       return;
@@ -819,6 +827,17 @@ export class ExpensesPageComponent implements OnInit, OnDestroy {
 
   goProfiles(): void {
     navigateFromExpensesMenu(this.router, '/profiles', () => this.closeSidebar());
+  }
+
+  goInvitations(): void {
+    navigateFromExpensesMenu(this.router, '/invitations', () => this.closeSidebar());
+  }
+
+  private loadPendingInvitationsCount(): void {
+    this.meApi.listInvitations().subscribe({
+      next: (list) => this.pendingInvitationsCount.set(list.length),
+      error: () => this.pendingInvitationsCount.set(0),
+    });
   }
 
   goSetup(): void {
