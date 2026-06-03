@@ -11,6 +11,7 @@ import { ResetPasswordPageComponent } from './pages/reset-password/reset-passwor
 import { SetupPasswordPageComponent } from './pages/setup-password/setup-password-page.component';
 import { HistorialPageComponent } from './pages/historial/historial-page.component';
 import { InventoryPageComponent } from './pages/inventory/inventory-page.component';
+import { InvitationsPageComponent } from './pages/invitations/invitations-page.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
@@ -44,6 +45,11 @@ export const routes: Routes = [
   {
     path: 'historial',
     component: HistorialPageComponent,
+    canActivate: [requiresPasswordGuard],
+  },
+  {
+    path: 'invitations',
+    component: InvitationsPageComponent,
     canActivate: [requiresPasswordGuard],
   },
   {

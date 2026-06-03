@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject, signal, computed, OnInit } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { AppContextService } from '../../core/app-context.service';
@@ -8,10 +9,12 @@ import { formatApiHttpError } from '../../core/http-error.util';
 import {
   InventoryApiService,
   type InventoryItem,
+  type InventoryBranch,
   type InventorySummary,
   type MovementType,
   type CreateInventoryItemBody,
 } from '../../core/inventory-api.service';
+import { MeApiService } from '../../core/me-api.service';
 import { StockListComponent } from './stock-list.component';
 import { ItemFormModalComponent } from './item-form-modal.component';
 import { MovementFormModalComponent } from './movement-form-modal.component';
@@ -37,12 +40,19 @@ export class InventoryPageComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly appContext = inject(AppContextService);
   private readonly api = inject(InventoryApiService);
+  private readonly meApi = inject(MeApiService);
   private readonly auth = inject(AuthService);
 
   // Signals de estado
   readonly profileId = signal<string | null>(null);
   readonly profileName = signal<string>('');
+  readonly isSharedProfile = signal<boolean>(false);
+  readonly profileOwnerName = signal<string | null>(null);
+  readonly accessDenied = signal<boolean>(false);
   readonly items = signal<InventoryItem[]>([]);
+  readonly branches = signal<InventoryBranch[]>([]);
+  readonly branchNameDraft = signal('');
+  readonly branchesPanelOpen = signal(false);
   readonly summary = signal<InventorySummary | null>(null);
   readonly searchQuery = signal<string>('');
   readonly viewMode = signal<ViewMode>('all');
@@ -89,14 +99,109 @@ export class InventoryPageComponent implements OnInit {
 
     this.profileId.set(pid);
 
-    // Buscar nombre del perfil en contexto
-    const profiles = this.appContext.profiles();
-    const profile = profiles.find((p) => p.id === pid);
-    if (profile) {
-      this.profileName.set(profile.name);
+    const ensureProfileAndLoad = (): void => {
+      const profiles = this.appContext.profiles();
+      const profile = profiles.find((p) => p.id === pid);
+      if (profile) {
+        if (profile.type !== 'comercio') {
+          void this.router.navigate(['/profiles']);
+          return;
+        }
+        this.applyProfileMeta(profile);
+        this.loadBranches();
+        this.loadData();
+        return;
+      }
+      this.meApi.listProfiles().subscribe({
+        next: (list) => {
+          this.appContext.setProfiles(list);
+          const found = list.find((p) => p.id === pid);
+          if (!found || found.type !== 'comercio') {
+            void this.router.navigate(['/profiles']);
+            return;
+          }
+          this.applyProfileMeta(found);
+          this.loadBranches();
+          this.loadData();
+        },
+        error: () => void this.router.navigate(['/profiles']),
+      });
+    };
+
+    ensureProfileAndLoad();
+  }
+
+  private applyProfileMeta(profile: {
+    name: string;
+    access?: 'owner' | 'collaborator';
+    ownerName?: string | null;
+  }): void {
+    this.profileName.set(profile.name);
+    this.isSharedProfile.set(profile.access === 'collaborator');
+    this.profileOwnerName.set(profile.ownerName ?? null);
+  }
+
+  private refreshProfilesAfterAccessLoss(): void {
+    this.meApi.listProfiles().subscribe({
+      next: (list) => this.appContext.setProfiles(list),
+    });
+  }
+
+  private handleInventoryAccessError(err: unknown): void {
+    if (err instanceof HttpErrorResponse && err.status === 403) {
+      this.accessDenied.set(true);
+      this.error.set('Ya no tienes acceso a este inventario');
+      this.refreshProfilesAfterAccessLoss();
+      return;
+    }
+    this.error.set(formatApiHttpError(err));
+  }
+
+  loadBranches(): void {
+    const pid = this.profileId();
+    if (!pid) return;
+
+    this.api.listBranches(pid).subscribe({
+      next: (list) => this.branches.set(list),
+      error: () => this.branches.set([]),
+    });
+  }
+
+  addBranch(): void {
+    const pid = this.profileId();
+    const name = this.branchNameDraft().trim();
+    if (!pid || !name) {
+      globalThis.alert('Indica un nombre para la sucursal');
+      return;
     }
 
-    this.loadData();
+    this.api.createBranch(pid, { name }).subscribe({
+      next: (branch) => {
+        this.branches.update((list) => [...list, branch]);
+        this.branchNameDraft.set('');
+      },
+      error: (err: unknown) => globalThis.alert(formatApiHttpError(err)),
+    });
+  }
+
+  removeBranch(branchId: string): void {
+    const pid = this.profileId();
+    if (!pid) return;
+
+    if (!globalThis.confirm('¿Eliminar esta sucursal? Solo si no tiene stock ni movimientos.')) {
+      return;
+    }
+
+    this.api.deleteBranch(pid, branchId).subscribe({
+      next: () => {
+        this.branches.update((list) => list.filter((b) => b.id !== branchId));
+      },
+      error: (err: unknown) => globalThis.alert(formatApiHttpError(err)),
+    });
+  }
+
+  toggleBranchesPanel(): void {
+    this.branchesPanelOpen.update((v) => !v);
   }
 
   loadData(): void {
@@ -105,6 +210,7 @@ export class InventoryPageComponent implements OnInit {
 
     this.loading.set(true);
     this.error.set(null);
+    this.accessDenied.set(false);
 
     // Cargar items y summary en paralelo
     Promise.all([
@@ -115,7 +221,7 @@ export class InventoryPageComponent implements OnInit {
             resolve();
           },
           error: (err: unknown) => {
-            this.error.set(formatApiHttpError(err));
+            this.handleInventoryAccessError(err);
             resolve();
           },
         });
@@ -168,7 +274,7 @@ export class InventoryPageComponent implements OnInit {
         this.loading.set(false);
       },
       error: (err: unknown) => {
-        this.error.set(formatApiHttpError(err));
+        this.handleInventoryAccessError(err);
         this.loading.set(false);
       },
     });
@@ -253,9 +359,37 @@ export class InventoryPageComponent implements OnInit {
     type: MovementType;
     quantity: number;
     reason?: string;
+    sourceBranchId?: string;
+    targetBranchId?: string;
+    unitPrice?: number;
   }): void {
     const pid = this.profileId();
     if (!pid) return;
+
+    if (
+      data.type === 'TRANSFER_OUT' &&
+      data.sourceBranchId &&
+      data.targetBranchId
+    ) {
+      this.api
+        .transferStock(pid, {
+          itemId: data.itemId,
+          sourceBranchId: data.sourceBranchId,
+          targetBranchId: data.targetBranchId,
+          quantity: data.quantity,
+          reason: data.reason,
+        })
+        .subscribe({
+          next: () => {
+            this.closeMovementModal();
+            this.reloadItems();
+          },
+          error: (err: unknown) => {
+            globalThis.alert(formatApiHttpError(err));
+          },
+        });
+      return;
+    }
 
     this.api.createMovement(pid, data).subscribe({
       next: () => {
@@ -288,6 +422,10 @@ export class InventoryPageComponent implements OnInit {
 
   goBack(): void {
     void this.router.navigate(['/expenses']);
+  }
+
+  goToProfiles(): void {
+    void this.router.navigate(['/profiles']);
   }
 }
 

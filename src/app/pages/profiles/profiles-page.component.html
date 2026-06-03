@@ -199,9 +199,9 @@
 
         @if (profiles.length > 0) {
           <div>
-            <p class="block text-sm font-medium text-foreground mb-2">Perfiles Creados</p>
+            <p class="block text-sm font-medium text-foreground mb-2">Mis perfiles</p>
             <div class="space-y-2">
-              @for (profile of profiles; track profile.id) {
+              @for (profile of ownedProfiles; track profile.id) {
                 <div
                   class="flex items-center justify-between bg-linear-to-r from-muted to-muted px-4 py-3 rounded-lg border border-border"
                 >
@@ -213,6 +213,13 @@
                   </div>
                   <div class="flex items-center gap-2">
                     @if (profile.type === 'comercio') {
+                      <button
+                        type="button"
+                        (click)="openTeam(profile)"
+                        class="text-primary hover:opacity-80 transition-colors text-sm font-medium"
+                      >
+                        Equipo
+                      </button>
                       <a
                         [routerLink]="['/inventory']"
                         [queryParams]="{ profileId: profile.id }"
@@ -258,6 +265,40 @@
               }
             </div>
           </div>
+
+          @if (sharedProfiles.length > 0) {
+            <div>
+              <p class="block text-sm font-medium text-foreground mb-2 mt-6">
+                Compartidos contigo
+              </p>
+              <div class="space-y-2">
+                @for (profile of sharedProfiles; track profile.id) {
+                  <div
+                    class="flex items-center justify-between bg-muted/60 px-4 py-3 rounded-lg border border-border"
+                  >
+                    <div>
+                      <p class="font-medium text-card-foreground flex items-center gap-2">
+                        {{ profile.name }}
+                        <span class="text-[10px] uppercase tracking-wide bg-primary/15 text-primary px-2 py-0.5 rounded-full">
+                          Compartido
+                        </span>
+                      </p>
+                      <p class="text-xs text-muted-foreground">
+                        De {{ profile.ownerName || 'otro usuario' }}
+                      </p>
+                    </div>
+                    <a
+                      [routerLink]="['/inventory']"
+                      [queryParams]="{ profileId: profile.id }"
+                      class="text-primary hover:opacity-80 text-sm font-medium"
+                    >
+                      Inventario
+                    </a>
+                  </div>
+                }
+              </div>
+            </div>
+          }
         }
 
         @if (membersModalOpen) {
@@ -320,6 +361,88 @@
                         >
                           Quitar
                         </button>
+                      </div>
+                    }
+                  </div>
+                }
+              </div>
+            </div>
+          </dialog>
+        }
+
+        @if (teamModalOpen) {
+          <dialog
+            open
+            class="rounded-2xl shadow-xl w-full max-w-md p-0 backdrop:bg-foreground/40 lg:fixed lg:left-1/2 lg:top-1/2 lg:-translate-x-1/2 lg:-translate-y-1/2 lg:m-0"
+            (click)="onTeamDialogClick($event)"
+            (keydown.escape)="closeTeam()"
+          >
+            <div class="bg-card rounded-2xl p-5">
+              <div class="flex items-start justify-between gap-2 mb-4">
+                <div>
+                  <h2 class="text-xl font-bold text-card-foreground">Equipo</h2>
+                  <p class="text-sm text-muted-foreground">
+                    Perfil: <span class="font-medium">{{ teamProfileName }}</span>
+                  </p>
+                  <p class="text-xs text-muted-foreground mt-1">
+                    Colaboradores con acceso al inventario
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  (click)="closeTeam()"
+                  class="text-muted-foreground hover:text-foreground"
+                  aria-label="Cerrar"
+                >
+                  Cerrar
+                </button>
+              </div>
+
+              <div class="flex gap-2">
+                <input
+                  type="email"
+                  [(ngModel)]="inviteEmail"
+                  placeholder="Email del usuario registrado"
+                  class="flex-1 px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent"
+                />
+                <button
+                  type="button"
+                  (click)="sendInvite()"
+                  class="bg-primary text-primary-foreground px-4 rounded-lg hover:opacity-90 transition-colors shrink-0"
+                >
+                  Invitar
+                </button>
+              </div>
+
+              <div class="mt-4">
+                @if (teamLoading) {
+                  <p class="text-sm text-muted-foreground">Cargando…</p>
+                } @else if (collaborators.length === 0) {
+                  <p class="text-sm text-muted-foreground">
+                    Aún no hay colaboradores. Invita a alguien que ya tenga cuenta.
+                  </p>
+                } @else {
+                  <div class="space-y-2">
+                    @for (c of collaborators; track c.id) {
+                      <div class="flex items-center justify-between px-3 py-2 rounded-lg bg-muted border border-border gap-2">
+                        <div class="min-w-0">
+                          <p class="text-sm font-medium text-card-foreground truncate">
+                            {{ c.userName || c.userEmail }}
+                          </p>
+                          <p class="text-xs text-muted-foreground truncate">{{ c.userEmail }}</p>
+                          <span class="text-[10px] uppercase tracking-wide text-muted-foreground">
+                            {{ collaboratorStatusLabel(c.status) }}
+                          </span>
+                        </div>
+                        @if (c.status === 'accepted' || c.status === 'pending') {
+                          <button
+                            type="button"
+                            (click)="revokeCollaborator(c.userId)"
+                            class="text-destructive hover:opacity-80 text-sm font-medium shrink-0"
+                          >
+                            {{ c.status === 'pending' ? 'Cancelar' : 'Revocar' }}
+                          </button>
+                        }
                       </div>
                     }
                   </div>

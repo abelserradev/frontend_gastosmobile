@@ -1,0 +1,54 @@
+<div class="min-h-screen bg-linear-to-br from-muted to-background p-6">
+  <div class="max-w-md mx-auto">
+    <div class="bg-card rounded-2xl shadow-xl p-6 mt-8">
+      <div class="flex items-center justify-between mb-4">
+        <button
+          type="button"
+          (click)="goBack()"
+          class="text-sm font-medium text-muted-foreground hover:text-foreground"
+        >
+          ← Volver
+        </button>
+        <a routerLink="/profiles" class="text-sm text-primary hover:underline">Perfiles</a>
+      </div>
+
+      <h1 class="text-2xl font-bold text-foreground mb-2">Invitaciones</h1>
+      <p class="text-sm text-muted-foreground mb-6">
+        Comercios que te invitaron a colaborar en inventario.
+      </p>
+
+      @if (loading()) {
+        <p class="text-sm text-muted-foreground">Cargando…</p>
+      } @else if (invitations().length === 0) {
+        <p class="text-sm text-muted-foreground">No tienes invitaciones pendientes.</p>
+      } @else {
+        <div class="space-y-3">
+          @for (inv of invitations(); track inv.id) {
+            <div class="border border-border rounded-xl p-4 bg-muted/30">
+              <p class="font-semibold text-foreground">{{ inv.profileName }}</p>
+              <p class="text-xs text-muted-foreground mt-1">
+                Invitado por {{ inv.invitedByName }}
+              </p>
+              <div class="flex gap-2 mt-3">
+                <button
+                  type="button"
+                  (click)="accept(inv)"
+                  class="flex-1 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium"
+                >
+                  Aceptar
+                </button>
+                <button
+                  type="button"
+                  (click)="reject(inv)"
+                  class="flex-1 py-2 rounded-lg border border-border text-sm font-medium"
+                >
+                  Rechazar
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  </div>
+</div>

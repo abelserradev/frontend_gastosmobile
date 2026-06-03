@@ -76,6 +76,13 @@ export class MovementsHistoryModalComponent {
   movementDetail(m: StockMovement): string | null {
     const parts: string[] = [];
     if (m.reason) parts.push(m.reason);
+    if (m.unitPrice != null) {
+      const total =
+        m.lineValue != null
+          ? m.lineValue.toFixed(2)
+          : (Math.abs(m.quantity) * m.unitPrice).toFixed(2);
+      parts.push(`$${m.unitPrice.toFixed(2)} × ${Math.abs(m.quantity)} = $${total}`);
+    }
     if (m.targetBranchName) parts.push(`→ ${m.targetBranchName}`);
     else if (m.branchName) parts.push(m.branchName);
     return parts.length ? parts.join(' · ') : null;

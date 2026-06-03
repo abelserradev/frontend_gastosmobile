@@ -15,7 +15,7 @@ export function subpageBackTarget(fromExpenses: boolean): '/expenses' | '/setup'
 
 export function navigateFromExpensesMenu(
   router: Router,
-  path: '/profiles' | '/setup',
+  path: '/profiles' | '/setup' | '/invitations',
   onNavigate?: () => void,
 ): void {
   onNavigate?.();

@@ -27,6 +27,7 @@ export interface InventoryItem {
   minStock: number;
   currentStock: number;
   isLowStock: boolean;
+  salePrice: number | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -46,6 +47,8 @@ export interface StockMovement {
   branchName: string | null;
   targetBranchId: string | null;
   targetBranchName: string | null;
+  unitPrice: number | null;
+  lineValue: number | null;
   createdAt: string;
 }
 
@@ -58,6 +61,7 @@ export interface CreateInventoryItemBody {
   unit?: string;
   minStock?: number;
   initialStock?: number;
+  salePrice?: number | null;
 }
 
 /**
@@ -68,6 +72,7 @@ export interface UpdateInventoryItemBody {
   sku?: string;
   unit?: string;
   minStock?: number;
+  salePrice?: number | null;
 }
 
 /**
@@ -80,6 +85,7 @@ export interface CreateStockMovementBody {
   reason?: string;
   branchId?: string;
   targetBranchId?: string;
+  unitPrice?: number;
 }
 
 /**
@@ -99,6 +105,29 @@ export interface InventorySummary {
   lowStockCount: number;
   totalStockValue: number;
   lastMovementAt: string | null;
+}
+
+export interface InventoryBranch {
+  id: string;
+  profileId: string;
+  name: string;
+  address: string | null;
+  managerName: string | null;
+  createdAt: string;
+}
+
+export interface CreateBranchBody {
+  name: string;
+  address?: string;
+  managerName?: string;
+}
+
+export interface TransferStockBody {
+  itemId: string;
+  sourceBranchId: string;
+  targetBranchId: string;
+  quantity: number;
+  reason?: string;
 }
 
 /**
@@ -197,6 +226,40 @@ export class InventoryApiService {
     return this.http.post<StockMovement>(
       `${this.base}/me/profiles/${profileId}/inventory/movements/adjust`,
       body
+    );
+  }
+
+  transferStock(
+    profileId: string,
+    body: TransferStockBody
+  ): Observable<StockMovement[]> {
+    return this.http.post<StockMovement[]>(
+      `${this.base}/me/profiles/${profileId}/inventory/movements/transfer`,
+      body
+    );
+  }
+
+  // ========== SUCURSALES (Fase B) ==========
+
+  listBranches(profileId: string): Observable<InventoryBranch[]> {
+    return this.http.get<InventoryBranch[]>(
+      `${this.base}/me/profiles/${profileId}/inventory/branches`
+    );
+  }
+
+  createBranch(
+    profileId: string,
+    body: CreateBranchBody
+  ): Observable<InventoryBranch> {
+    return this.http.post<InventoryBranch>(
+      `${this.base}/me/profiles/${profileId}/inventory/branches`,
+      body
+    );
+  }
+
+  deleteBranch(profileId: string, branchId: string): Observable<void> {
+    return this.http.delete<void>(
+      `${this.base}/me/profiles/${profileId}/inventory/branches/${branchId}`
     );
   }
 }

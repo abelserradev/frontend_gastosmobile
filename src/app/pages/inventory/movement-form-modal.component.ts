@@ -1,14 +1,16 @@
 import { CommonModule } from '@angular/common';
-import { Component, input, output, signal, computed } from '@angular/core';
+import { Component, input, output, signal, computed, OnChanges } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import type {
   InventoryItem,
+  InventoryBranch,
   MovementType,
 } from '../../core/inventory-api.service';
 
 interface MovementFormData {
   quantity: number;
   reason: string;
+  unitPrice: string;
 }
 
 /** Motivos de salida visibles al usuario; se mapean a tipos del backend. */
@@ -20,9 +22,10 @@ type ExitCategory = 'sale' | 'transfer_store' | 'transfer_warehouse';
   imports: [CommonModule, FormsModule],
   templateUrl: './movement-form-modal.component.html',
 })
-export class MovementFormModalComponent {
+export class MovementFormModalComponent implements OnChanges {
   readonly isOpen = input.required<boolean>();
   readonly item = input<InventoryItem | null>(null);
+  readonly branches = input<InventoryBranch[]>([]);
 
   readonly onClose = output<void>();
   readonly onSave = output<{
@@ -30,20 +33,36 @@ export class MovementFormModalComponent {
     type: MovementType;
     quantity: number;
     reason?: string;
+    sourceBranchId?: string;
+    targetBranchId?: string;
+    unitPrice?: number;
   }>();
 
   readonly formData = signal<MovementFormData>({
     quantity: 1,
     reason: '',
+    unitPrice: '',
   });
 
   readonly exitCategory = signal<ExitCategory>('sale');
+  readonly sourceBranchId = signal<string>('');
+  readonly targetBranchId = signal<string>('');
   readonly errors = signal<Record<string, string>>({});
 
   readonly movementType = computed(() => this.item()?.movementType ?? 'SALE');
 
+  readonly isTransferExit = computed(
+    () =>
+      this.exitCategory() === 'transfer_store' ||
+      this.exitCategory() === 'transfer_warehouse',
+  );
+
+  readonly canTransferBetweenBranches = computed(
+    () => this.branches().length >= 2 && this.isTransferExit(),
+  );
+
   readonly showExitCategory = computed(
-    () => this.movementType() === 'SALE' || this.movementType() === 'TRANSFER_OUT'
+    () => this.movementType() === 'SALE' || this.movementType() === 'TRANSFER_OUT',
   );
 
   readonly modalTitle = computed(() => {
@@ -83,8 +102,28 @@ export class MovementFormModalComponent {
     }
   });
 
+  readonly showUnitPriceField = computed(() => {
+    if (this.isTransferExit()) return false;
+    const type = this.resolveMovementTypeForUi();
+    return type === 'SALE' || type === 'PURCHASE';
+  });
+
+  readonly unitPriceHint = computed(() => {
+    const it = this.item();
+    if (it?.salePrice != null && this.resolveMovementTypeForUi() === 'SALE') {
+      return `Catálogo: ${it.salePrice.toFixed(2)} USD`;
+    }
+    return 'Opcional — deja vacío si no controlas valor';
+  });
+
+  private resolveMovementTypeForUi(): MovementType {
+    const base = this.movementType();
+    if (base !== 'SALE' && base !== 'TRANSFER_OUT') return base;
+    return this.exitCategory() === 'sale' ? 'SALE' : 'TRANSFER_OUT';
+  }
+
   readonly previewLabel = computed(() =>
-    this.isNegativeMovement() ? 'Stock después de la salida:' : 'Stock después de la entrada:'
+    this.isNegativeMovement() ? 'Stock después de la salida:' : 'Stock después de la entrada:',
   );
 
   ngOnChanges(): void {
@@ -92,8 +131,15 @@ export class MovementFormModalComponent {
   }
 
   resetForm(): void {
-    this.formData.set({ quantity: 1, reason: '' });
+    const it = this.item();
+    const suggested =
+      it?.salePrice != null && this.movementType() === 'SALE'
+        ? String(it.salePrice)
+        : '';
+    this.formData.set({ quantity: 1, reason: '', unitPrice: suggested });
     this.exitCategory.set('sale');
+    this.sourceBranchId.set('');
+    this.targetBranchId.set('');
     this.errors.set({});
   }
 
@@ -118,6 +164,32 @@ export class MovementFormModalComponent {
     if (item && this.isNegativeMovement()) {
       if (data.quantity > item.currentStock) {
         errs['quantity'] = `Stock insuficiente. Disponible: ${item.currentStock}`;
+      }
+    }
+
+    if (this.canTransferBetweenBranches()) {
+      if (!this.sourceBranchId()) {
+        errs['sourceBranchId'] = 'Selecciona la sucursal origen';
+      }
+      if (!this.targetBranchId()) {
+        errs['targetBranchId'] = 'Selecciona la sucursal destino';
+      }
+      if (
+        this.sourceBranchId() &&
+        this.targetBranchId() &&
+        this.sourceBranchId() === this.targetBranchId()
+      ) {
+        errs['targetBranchId'] = 'Origen y destino deben ser distintos';
+      }
+    }
+
+    if (this.showUnitPriceField()) {
+      const raw = data.unitPrice.trim();
+      if (raw !== '') {
+        const parsed = Number(raw);
+        if (Number.isNaN(parsed) || parsed < 0) {
+          errs['unitPrice'] = 'El precio debe ser un número ≥ 0';
+        }
       }
     }
 
@@ -162,12 +234,34 @@ export class MovementFormModalComponent {
 
     const data = this.formData();
 
-    this.onSave.emit({
+    const payload: {
+      itemId: string;
+      type: MovementType;
+      quantity: number;
+      reason?: string;
+      sourceBranchId?: string;
+      targetBranchId?: string;
+      unitPrice?: number;
+    } = {
       itemId: item.id,
       type: this.resolveMovementType(),
       quantity: data.quantity,
       reason: this.buildReason(),
-    });
+    };
+
+    if (this.canTransferBetweenBranches()) {
+      payload.sourceBranchId = this.sourceBranchId();
+      payload.targetBranchId = this.targetBranchId();
+    }
+
+    if (this.showUnitPriceField()) {
+      const raw = data.unitPrice.trim();
+      if (raw !== '') {
+        payload.unitPrice = Number(raw);
+      }
+    }
+
+    this.onSave.emit(payload);
   }
 
   onBackdropClick(event: MouseEvent): void {

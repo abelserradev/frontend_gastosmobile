@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, input, output, signal } from '@angular/core';
+import { Component, input, output, signal, OnChanges } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import type {
   InventoryItem,
@@ -12,6 +12,7 @@ interface ItemFormData {
   unit: string;
   minStock: number;
   initialStock: number;
+  salePrice: string;
 }
 
 @Component({
@@ -20,7 +21,7 @@ interface ItemFormData {
   imports: [CommonModule, FormsModule],
   templateUrl: './item-form-modal.component.html',
 })
-export class ItemFormModalComponent {
+export class ItemFormModalComponent implements OnChanges {
   readonly isOpen = input.required<boolean>();
   readonly itemToEdit = input<InventoryItem | null>(null);
 
@@ -33,6 +34,7 @@ export class ItemFormModalComponent {
     unit: 'pieza',
     minStock: 0,
     initialStock: 0,
+    salePrice: '',
   });
 
   readonly errors = signal<Record<string, string>>({});
@@ -45,7 +47,9 @@ export class ItemFormModalComponent {
         sku: editing.sku ?? '',
         unit: editing.unit,
         minStock: editing.minStock,
-        initialStock: 0, // no editable en update
+        initialStock: 0,
+        salePrice:
+          editing.salePrice != null ? String(editing.salePrice) : '',
       });
     } else {
       this.resetForm();
@@ -59,6 +63,7 @@ export class ItemFormModalComponent {
       unit: 'pieza',
       minStock: 0,
       initialStock: 0,
+      salePrice: '',
     });
     this.errors.set({});
   }
@@ -84,6 +89,14 @@ export class ItemFormModalComponent {
       errs['initialStock'] = 'El stock inicial no puede ser negativo';
     }
 
+    const saleRaw = data.salePrice.trim();
+    if (saleRaw !== '') {
+      const parsed = Number(saleRaw);
+      if (Number.isNaN(parsed) || parsed < 0) {
+        errs['salePrice'] = 'El precio debe ser un número ≥ 0';
+      }
+    }
+
     this.errors.set(errs);
     return Object.keys(errs).length === 0;
   }
@@ -104,6 +117,13 @@ export class ItemFormModalComponent {
     // Solo enviar initialStock al crear
     if (!editing && data.initialStock > 0) {
       body.initialStock = data.initialStock;
+    }
+
+    const saleRaw = data.salePrice.trim();
+    if (saleRaw !== '') {
+      body.salePrice = Number(saleRaw);
+    } else if (editing) {
+      body.salePrice = null;
     }
 
     this.onSave.emit(body);
