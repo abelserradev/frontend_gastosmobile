@@ -14,12 +14,12 @@ export class StockListComponent {
   readonly loading = input<boolean>(false);
 
   // Outputs
-  readonly onEdit = output<InventoryItem>();
-  readonly onDelete = output<InventoryItem>();
-  readonly onSale = output<InventoryItem>();
-  readonly onPurchase = output<InventoryItem>();
-  readonly onAdjust = output<InventoryItem>();
-  readonly onHistory = output<InventoryItem>();
+  readonly edited = output<InventoryItem>();
+  readonly deleted = output<InventoryItem>();
+  readonly sale = output<InventoryItem>();
+  readonly purchase = output<InventoryItem>();
+  readonly adjust = output<InventoryItem>();
+  readonly history = output<InventoryItem>();
 
   // Estados de UI por item (para menú de acciones)
   expandedItemId: string | null = null;
@@ -30,35 +30,35 @@ export class StockListComponent {
 
   editItem(item: InventoryItem, event: Event): void {
     event.stopPropagation();
-    this.onEdit.emit(item);
+    this.edited.emit(item);
   }
 
   deleteItem(item: InventoryItem, event: Event): void {
     event.stopPropagation();
-    this.onDelete.emit(item);
+    this.deleted.emit(item);
   }
 
   registerSale(item: InventoryItem, event: Event): void {
     event.stopPropagation();
-    this.onSale.emit(item);
+    this.sale.emit(item);
     this.expandedItemId = null;
   }
 
   registerPurchase(item: InventoryItem, event: Event): void {
     event.stopPropagation();
-    this.onPurchase.emit(item);
+    this.purchase.emit(item);
     this.expandedItemId = null;
   }
 
   adjustStock(item: InventoryItem, event: Event): void {
     event.stopPropagation();
-    this.onAdjust.emit(item);
+    this.adjust.emit(item);
     this.expandedItemId = null;
   }
 
   viewHistory(item: InventoryItem, event: Event): void {
     event.stopPropagation();
-    this.onHistory.emit(item);
+    this.history.emit(item);
     this.expandedItemId = null;
   }
 

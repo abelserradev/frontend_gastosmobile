@@ -2,6 +2,8 @@
   <div
     class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
     (click)="onBackdropClick($event)"
+    (keydown.escape)="close()"
+    tabindex="-1"
   >
     <div class="bg-card text-card-foreground rounded-xl w-full max-w-md max-h-[90vh] overflow-y-auto border border-border shadow-xl">
       <!-- Header -->
@@ -23,10 +25,11 @@
       <div class="p-4 space-y-4">
         <!-- Nombre -->
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">
+          <label for="item-name" class="block text-sm font-medium text-gray-700 mb-1">
             Nombre <span class="text-red-500">*</span>
           </label>
           <input
+            id="item-name"
             type="text"
             [(ngModel)]="formData().name"
             placeholder="Ej: Coca-Cola 2L"
@@ -40,10 +43,11 @@
 
         <!-- SKU -->
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">
+          <label for="item-sku" class="block text-sm font-medium text-gray-700 mb-1">
             SKU (opcional)
           </label>
           <input
+            id="item-sku"
             type="text"
             [(ngModel)]="formData().sku"
             placeholder="Ej: CC-2L-001"
@@ -54,10 +58,11 @@
 
         <!-- Unidad -->
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">
+          <label for="item-unit" class="block text-sm font-medium text-gray-700 mb-1">
             Unidad
           </label>
           <select
+            id="item-unit"
             [(ngModel)]="formData().unit"
             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           >
@@ -73,10 +78,11 @@
 
         <!-- Precio de venta (FEAT-004) -->
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">
+          <label for="item-sale-price" class="block text-sm font-medium text-gray-700 mb-1">
             Precio de venta (opcional)
           </label>
           <input
+            id="item-sale-price"
             type="number"
             step="0.01"
             min="0"
@@ -94,10 +100,11 @@
         <div class="grid grid-cols-2 gap-4">
           <!-- Stock Mínimo -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">
+            <label for="item-min-stock" class="block text-sm font-medium text-gray-700 mb-1">
               Stock Mínimo
             </label>
             <input
+              id="item-min-stock"
               type="number"
               [(ngModel)]="formData().minStock"
               min="0"
@@ -113,10 +120,11 @@
           <!-- Stock Inicial (solo al crear) -->
           @if (!itemToEdit()) {
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">
+              <label for="item-initial-stock" class="block text-sm font-medium text-gray-700 mb-1">
                 Stock Inicial
               </label>
               <input
+                id="item-initial-stock"
                 type="number"
                 [(ngModel)]="formData().initialStock"
                 min="0"

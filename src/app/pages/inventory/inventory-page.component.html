@@ -249,12 +249,12 @@
       <app-stock-list
         [items]="filteredItems()"
         [loading]="loading()"
-        (onEdit)="openEditItemModal($event)"
-        (onDelete)="handleItemDelete($event)"
-        (onSale)="openMovementModal($event, 'SALE')"
-        (onPurchase)="openMovementModal($event, 'PURCHASE')"
-        (onAdjust)="openMovementModal($event, 'ADJUSTMENT')"
-        (onHistory)="openMovementsHistory($event)"
+        (edited)="openEditItemModal($event)"
+        (deleted)="handleItemDelete($event)"
+        (sale)="openMovementModal($event, 'SALE')"
+        (purchase)="openMovementModal($event, 'PURCHASE')"
+        (adjust)="openMovementModal($event, 'ADJUSTMENT')"
+        (history)="openMovementsHistory($event)"
       />
     </div>
 
@@ -296,21 +296,21 @@
 <app-item-form-modal
   [isOpen]="itemModalOpen()"
   [itemToEdit]="itemToEdit()"
-  (onClose)="closeItemModal()"
-  (onSave)="handleItemSave($event)"
+  (closed)="closeItemModal()"
+  (saved)="handleItemSave($event)"
 />
 
 <app-movement-form-modal
   [isOpen]="movementModalOpen()"
   [item]="itemForMovement()"
   [branches]="branches()"
-  (onClose)="closeMovementModal()"
-  (onSave)="handleMovementSave($event)"
+  (closed)="closeMovementModal()"
+  (saved)="handleMovementSave($event)"
 />
 
 <app-movements-history-modal
   [isOpen]="itemMovementsOpen()"
   [profileId]="profileId()"
   [item]="selectedItem()"
-  (onClose)="closeMovementsHistory()"
+  (closed)="closeMovementsHistory()"
 />

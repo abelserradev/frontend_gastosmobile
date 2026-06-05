@@ -25,8 +25,8 @@ export class ItemFormModalComponent implements OnChanges {
   readonly isOpen = input.required<boolean>();
   readonly itemToEdit = input<InventoryItem | null>(null);
 
-  readonly onClose = output<void>();
-  readonly onSave = output<CreateInventoryItemBody>();
+  readonly closed = output<void>();
+  readonly saved = output<CreateInventoryItemBody>();
 
   readonly formData = signal<ItemFormData>({
     name: '',
@@ -48,8 +48,7 @@ export class ItemFormModalComponent implements OnChanges {
         unit: editing.unit,
         minStock: editing.minStock,
         initialStock: 0,
-        salePrice:
-          editing.salePrice != null ? String(editing.salePrice) : '',
+        salePrice: String(editing.salePrice ?? ''),
       });
     } else {
       this.resetForm();
@@ -69,7 +68,7 @@ export class ItemFormModalComponent implements OnChanges {
   }
 
   close(): void {
-    this.onClose.emit();
+    this.closed.emit();
     this.resetForm();
   }
 
@@ -126,7 +125,7 @@ export class ItemFormModalComponent implements OnChanges {
       body.salePrice = null;
     }
 
-    this.onSave.emit(body);
+    this.saved.emit(body);
   }
 
   onBackdropClick(event: MouseEvent): void {
