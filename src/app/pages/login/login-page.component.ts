@@ -60,10 +60,8 @@ export class LoginPageComponent implements OnInit {
       return;
     }
 
-    this.auth.tryRestoreSession().subscribe((ok) => {
-      if (ok) {
-        this.navigateByOnBoardingState();
-      }
+    this.auth.restoreActiveSession().subscribe({
+      next: () => this.navigateByOnBoardingState(),
     });
   }
 
