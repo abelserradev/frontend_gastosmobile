@@ -116,7 +116,7 @@ export class InventoryPageComponent implements OnInit {
         next: (list) => {
           this.appContext.setProfiles(list);
           const found = list.find((p) => p.id === pid);
-          if (!found || found.type !== 'comercio') {
+          if (found?.type !== 'comercio') {
             void this.router.navigate(['/profiles']);
             return;
           }

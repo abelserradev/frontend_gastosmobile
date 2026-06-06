@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { Capacitor } from '@capacitor/core';
 import { AuthService } from '../../core/auth.service';
 import { FirebaseAuthService } from '../../core/firebase-auth.service';
 import { routePathForMeState } from '../../core/me-route.util';
@@ -9,6 +10,12 @@ import { getStateWithAutoRollover } from '../../core/month-renewal.util';
 import { formatApiHttpError, isAccountLockedError } from '../../core/http-error.util';
 import { switchMap } from 'rxjs';
 import { MeApiService, type MeState } from '../../core/me-api.service';
+import {
+  BRAND_APP_NAME,
+  BRAND_LOGO_SRC,
+  BRAND_TAGLINE,
+} from '../../core/brand-assets';
+import { NativeSessionTokenService } from '../../core/native/native-session-token.service';
 
 @Component({
   selector: 'app-login-page',
@@ -21,6 +28,10 @@ export class LoginPageComponent implements OnInit {
   private readonly auth = inject(AuthService);
   private readonly firebaseAuth = inject(FirebaseAuthService);
   private readonly meApi = inject(MeApiService);
+  private readonly nativeToken = inject(NativeSessionTokenService);
+  readonly brandLogoSrc = BRAND_LOGO_SRC;
+  readonly brandAppName = BRAND_APP_NAME;
+  readonly brandTagline = BRAND_TAGLINE;
   readonly isLogin = signal(true);
   readonly showPassword = signal(false);
   readonly forgotPasswordOpen = signal(false);
@@ -59,6 +70,12 @@ export class LoginPageComponent implements OnInit {
   }
 
   private navigateByOnBoardingState(): void {
+    if (Capacitor.isNativePlatform() && !this.nativeToken.hasToken()) {
+      globalThis.alert(
+        'El servidor no devolvió sesión para la APK. Redesplegá el backend en Coolify y probá de nuevo.',
+      );
+      return;
+    }
     if (!this.auth.hasPassword()) {
       this.router.navigate(['/setup-password']).catch(() => undefined);
       return;
@@ -176,6 +193,18 @@ export class LoginPageComponent implements OnInit {
 
   toggleShowPassword(): void {
     this.showPassword.update((v) => !v);
+  }
+
+  /** Sonar: no usar current/new-password cuando el input es type=text (ojo visible). */
+  passwordAutocomplete(): string {
+    if (this.showPassword()) {
+      return 'off';
+    }
+    return this.isLogin() ? 'current-password' : 'new-password';
+  }
+
+  confirmPasswordAutocomplete(): string {
+    return this.showPassword() ? 'off' : 'new-password';
   }
 
   handleSubmit(): void {

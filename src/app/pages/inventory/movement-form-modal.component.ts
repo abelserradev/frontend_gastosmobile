@@ -28,8 +28,8 @@ export class MovementFormModalComponent implements OnChanges {
   readonly item = input<InventoryItem | null>(null);
   readonly branches = input<InventoryBranch[]>([]);
 
-  readonly onClose = output<void>();
-  readonly onSave = output<{
+  readonly closed = output<void>();
+  readonly saved = output<{
     itemId: string;
     type: MovementType;
     quantity: number;
@@ -145,57 +145,63 @@ export class MovementFormModalComponent implements OnChanges {
   }
 
   close(): void {
-    this.onClose.emit();
+    this.closed.emit();
     this.resetForm();
   }
 
   validate(): boolean {
     const errs: Record<string, string> = {};
     const data = this.formData();
-    const item = this.item();
 
+    this.validateQuantity(data, errs);
+    this.validateTransferBranches(errs);
+    this.validateUnitPrice(data, errs);
+
+    this.errors.set(errs);
+    return Object.keys(errs).length === 0;
+  }
+
+  private validateQuantity(data: MovementFormData, errs: Record<string, string>): void {
     if (!data.quantity || data.quantity <= 0) {
       errs['quantity'] = 'La cantidad debe ser mayor a 0';
+      return;
     }
 
     if (!Number.isInteger(data.quantity)) {
       errs['quantity'] = 'La cantidad debe ser un número entero';
+      return;
     }
 
-    if (item && this.isNegativeMovement()) {
-      if (data.quantity > item.currentStock) {
-        errs['quantity'] = `Stock insuficiente. Disponible: ${item.currentStock}`;
-      }
+    const item = this.item();
+    if (item && this.isNegativeMovement() && data.quantity > item.currentStock) {
+      errs['quantity'] = `Stock insuficiente. Disponible: ${item.currentStock}`;
     }
+  }
 
-    if (this.canTransferBetweenBranches()) {
-      if (!this.sourceBranchId()) {
-        errs['sourceBranchId'] = 'Selecciona la sucursal origen';
-      }
-      if (!this.targetBranchId()) {
-        errs['targetBranchId'] = 'Selecciona la sucursal destino';
-      }
-      if (
-        this.sourceBranchId() &&
-        this.targetBranchId() &&
-        this.sourceBranchId() === this.targetBranchId()
-      ) {
-        errs['targetBranchId'] = 'Origen y destino deben ser distintos';
-      }
+  private validateTransferBranches(errs: Record<string, string>): void {
+    if (!this.canTransferBetweenBranches()) return;
+
+    if (!this.sourceBranchId()) {
+      errs['sourceBranchId'] = 'Selecciona la sucursal origen';
     }
-
-    if (this.showUnitPriceField()) {
-      const raw = this.asPriceText(data.unitPrice);
-      if (raw !== '') {
-        const parsed = Number(raw);
-        if (Number.isNaN(parsed) || parsed < 0) {
-          errs['unitPrice'] = 'El precio debe ser un número ≥ 0';
-        }
-      }
+    if (!this.targetBranchId()) {
+      errs['targetBranchId'] = 'Selecciona la sucursal destino';
     }
+    if (this.sourceBranchId() && this.targetBranchId() && this.sourceBranchId() === this.targetBranchId()) {
+      errs['targetBranchId'] = 'Origen y destino deben ser distintos';
+    }
+  }
 
-    this.errors.set(errs);
-    return Object.keys(errs).length === 0;
+  private validateUnitPrice(data: MovementFormData, errs: Record<string, string>): void {
+    if (!this.showUnitPriceField()) return;
+
+    const raw = this.asPriceText(data.unitPrice);
+    if (raw === '') return;
+
+    const parsed = Number(raw);
+    if (Number.isNaN(parsed) || parsed < 0) {
+      errs['unitPrice'] = 'El precio debe ser un número ≥ 0';
+    }
   }
 
   resolveMovementType(): MovementType {
@@ -262,7 +268,7 @@ export class MovementFormModalComponent implements OnChanges {
       }
     }
 
-    this.onSave.emit(payload);
+    this.saved.emit(payload);
   }
 
   onBackdropClick(event: MouseEvent): void {

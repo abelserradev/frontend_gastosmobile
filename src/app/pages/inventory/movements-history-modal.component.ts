@@ -24,7 +24,7 @@ export class MovementsHistoryModalComponent {
   readonly profileId = input<string | null>(null);
   readonly item = input<InventoryItem | null>(null);
 
-  readonly onClose = output<void>();
+  readonly closed = output<void>();
 
   readonly movements = signal<StockMovement[]>([]);
   readonly loading = signal(false);
@@ -62,7 +62,7 @@ export class MovementsHistoryModalComponent {
   }
 
   close(): void {
-    this.onClose.emit();
+    this.closed.emit();
     this.movements.set([]);
     this.error.set(null);
   }

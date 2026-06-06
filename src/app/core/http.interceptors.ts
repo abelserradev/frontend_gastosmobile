@@ -3,9 +3,14 @@ import {
   HttpInterceptorFn,
 } from '@angular/common/http';
 import { inject } from '@angular/core';
+import { Capacitor } from '@capacitor/core';
 import { catchError, throwError } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { AuthService } from './auth.service';
+import { NativeSessionTokenService } from './native/native-session-token.service';
+
+const GASTOS_CLIENT_HEADER = 'x-gastos-client';
+const GASTOS_CLIENT_CAPACITOR = 'capacitor';
 
 /** Rutas donde un 401 es esperado y no debe limpiar sesión local. */
 const AUTH_PUBLIC_SUBSTRINGS = [
@@ -46,6 +51,25 @@ export const apiUnauthorizedInterceptor: HttpInterceptorFn = (req, next) => {
       return throwError(() => err);
     }),
   );
+};
+
+/**
+ * Capacitor: identifica el cliente y envía Bearer porque la cookie HttpOnly no persiste.
+ */
+export const nativeAuthInterceptor: HttpInterceptorFn = (req, next) => {
+  const base = environment.apiUrl;
+  if (!req.url.startsWith(base) || !Capacitor.isNativePlatform()) {
+    return next(req);
+  }
+  const nativeToken = inject(NativeSessionTokenService);
+  const headers: Record<string, string> = {
+    [GASTOS_CLIENT_HEADER]: GASTOS_CLIENT_CAPACITOR,
+  };
+  const bearer = nativeToken.read();
+  if (bearer) {
+    headers['Authorization'] = `Bearer ${bearer}`;
+  }
+  return next(req.clone({ setHeaders: headers }));
 };
 
 export const apiKeyInterceptor: HttpInterceptorFn = (req, next) => {

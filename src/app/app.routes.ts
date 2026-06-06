@@ -12,9 +12,17 @@ import { SetupPasswordPageComponent } from './pages/setup-password/setup-passwor
 import { HistorialPageComponent } from './pages/historial/historial-page.component';
 import { InventoryPageComponent } from './pages/inventory/inventory-page.component';
 import { InvitationsPageComponent } from './pages/invitations/invitations-page.component';
+import { SplashPageComponent } from './pages/splash/splash-page.component';
 
+/**
+ * Rutas de Spend$ave (mobile).
+ *
+ * - '/' → Splash screen con animación y verificación de sesión
+ * - '/login' → Login/Registro mobile-optimizado
+ * - Rutas protegidas requieren sesión válida
+ */
 export const routes: Routes = [
-  { path: '', redirectTo: 'login', pathMatch: 'full' },
+  { path: '', component: SplashPageComponent },
   { path: 'login', component: LoginPageComponent },
   {
     path: 'setup-password',

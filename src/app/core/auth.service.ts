@@ -1,8 +1,10 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject, signal } from '@angular/core';
+import { Capacitor } from '@capacitor/core';
 import { Observable, catchError, map, of, tap, throwError } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { FirebaseAuthService } from './firebase-auth.service';
+import { NativeSessionTokenService } from './native/native-session-token.service';
 
 const STORAGE_KEY = 'gastos_auth';
 
@@ -25,6 +27,8 @@ export interface AuthApiUser {
 
 export interface AuthSessionResponse {
   user: AuthApiUser;
+  /** Presente en APK cuando el backend detecta cliente Capacitor. */
+  accessToken?: string;
 }
 
 /**
@@ -34,6 +38,7 @@ export interface AuthSessionResponse {
 export class AuthService {
   private readonly http = inject(HttpClient);
   private readonly firebaseAuth = inject(FirebaseAuthService);
+  private readonly nativeToken = inject(NativeSessionTokenService);
 
   readonly userId = signal<string | null>(null);
   readonly email = signal<string | null>(null);
@@ -72,7 +77,7 @@ export class AuthService {
         name,
       })
       .pipe(
-        tap((res) => this.persistUser(res.user)),
+        tap((res) => this.persistSession(res)),
         catchError((err) => throwError(() => err)),
       );
   }
@@ -84,7 +89,7 @@ export class AuthService {
         password,
       })
       .pipe(
-        tap((res) => this.persistUser(res.user)),
+        tap((res) => this.persistSession(res)),
         catchError((err) => throwError(() => err)),
       );
   }
@@ -126,7 +131,7 @@ export class AuthService {
         { password },
       )
       .pipe(
-        tap((res) => this.persistUser(res.user)),
+        tap((res) => this.persistSession(res)),
         catchError((err) => throwError(() => err)),
       );
   }
@@ -140,7 +145,7 @@ export class AuthService {
         { withCredentials: true },
       )
       .pipe(
-        tap((res) => this.persistUser(res.user)),
+        tap((res) => this.persistSession(res)),
         catchError((err) => throwError(() => err)),
       );
   }
@@ -167,11 +172,28 @@ export class AuthService {
 
   /** Sin llamada HTTP (p. ej. tras 401). */
   clearClientSession(): void {
+    this.nativeToken.clear();
     localStorage.removeItem(STORAGE_KEY);
     this.userId.set(null);
     this.email.set(null);
     this.displayName.set(null);
     this.hasPassword.set(true);
+  }
+
+  private persistSession(res: AuthSessionResponse): void {
+    this.persistUser(res.user);
+    if (!Capacitor.isNativePlatform()) {
+      return;
+    }
+    const token = res.accessToken?.trim();
+    if (token) {
+      this.nativeToken.save(token);
+      return;
+    }
+    // Sin token el siguiente GET /me/state devuelve 401 en APK
+    console.error(
+      '[AuthService] APK sin accessToken en respuesta de login; redesplegá el backend.',
+    );
   }
 
   private persistUser(user: AuthApiUser): void {
