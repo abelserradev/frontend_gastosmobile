@@ -3,6 +3,7 @@ import {
   requiresPasswordGuard,
   setupPasswordFlowGuard,
 } from './core/auth-flow.guards';
+import { AppAndroidPageComponent } from './pages/app-android/app-android-page.component';
 import { ExpensesPageComponent } from './pages/expenses/expenses-page.component';
 import { InitialFormComponent } from './pages/initial-form/initial-form.component';
 import { LoginPageComponent } from './pages/login/login-page.component';
@@ -63,6 +64,11 @@ export const routes: Routes = [
   {
     path: 'inventory',
     component: InventoryPageComponent,
+    canActivate: [requiresPasswordGuard],
+  },
+  {
+    path: 'app-android',
+    component: AppAndroidPageComponent,
     canActivate: [requiresPasswordGuard],
   },
   { path: '**', redirectTo: 'login' },
