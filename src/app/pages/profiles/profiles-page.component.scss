@@ -1,0 +1,9 @@
+dialog.profile-modal-dialog {
+  &::backdrop {
+    background-color: color-mix(in srgb, var(--foreground) 45%, transparent);
+  }
+
+  &:not([open]) {
+    display: none;
+  }
+}
