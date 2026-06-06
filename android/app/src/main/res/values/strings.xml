@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">GastosMobile</string>
-    <string name="title_activity_main">GastosMobile</string>
+    <string name="app_name">Spend$ave</string>
+    <string name="title_activity_main">Spend$ave</string>
     <string name="package_name">com.gastos.mobile</string>
     <string name="custom_url_scheme">com.gastos.mobile</string>
 </resources>
