@@ -7,7 +7,6 @@ import { MeApiService } from '../../core/me-api.service';
 import {
   BRAND_APP_NAME,
   BRAND_LOGO_SRC,
-  BRAND_TAGLINE,
 } from '../../core/brand-assets';
 import { routePathForMeState } from '../../core/me-route.util';
 
@@ -81,7 +80,6 @@ export class SplashPageComponent implements OnInit {
   readonly version = '1.3.1';
   readonly brandLogoSrc = BRAND_LOGO_SRC;
   readonly brandAppName = BRAND_APP_NAME;
-  readonly brandTagline = BRAND_TAGLINE;
   readonly isVisible = signal(false);
 
   ngOnInit(): void {
