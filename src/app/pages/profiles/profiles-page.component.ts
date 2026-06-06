@@ -1,5 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, OnInit } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  inject,
+  OnInit,
+  ViewChild,
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import {
@@ -28,6 +34,7 @@ import {
   standalone: true,
   imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './profiles-page.component.html',
+  styleUrl: './profiles-page.component.scss',
 })
 export class ProfilesPageComponent implements OnInit {
   private readonly router = inject(Router);
@@ -54,6 +61,9 @@ export class ProfilesPageComponent implements OnInit {
   teamLoading = false;
   collaborators: ProfileCollaborator[] = [];
   inviteEmail = '';
+
+  @ViewChild('membersDialog') private membersDialog?: ElementRef<HTMLDialogElement>;
+  @ViewChild('teamDialog') private teamDialog?: ElementRef<HTMLDialogElement>;
 
   get ownedProfiles(): UserProfile[] {
     return this.profiles.filter((p) => (p.access ?? 'owner') === 'owner');
@@ -152,9 +162,11 @@ export class ProfilesPageComponent implements OnInit {
     this.memberName = '';
     this.members = [];
     this.loadMembers();
+    this.queueShowModal(() => this.membersDialog);
   }
 
   closeMembers(): void {
+    this.membersDialog?.nativeElement.close();
     this.membersModalOpen = false;
     this.membersProfileId = null;
     this.membersProfileName = null;
@@ -227,9 +239,11 @@ export class ProfilesPageComponent implements OnInit {
     this.inviteEmail = '';
     this.collaborators = [];
     this.loadCollaborators();
+    this.queueShowModal(() => this.teamDialog);
   }
 
   closeTeam(): void {
+    this.teamDialog?.nativeElement.close();
     this.teamModalOpen = false;
     this.teamProfileId = null;
     this.teamProfileName = null;
@@ -312,5 +326,17 @@ export class ProfilesPageComponent implements OnInit {
 
   goBack(): void {
     void this.router.navigate([subpageBackTarget(this.fromExpenses)]);
+  }
+
+  /** El @if del template crea el <dialog> un tick después; showModal centra y activa backdrop en mobile. */
+  private queueShowModal(
+    resolveRef: () => ElementRef<HTMLDialogElement> | undefined,
+  ): void {
+    setTimeout(() => {
+      const host = resolveRef()?.nativeElement;
+      if (host && !host.open) {
+        host.showModal();
+      }
+    });
   }
 }
