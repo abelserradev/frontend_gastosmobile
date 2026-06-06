@@ -4,12 +4,16 @@
   "packageManager": "pnpm@11.3.0",
   "scripts": {
     "ng": "ng",
-    "prebuild": "node scripts/write-firebase-api-key.mjs",
-    "prestart": "node scripts/write-firebase-api-key.mjs",
+    "prebuild": "node scripts/write-firebase-api-key.mjs && node scripts/write-api-key.mjs",
+    "prestart": "node scripts/write-firebase-api-key.mjs && node scripts/write-api-key.mjs",
     "start": "ng serve",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "mobile:sync": "cap sync android",
+    "mobile:open": "cap open android",
+    "mobile:build": "npm run build && npm run mobile:sync && npm run mobile:open",
+    "mobile:live": "ng serve --host 0.0.0.0"
   },
   "private": true,
   "dependencies": {
@@ -20,6 +24,7 @@
     "@angular/platform-browser": "^20.0.0",
     "@angular/platform-browser-dynamic": "^20.0.0",
     "@angular/router": "^20.0.0",
+    "@capacitor-firebase/authentication": "^8.3.0",
     "@capacitor/android": "^8.4.0",
     "@capacitor/cli": "^8.4.0",
     "@capacitor/core": "^8.4.0",

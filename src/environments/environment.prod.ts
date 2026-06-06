@@ -1,8 +1,9 @@
+import { gastosApiKey } from './api-key';
 import { firebaseWebConfig } from './firebase-options';
 
 export const environment = {
   production: true,
-  apikey: 'OpPvE+U+HA+2e0MURoF+9Z0RoJLTg4/ofvFOgDY9CpA=',
+  apikey: gastosApiKey,
   apiUrl: 'https://api-gastos.buildforge.work/api',
   appOriginUrl: 'https://mobilegastos.buildforge.work',
   firebase: firebaseWebConfig,

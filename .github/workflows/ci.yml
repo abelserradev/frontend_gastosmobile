@@ -44,4 +44,5 @@ jobs:
       - name: Build producción
         env:
           FIREBASE_WEB_API_KEY: ${{ secrets.FIREBASE_WEB_API_KEY || 'ci-placeholder-firebase-web-api-key' }}
+          GASTOS_API_KEY: ${{ secrets.GASTOS_API_KEY || 'ci-placeholder-gastos-api-key' }}
         run: pnpm run build

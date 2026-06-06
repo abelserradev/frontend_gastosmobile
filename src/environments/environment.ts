@@ -1,8 +1,9 @@
+import { gastosApiKey } from './api-key';
 import { firebaseWebConfig } from './firebase-options';
 
 export const environment = {
   production: false,
-  apikey: 'OpPvE+U+HA+2e0MURoF+9Z0RoJLTg4/ofvFOgDY9CpA=',
+  apikey: gastosApiKey,
   apiUrl: 'http://localhost:3088/api',
   appOriginUrl: 'http://localhost:4200',
   firebase: firebaseWebConfig,
