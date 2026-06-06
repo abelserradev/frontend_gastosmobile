@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { AuthService } from '../../core/auth.service';
 import { BRAND_APP_NAME } from '../../core/brand-assets';
 
@@ -14,7 +14,7 @@ import { BRAND_APP_NAME } from '../../core/brand-assets';
 @Component({
   selector: 'app-android-page',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule],
   templateUrl: './app-android-page.component.html',
 })
 export class AppAndroidPageComponent {

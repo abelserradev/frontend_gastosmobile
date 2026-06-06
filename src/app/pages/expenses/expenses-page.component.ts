@@ -154,6 +154,10 @@ export class ExpensesPageComponent implements OnInit, OnDestroy {
   readonly expenseProfiles = computed(() =>
     this.ctx.profiles().filter((p) => (p.access ?? 'owner') === 'owner'),
   );
+  /** Determina si mostrar el enlace de inventario en el sidebar (al menos un perfil comercio). */
+  readonly hasInventory = computed(() =>
+    this.ctx.profiles().some((p) => p.type === 'comercio'),
+  );
   readonly hoveredReceiptId = signal<string | null>(null);
   /** Fuerza repaint cuando llega una miniatura de recibo en caché. */
   readonly receiptPreviewTick = signal(0);
