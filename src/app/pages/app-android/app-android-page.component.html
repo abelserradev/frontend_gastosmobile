@@ -1,0 +1,102 @@
+<div class="min-h-screen bg-gradient-to-br from-[#FFD300]/20 to-background p-6">
+  <div class="max-w-md mx-auto">
+
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-6 mt-4">
+      <button
+        type="button"
+        (click)="goBack()"
+        class="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+      >
+        ← Volver
+      </button>
+    </div>
+
+    <!-- Card principal -->
+    <div class="bg-card rounded-2xl shadow-xl p-6">
+
+      <!-- Ícono + título -->
+      <div class="flex flex-col items-center text-center mb-6">
+        <div class="w-16 h-16 rounded-2xl bg-[#FFD300]/20 flex items-center justify-center mb-4">
+          <span class="text-3xl">📱</span>
+        </div>
+        <h1 class="text-2xl font-bold text-foreground">App Android</h1>
+        <p class="text-sm text-muted-foreground mt-1">{{ brandAppName }}</p>
+      </div>
+
+      <!-- Estado: correo habilitado -->
+      <div class="bg-green-50 border border-green-200 rounded-xl p-4 mb-6">
+        <p class="text-sm font-semibold text-green-800 mb-1">✅ Tu acceso está habilitado</p>
+        <p class="text-xs text-green-700 break-all">
+          {{ auth.email() }}
+        </p>
+      </div>
+
+      <!-- Instrucciones -->
+      <div class="space-y-4 mb-6">
+        <p class="text-sm font-semibold text-foreground">¿Cómo instalar la app?</p>
+
+        <ol class="space-y-3">
+          <li class="flex gap-3">
+            <span class="flex-shrink-0 w-6 h-6 rounded-full bg-[#FFD300] text-xs font-bold flex items-center justify-center text-[#333]">1</span>
+            <div>
+              <p class="text-sm text-foreground font-medium">Revisá tu correo</p>
+              <p class="text-xs text-muted-foreground mt-0.5">
+                Buscá un email de <strong>Firebase App Distribution</strong> en la bandeja de entrada y en spam.
+                Si aún no llegó, puede demorar unos minutos.
+              </p>
+            </div>
+          </li>
+
+          <li class="flex gap-3">
+            <span class="flex-shrink-0 w-6 h-6 rounded-full bg-[#FFD300] text-xs font-bold flex items-center justify-center text-[#333]">2</span>
+            <div>
+              <p class="text-sm text-foreground font-medium">Abrí el correo en el teléfono</p>
+              <p class="text-xs text-muted-foreground mt-0.5">
+                El enlace de descarga funciona desde Android. Desde el PC solo se verá la página de confirmación.
+              </p>
+            </div>
+          </li>
+
+          <li class="flex gap-3">
+            <span class="flex-shrink-0 w-6 h-6 rounded-full bg-[#FFD300] text-xs font-bold flex items-center justify-center text-[#333]">3</span>
+            <div>
+              <p class="text-sm text-foreground font-medium">Descargá e instalá el APK</p>
+              <p class="text-xs text-muted-foreground mt-0.5">
+                Android puede pedir permiso para instalar apps de fuentes externas. Aceptá solo para este archivo.
+              </p>
+            </div>
+          </li>
+
+          <li class="flex gap-3">
+            <span class="flex-shrink-0 w-6 h-6 rounded-full bg-[#FFD300] text-xs font-bold flex items-center justify-center text-[#333]">4</span>
+            <div>
+              <p class="text-sm text-foreground font-medium">Iniciá sesión con la misma cuenta</p>
+              <p class="text-xs text-muted-foreground mt-0.5">
+                Usá el mismo correo con el que te registraste en la web: <strong class="break-all">{{ auth.email() }}</strong>
+              </p>
+            </div>
+          </li>
+        </ol>
+      </div>
+
+      <!-- Nota informativa -->
+      <div class="bg-muted/40 border border-border rounded-xl p-4 text-xs text-muted-foreground leading-relaxed">
+        <p class="font-medium text-foreground mb-1">ℹ️ Distribución directa</p>
+        <p>
+          {{ brandAppName }} aún no está en Google Play. La distribución es directa: 
+          recibís el APK por correo cuando creás tu cuenta. Las actualizaciones 
+          también llegan por email cuando publicamos nuevas versiones.
+        </p>
+      </div>
+
+    </div>
+
+    <!-- Soporte -->
+    <p class="text-center text-xs text-muted-foreground mt-6">
+      ¿No recibiste el correo?
+      Revisá spam o contactanos desde la sección de soporte.
+    </p>
+
+  </div>
+</div>
