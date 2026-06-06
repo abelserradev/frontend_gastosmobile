@@ -13,11 +13,12 @@ RUN pnpm install --frozen-lockfile
 
 COPY . .
 
-# La API key web de Firebase no debe ir en el repo; Coolify/build debe pasar build-arg o env en tiempo de build.
 ARG FIREBASE_WEB_API_KEY
-ENV FIREBASE_WEB_API_KEY=${FIREBASE_WEB_API_KEY}
 ARG GASTOS_API_KEY
+ARG SECRET_API_KEY
+ENV FIREBASE_WEB_API_KEY=${FIREBASE_WEB_API_KEY}
 ENV GASTOS_API_KEY=${GASTOS_API_KEY}
+ENV SECRET_API_KEY=${SECRET_API_KEY}
 
 RUN pnpm run build
 
