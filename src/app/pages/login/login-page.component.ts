@@ -13,7 +13,6 @@ import { MeApiService, type MeState } from '../../core/me-api.service';
 import {
   BRAND_APP_NAME,
   BRAND_LOGO_SRC,
-  BRAND_TAGLINE,
 } from '../../core/brand-assets';
 import { NativeSessionTokenService } from '../../core/native/native-session-token.service';
 
@@ -31,7 +30,6 @@ export class LoginPageComponent implements OnInit {
   private readonly nativeToken = inject(NativeSessionTokenService);
   readonly brandLogoSrc = BRAND_LOGO_SRC;
   readonly brandAppName = BRAND_APP_NAME;
-  readonly brandTagline = BRAND_TAGLINE;
   readonly isLogin = signal(true);
   readonly showPassword = signal(false);
   readonly forgotPasswordOpen = signal(false);
@@ -62,10 +60,8 @@ export class LoginPageComponent implements OnInit {
       return;
     }
 
-    this.auth.tryRestoreSession().subscribe((ok) => {
-      if (ok) {
-        this.navigateByOnBoardingState();
-      }
+    this.auth.restoreActiveSession().subscribe({
+      next: () => this.navigateByOnBoardingState(),
     });
   }
 

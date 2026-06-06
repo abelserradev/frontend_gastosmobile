@@ -56,12 +56,12 @@ export class AuthService {
 
   /**
    * Si la cookie HttpOnly sigue válida, recupera el usuario (p. ej. localStorage borrado).
+   * Falla el observable si no hay sesión remota (el suscriptor usa error → login).
    */
-  tryRestoreSession(): Observable<boolean> {
+  restoreActiveSession(): Observable<void> {
     return this.http.get<AuthSessionResponse>(`${environment.apiUrl}/auth/me`).pipe(
       tap((res) => this.persistUser(res.user)),
-      map(() => true),
-      catchError(() => of(false)),
+      map(() => undefined),
     );
   }
 

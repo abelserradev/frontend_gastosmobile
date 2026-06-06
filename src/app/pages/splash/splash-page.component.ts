@@ -7,7 +7,6 @@ import { MeApiService } from '../../core/me-api.service';
 import {
   BRAND_APP_NAME,
   BRAND_LOGO_SRC,
-  BRAND_TAGLINE,
 } from '../../core/brand-assets';
 import { routePathForMeState } from '../../core/me-route.util';
 
@@ -37,16 +36,6 @@ import { routePathForMeState } from '../../core/me-route.util';
       </div>
 
       <!-- Tagline -->
-      <p
-        class="mt-6 text-foreground/80 text-base font-medium tracking-wide"
-        [class.opacity-0]="!isVisible()"
-        [class.opacity-100]="isVisible()"
-        [class.translate-y-4]="!isVisible()"
-        [class.translate-y-0]="isVisible()"
-        class="mt-6 text-foreground/80 text-base font-medium tracking-wide transition-all duration-700 delay-200"
-      >
-        {{ brandTagline }}
-      </p>
 
       <!-- Loading indicator -->
       <div class="mt-12">
@@ -81,7 +70,6 @@ export class SplashPageComponent implements OnInit {
   readonly version = '1.3.1';
   readonly brandLogoSrc = BRAND_LOGO_SRC;
   readonly brandAppName = BRAND_APP_NAME;
-  readonly brandTagline = BRAND_TAGLINE;
   readonly isVisible = signal(false);
 
   ngOnInit(): void {
@@ -95,25 +83,26 @@ export class SplashPageComponent implements OnInit {
   }
 
   private checkSessionAndNavigate(): void {
-    // Si tiene sesión activa, ir al dashboard
     if (this.auth.hasSession()) {
-      this.navigateToDashboard();
+      this.continueAsAuthenticatedUser();
       return;
     }
+    this.restoreSessionFromServer();
+  }
 
-    // Intentar restaurar sesión
-    this.auth.tryRestoreSession().subscribe({
-      next: (hasSession) => {
-        if (hasSession) {
-          this.navigateToDashboard();
-        } else {
-          this.navigateToLogin();
-        }
-      },
-      error: () => {
-        this.navigateToLogin();
-      }
+  private continueAsAuthenticatedUser(): void {
+    this.navigateToDashboard();
+  }
+
+  private restoreSessionFromServer(): void {
+    this.auth.restoreActiveSession().subscribe({
+      next: () => this.continueAsAuthenticatedUser(),
+      error: () => this.redirectToLogin(),
     });
+  }
+
+  private redirectToLogin(): void {
+    this.navigateToLogin();
   }
 
   private navigateToDashboard(): void {
