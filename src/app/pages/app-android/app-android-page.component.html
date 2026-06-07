@@ -32,18 +32,35 @@
         </p>
       </div>
 
+      <!-- Descarga directa (respaldo si Firebase no manda el correo) -->
+      <div class="mb-6 text-center">
+        <a
+          href="/gastos-mobile.apk"
+          download="gastos-mobile.apk"
+          class="inline-flex items-center justify-center gap-2 w-full py-3.5 px-6 rounded-xl text-sm font-bold bg-primary text-primary-foreground hover:opacity-90 transition-opacity shadow-sm"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <rect width="14" height="20" x="5" y="2" rx="2" ry="2" />
+            <path d="M12 18h.01" />
+          </svg>
+          Descargar aplicación móvil
+        </a>
+        <p class="text-xs text-muted-foreground mt-2">
+          Abrí este enlace desde tu teléfono Android para instalar.
+        </p>
+      </div>
+
       <!-- Instrucciones -->
       <div class="space-y-4 mb-6">
-        <p class="text-sm font-semibold text-foreground">¿Cómo instalar la app?</p>
+        <p class="text-sm font-semibold text-foreground">Pasos de instalación</p>
 
         <ol class="space-y-3">
           <li class="flex gap-3">
             <span class="flex-shrink-0 w-6 h-6 rounded-full bg-[#FFD300] text-xs font-bold flex items-center justify-center text-[#333]">1</span>
             <div>
-              <p class="text-sm text-foreground font-medium">Revisa tu correo</p>
+              <p class="text-sm text-foreground font-medium">Descargá el APK en el teléfono</p>
               <p class="text-xs text-muted-foreground mt-0.5">
-                Busca un email de <strong>Firebase App Distribution</strong> en la bandeja de entrada y en spam.
-                Si aún no llegó, puede demorar unos minutos.
+                Usá el botón de arriba desde Android, o el correo de Firebase App Distribution si te llegó.
               </p>
             </div>
           </li>
@@ -51,9 +68,9 @@
           <li class="flex gap-3">
             <span class="flex-shrink-0 w-6 h-6 rounded-full bg-[#FFD300] text-xs font-bold flex items-center justify-center text-[#333]">2</span>
             <div>
-              <p class="text-sm text-foreground font-medium">Deberás abrir el correo en el teléfono</p>
+              <p class="text-sm text-foreground font-medium">Instalá la app</p>
               <p class="text-xs text-muted-foreground mt-0.5">
-                El enlace de descarga funciona desde Android. Desde el PC solo se verá la página de confirmación.
+                Android puede pedir permiso para instalar apps de fuentes externas. Aceptá solo para este archivo.
               </p>
             </div>
           </li>
@@ -61,19 +78,9 @@
           <li class="flex gap-3">
             <span class="flex-shrink-0 w-6 h-6 rounded-full bg-[#FFD300] text-xs font-bold flex items-center justify-center text-[#333]">3</span>
             <div>
-              <p class="text-sm text-foreground font-medium">Descarga e instala el APK</p>
+              <p class="text-sm text-foreground font-medium">Iniciá sesión con la misma cuenta</p>
               <p class="text-xs text-muted-foreground mt-0.5">
-                Android puede pedir permiso para instalar apps de fuentes externas. Acepta solo para este archivo.
-              </p>
-            </div>
-          </li>
-
-          <li class="flex gap-3">
-            <span class="flex-shrink-0 w-6 h-6 rounded-full bg-[#FFD300] text-xs font-bold flex items-center justify-center text-[#333]">4</span>
-            <div>
-              <p class="text-sm text-foreground font-medium">Inicia sesión con la misma cuenta</p>
-              <p class="text-xs text-muted-foreground mt-0.5">
-                Usa el mismo correo con el que te registraste en la web: <strong class="break-all">{{ auth.email() }}</strong>
+                Usá el mismo correo con el que te registraste en la web: <strong class="break-all">{{ auth.email() }}</strong>
               </p>
             </div>
           </li>
@@ -84,9 +91,8 @@
       <div class="bg-muted/40 border border-border rounded-xl p-4 text-xs text-muted-foreground leading-relaxed">
         <p class="font-medium text-foreground mb-1">ℹ️ Distribución directa</p>
         <p>
-          {{ brandAppName }} aún no está en Google Play. La distribución es directa: 
-          recibirás el APK por correo cuando crees tu cuenta. Las actualizaciones 
-          también llegan por email cuando publicamos nuevas versiones.
+          {{ brandAppName }} aún no está en Google Play. Podés descargar la app desde esta página
+          o por el correo de Firebase cuando estés habilitado como usuario registrado.
         </p>
       </div>
 
@@ -94,8 +100,7 @@
 
     <!-- Soporte -->
     <p class="text-center text-xs text-muted-foreground mt-6">
-      ¿No recibiste el correo?
-      Revisa spam o contacta con nosotros desde la sección de soporte.
+      ¿No recibiste el correo de Firebase? Usá el botón de descarga directa arriba.
     </p>
 
   </div>
