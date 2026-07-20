@@ -157,6 +157,19 @@ export interface MeHistoryMonthSummary {
   totalAmountUsd: number;
 }
 
+export interface TelegramLinkCodeResponse {
+  code: string;
+  expiresAt: string;
+  botUsername: string | null;
+  deepLink: string | null;
+}
+
+export interface TelegramLinkStatusResponse {
+  linked: boolean;
+  username: string | null;
+  linkedAt: string | null;
+}
+
 export interface MeState {
   preferences: MePreferences | null;
   categories: MeCategory[];
@@ -475,6 +488,23 @@ export class MeApiService {
       `${this.base}/me/incomes/delete-many`,
       { ids },
     );
+  }
+
+  createTelegramLinkCode(): Observable<TelegramLinkCodeResponse> {
+    return this.http.post<TelegramLinkCodeResponse>(
+      `${this.base}/me/telegram/link-code`,
+      {},
+    );
+  }
+
+  getTelegramLinkStatus(): Observable<TelegramLinkStatusResponse> {
+    return this.http.get<TelegramLinkStatusResponse>(
+      `${this.base}/me/telegram/status`,
+    );
+  }
+
+  unlinkTelegram(): Observable<{ ok: true }> {
+    return this.http.delete<{ ok: true }>(`${this.base}/me/telegram/link`);
   }
 
   /** v1.3 — feedback OCR; no debe bloquear UI (llamar con subscribe errores ignorados si aplica). */
