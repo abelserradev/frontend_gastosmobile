@@ -33,6 +33,7 @@ import { ExpensePieChartComponent } from './expense-pie-chart.component';
 import { ExpenseTypeSelectorComponent, type ExpenseCreationMode } from './expense-type-selector.component';
 import { ImageUploadModalComponent, type ImageUploadMode } from './image-upload-modal.component';
 import { ReceiptViewerComponent } from './receipt-viewer.component';
+import { TelegramLinkPanelComponent } from './telegram-link-panel.component';
 import { resolveExpenseCategoryIcon, type ExpenseCategoryIconKind } from './expense-category-icon.util';
 import {
   buildLastSevenDaySpending,
@@ -93,6 +94,7 @@ function toIncomeItem(i: MeIncome) {
     ExpenseTypeSelectorComponent,
     ImageUploadModalComponent,
     ReceiptViewerComponent,
+    TelegramLinkPanelComponent,
   ],
   templateUrl: './expenses-page.component.html',
   styleUrl: './expenses-page.component.scss',
