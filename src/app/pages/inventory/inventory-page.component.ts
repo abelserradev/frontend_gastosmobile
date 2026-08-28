@@ -19,6 +19,7 @@ import { StockListComponent } from './stock-list.component';
 import { ItemFormModalComponent } from './item-form-modal.component';
 import { MovementFormModalComponent } from './movement-form-modal.component';
 import { MovementsHistoryModalComponent } from './movements-history-modal.component';
+import { HelpChatWidgetComponent } from '../../shared/help-chat/help-chat-widget.component';
 
 type ViewMode = 'all' | 'low-stock' | 'movements';
 
@@ -32,6 +33,7 @@ type ViewMode = 'all' | 'low-stock' | 'movements';
     ItemFormModalComponent,
     MovementFormModalComponent,
     MovementsHistoryModalComponent,
+    HelpChatWidgetComponent,
   ],
   templateUrl: './inventory-page.component.html',
 })
