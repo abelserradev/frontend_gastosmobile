@@ -1,0 +1,58 @@
+<div class="rounded-xl border border-border/70 bg-muted/30 p-3 space-y-2">
+  <p class="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+    Telegram
+  </p>
+
+  @if (error()) {
+    <p class="text-xs text-destructive">{{ error() }}</p>
+  }
+
+  @if (status()?.linked) {
+    <p class="text-xs text-foreground">
+      Vinculado
+      @if (status()?.username) {
+        · @{{ status()?.username }}
+      }
+    </p>
+    <button
+      type="button"
+      (click)="unlink()"
+      [disabled]="loading()"
+      class="text-xs text-muted-foreground hover:text-destructive transition-colors"
+    >
+      Desvincular
+    </button>
+  } @else {
+    <p class="text-xs text-muted-foreground leading-relaxed">
+      Registra gastos e ingresos por chat con mensajes naturales.
+    </p>
+    <button
+      type="button"
+      (click)="generateCode()"
+      [disabled]="loading()"
+      class="w-full py-2 text-xs font-semibold rounded-lg bg-primary/10 text-primary hover:bg-primary/15 transition-colors disabled:opacity-50"
+    >
+      {{ loading() ? 'Generando…' : 'Conectar Telegram' }}
+    </button>
+  }
+
+  @if (linkCode(); as code) {
+    <div class="rounded-lg border border-dashed border-primary/40 bg-card px-3 py-2 space-y-1">
+      <p class="text-[11px] text-muted-foreground">Código (10 min)</p>
+      <p class="text-lg font-mono font-bold tracking-widest text-foreground">{{ code.code }}</p>
+      <p class="text-[11px] text-muted-foreground">
+        En Telegram: <span class="font-mono">/vincular {{ code.code }}</span>
+      </p>
+      @if (code.deepLink) {
+        <a
+          [href]="code.deepLink"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="text-[11px] text-primary underline break-all"
+        >
+          Abrir bot
+        </a>
+      }
+    </div>
+  }
+</div>
