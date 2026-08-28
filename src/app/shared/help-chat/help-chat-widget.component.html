@@ -1,0 +1,90 @@
+@if (abierto()) {
+  <div
+    class="help-chat-panel glass-panel"
+    role="dialog"
+    aria-label="Asistente Spend$ave"
+  >
+    <header class="help-chat-header">
+      <div>
+        <p class="help-chat-title">Asistente Spend$ave</p>
+        <p class="help-chat-sub">
+          @if (perfilActivoLabel(); as nombre) {
+            Perfil: {{ nombre }}
+          } @else {
+            Gastos, ingresos e inventario
+          }
+        </p>
+      </div>
+      <div class="help-chat-actions">
+        <button type="button" class="icon-btn" (click)="reiniciar()" title="Nueva conversación">
+          ↺
+        </button>
+        <button type="button" class="icon-btn" (click)="toggle()" aria-label="Cerrar">
+          ✕
+        </button>
+      </div>
+    </header>
+
+    <div class="help-chat-body">
+      @if (mensajes().length === 0) {
+        <p class="help-chat-hint">
+          Pregunta cómo usar la app. Ejemplos:
+        </p>
+        <div class="help-chat-suggestions">
+          @for (s of sugerencias(); track s) {
+            <button type="button" class="suggestion-chip" (click)="enviar(s)">
+              {{ s }}
+            </button>
+          }
+        </div>
+      }
+
+      @for (m of mensajes(); track m.id) {
+        <div
+          class="help-chat-bubble"
+          [class.help-chat-bubble--user]="m.role === 'user'"
+          [class.help-chat-bubble--assistant]="m.role === 'assistant'"
+        >
+          {{ m.text }}
+        </div>
+      }
+
+      @if (cargando()) {
+        <p class="help-chat-typing">Escribiendo…</p>
+      }
+
+      @if (error()) {
+        <p class="help-chat-error">{{ error() }}</p>
+      }
+    </div>
+
+    <form class="help-chat-form" (submit)="onSubmit($event)">
+      <textarea
+        [(ngModel)]="entrada"
+        name="entrada"
+        rows="2"
+        maxlength="2000"
+        placeholder="Escribe tu pregunta…"
+        [disabled]="cargando()"
+        (keydown.enter)="$event.preventDefault(); enviar()"
+      ></textarea>
+      <button type="submit" [disabled]="cargando() || !entrada.trim()">
+        Enviar
+      </button>
+    </form>
+
+    @if (disclaimer()) {
+      <p class="help-chat-disclaimer">{{ disclaimer() }}</p>
+    }
+  </div>
+}
+
+<button
+  type="button"
+  class="help-chat-fab"
+  (click)="toggle()"
+  [attr.aria-expanded]="abierto()"
+  aria-label="Abrir asistente de ayuda"
+>
+  <span aria-hidden="true">?</span>
+</button>
