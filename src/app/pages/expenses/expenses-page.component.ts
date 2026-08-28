@@ -34,6 +34,7 @@ import { ExpenseTypeSelectorComponent, type ExpenseCreationMode } from './expens
 import { ImageUploadModalComponent, type ImageUploadMode } from './image-upload-modal.component';
 import { ReceiptViewerComponent } from './receipt-viewer.component';
 import { TelegramLinkPanelComponent } from './telegram-link-panel.component';
+import { HelpChatWidgetComponent } from '../../shared/help-chat/help-chat-widget.component';
 import { resolveExpenseCategoryIcon, type ExpenseCategoryIconKind } from './expense-category-icon.util';
 import {
   buildLastSevenDaySpending,
@@ -95,6 +96,7 @@ function toIncomeItem(i: MeIncome) {
     ImageUploadModalComponent,
     ReceiptViewerComponent,
     TelegramLinkPanelComponent,
+    HelpChatWidgetComponent,
   ],
   templateUrl: './expenses-page.component.html',
   styleUrl: './expenses-page.component.scss',
