@@ -31,16 +31,16 @@ importers:
         version: 20.3.26(@angular/common@20.3.26(@angular/core@20.3.26(@angular/compiler@20.3.26)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2))(@angular/core@20.3.26(@angular/compiler@20.3.26)(rxjs@7.8.2)(zone.js@0.15.1))(@angular/platform-browser@20.3.26(@angular/common@20.3.26(@angular/core@20.3.26(@angular/compiler@20.3.26)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2))(@angular/core@20.3.26(@angular/compiler@20.3.26)(rxjs@7.8.2)(zone.js@0.15.1)))(rxjs@7.8.2)
       '@capacitor-firebase/authentication':
         specifier: ^8.3.0
-        version: 8.3.0(@capacitor/core@8.4.0)(firebase@12.14.0)
+        version: 8.3.0(@capacitor/core@8.5.0)(firebase@12.14.0)
       '@capacitor/android':
         specifier: ^8.4.2
-        version: 8.4.2(@capacitor/core@8.4.0)
+        version: 8.5.0(@capacitor/core@8.5.0)
       '@capacitor/cli':
         specifier: ^8.4.0
         version: 8.4.0
       '@capacitor/core':
-        specifier: ^8.4.0
-        version: 8.4.0
+        specifier: ^8.5.0
+        version: 8.5.0
       chart.js:
         specifier: ^4.4.7
         version: 4.5.1
@@ -892,18 +892,18 @@ packages:
       firebase:
         optional: true
 
-  '@capacitor/android@8.4.2':
-    resolution: {integrity: sha512-bzf8XZ9C+ePgOQ+e+T0fnhHGH4aCNY494vvSQIF5w4AY07RwEmkFqZs1678DDSMH0hLSQpxEwXGFNUVcXO6bBA==}
+  '@capacitor/android@8.5.0':
+    resolution: {integrity: sha512-Rb3prJeQiTp0pQhSSOReJuG9VgibOGMG4ECs+UhMwr6TCCHZ3NCZO811bDA0HxD0xrT/gCrJAsY5yfEATu84JQ==}
     peerDependencies:
-      '@capacitor/core': ^8.4.0
+      '@capacitor/core': ^8.5.0
 
   '@capacitor/cli@8.4.0':
     resolution: {integrity: sha512-5Z9RKHxiqJYRTLrfMeZmzR4qrlg5B85MxsWZ5goyXsLkO3bgpW9a1qV/6fR1SX9s5gwLza5y7PZVwITl/hDJ7g==}
     engines: {node: '>=22.0.0'}
     hasBin: true
 
-  '@capacitor/core@8.4.0':
-    resolution: {integrity: sha512-LrS1xPIrqLtJABBIPDGXxxKmI9OyesrzWw8DiHbxhSC9JoiLUleUAJlX1a0LWIVLRbuY4Szgf9huFeRqYH2SAQ==}
+  '@capacitor/core@8.5.0':
+    resolution: {integrity: sha512-Ca4krtqH1hothjtBIwf2J2TW7IhYq1ujp8QeItTiJohNsqij8ja2DYYH3DU0l8RmxCWaBAFTGA2TgOgOMCSNsQ==}
 
   '@colors/colors@1.5.0':
     resolution: {integrity: sha512-ooWCrlZP11i8GImSjTHYHLkvFDP48nS4+204nGb1RiX/WXYHmJA2III9/e2DWVabCESdW7hBAEzHRqUn9OUVvQ==}
@@ -3024,10 +3024,6 @@ packages:
     resolution: {integrity: sha512-rpsZEGT1jFuve6QlpyRp9ckQ+kN61hvF9BzCPyMdaKTm8UJce96KBn3sorXOFXlzjPrs3Vc4T1NsSroZ3PxlFw==}
     engines: {node: '>=10.13.0'}
 
-  enhanced-resolve@5.24.3:
-    resolution: {integrity: sha512-PwKooW9JUzh5chmYfHM3IQl5OkK2u2Nm011MgeZrss3JmFraUx/fqrf78kk8GUMYoibx/14MdwTl/1WKkG7TpQ==}
-    engines: {node: '>=10.13.0'}
-
   ent@2.2.2:
     resolution: {integrity: sha512-kKvD1tO6BM+oK9HzCPpUdRb4vKFQY/FPTFmurMvh6LlN68VMrdj77w8yp51/kDbpkFOS9J8w5W6zIzgM2H8/hw==}
     engines: {node: '>= 0.4'}
@@ -4049,6 +4045,11 @@ packages:
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
     hasBin: true
 
+  nanoid@3.3.18:
+    resolution: {integrity: sha512-DTg4MJbGMWkfi6VZFdNt2/caMbQy4Ou+Op/hJQvGEWcnVfoA1QA+xzRKAzw9jD6+GVOOeYr/mIcuDSdug6F6+w==}
+    engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
+    hasBin: true
+
   native-run@2.0.3:
     resolution: {integrity: sha512-U1PllBuzW5d1gfan+88L+Hky2eZx+9gv3Pf6rNBxKbORxi7boHzqiA6QFGSnqMem4j0A9tZ08NMIs5+0m/VS1Q==}
     engines: {node: '>=16.0.0'}
@@ -4345,8 +4346,8 @@ packages:
     resolution: {integrity: sha512-FfR8sjd4em2T6fb3I2MwAJU7HWVMr9zba+enmQeeWFfCbm+UOC/0X4DS8XtpUTMwWMGbjKYP7xjfNekzyGmB3A==}
     engines: {node: ^10 || ^12 || >=14}
 
-  postcss@8.5.20:
-    resolution: {integrity: sha512-lW616l85ucIQL+FocMmL7pQFPqBmwejrCMg+iPxyImlrANNJG9NHq/RkyCZopDhd8C3LA03PHRJDjkbGu8vvug==}
+  postcss@8.5.26:
+    resolution: {integrity: sha512-u82N74LFzG8ca+dD8puPnplTXoGH4fTPpVGuIbt36G3qvNlkvfD0lEAZSxaly3KX8TS/L1A1gsCEmvKmBcVbkQ==}
     engines: {node: ^10 || ^12 || >=14}
 
   proc-log@5.0.0:
@@ -4812,9 +4813,6 @@ packages:
   supports-preserve-symlinks-flag@1.0.0:
     resolution: {integrity: sha512-ot0WnXS9fgdkgIcePe6RHNk1WA8+muPa6cSjeR3V8K27q9BB1rTE3R1p7Hv0z1ZyAc8s6Vvv8DIyWf681MAt0w==}
     engines: {node: '>= 0.4'}
-
-  tailwindcss@4.3.0:
-    resolution: {integrity: sha512-y6nxMGB1nMW9R6k96e5gdIFzcfL/gTJRNaqGes1YvkLnPVXzWgbqFF2yLC0T8G774n24cx3Pe8XrKoniCOAH+Q==}
 
   tailwindcss@4.3.3:
     resolution: {integrity: sha512-gOhV3P7ufE62QDGg1zVaTgCR+EtPv92k2nIhVcVKcLmxT1sUBsQGhnZj175j+MqRt4zLF7ic+sCYjfhxMxj7YQ==}
@@ -6334,15 +6332,15 @@ snapshots:
       '@babel/helper-string-parser': 7.29.7
       '@babel/helper-validator-identifier': 7.29.7
 
-  '@capacitor-firebase/authentication@8.3.0(@capacitor/core@8.4.0)(firebase@12.14.0)':
+  '@capacitor-firebase/authentication@8.3.0(@capacitor/core@8.5.0)(firebase@12.14.0)':
     dependencies:
-      '@capacitor/core': 8.4.0
+      '@capacitor/core': 8.5.0
     optionalDependencies:
       firebase: 12.14.0
 
-  '@capacitor/android@8.4.2(@capacitor/core@8.4.0)':
+  '@capacitor/android@8.5.0(@capacitor/core@8.5.0)':
     dependencies:
-      '@capacitor/core': 8.4.0
+      '@capacitor/core': 8.5.0
 
   '@capacitor/cli@8.4.0':
     dependencies:
@@ -6366,7 +6364,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@capacitor/core@8.4.0':
+  '@capacitor/core@8.5.0':
     dependencies:
       tslib: 2.8.1
 
@@ -7674,7 +7672,7 @@ snapshots:
   '@tailwindcss/node@4.3.3':
     dependencies:
       '@jridgewell/remapping': 2.3.5
-      enhanced-resolve: 5.24.3
+      enhanced-resolve: 5.24.2
       jiti: 2.7.0
       lightningcss: 1.32.0
       magic-string: 0.30.21
@@ -7737,7 +7735,7 @@ snapshots:
       '@alloc/quick-lru': 5.2.0
       '@tailwindcss/node': 4.3.3
       '@tailwindcss/oxide': 4.3.3
-      postcss: 8.5.20
+      postcss: 8.5.26
       tailwindcss: 4.3.3
 
   '@tufjs/canonical-json@2.0.0': {}
@@ -8118,7 +8116,7 @@ snapshots:
       domhandler: 5.0.3
       htmlparser2: 10.1.0
       picocolors: 1.1.1
-      postcss: 8.5.20
+      postcss: 8.5.15
       postcss-media-query-parser: 0.2.3
 
   big-integer@1.6.52: {}
@@ -8544,11 +8542,6 @@ snapshots:
       - utf-8-validate
 
   enhanced-resolve@5.24.2:
-    dependencies:
-      graceful-fs: 4.2.11
-      tapable: 2.3.3
-
-  enhanced-resolve@5.24.3:
     dependencies:
       graceful-fs: 4.2.11
       tapable: 2.3.3
@@ -9676,6 +9669,8 @@ snapshots:
 
   nanoid@3.3.16: {}
 
+  nanoid@3.3.18: {}
+
   native-run@2.0.3:
     dependencies:
       '@ionic/utils-fs': 3.1.7
@@ -10009,9 +10004,9 @@ snapshots:
       picocolors: 1.1.1
       source-map-js: 1.2.1
 
-  postcss@8.5.20:
+  postcss@8.5.26:
     dependencies:
-      nanoid: 3.3.16
+      nanoid: 3.3.18
       picocolors: 1.1.1
       source-map-js: 1.2.1
 
@@ -10594,8 +10589,6 @@ snapshots:
 
   supports-preserve-symlinks-flag@1.0.0: {}
 
-  tailwindcss@4.3.0: {}
-
   tailwindcss@4.3.3: {}
 
   tapable@2.3.3: {}
@@ -10750,7 +10743,7 @@ snapshots:
       esbuild: 0.28.1
       fdir: 6.5.0(picomatch@4.0.4)
       picomatch: 4.0.4
-      postcss: 8.5.20
+      postcss: 8.5.15
       rollup: 4.59.0
       tinyglobby: 0.2.17
     optionalDependencies:
