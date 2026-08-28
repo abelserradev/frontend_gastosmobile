@@ -14,7 +14,6 @@ import {
   standalone: true,
   imports: [CommonModule, RouterLink],
   templateUrl: './historial-page.component.html',
-  styleUrl: './historial-page.component.scss',
 })
 export class HistorialPageComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);

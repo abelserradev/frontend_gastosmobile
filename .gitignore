@@ -37,8 +37,33 @@ yarn-error.log
 testem.log
 /typings
 
-# Firebase Web API key (no versionar; usar FIREBASE_WEB_API_KEY en CI o copiar desde firebase-api-key.example.ts)
+# --- Secretos y credenciales (no subir a GitHub) ---
+# Firebase Web: generado por scripts/write-firebase-api-key.mjs o copiar desde firebase-api-key.example.ts
 /src/environments/firebase-api-key.ts
+# X-API-KEY compartida con backend (SECRET_API_KEY); generado por scripts/write-api-key.mjs
+/src/environments/api-key.ts
+# Firebase Android: descargar de Firebase Console; plantilla en android/app/google-services.json.example
+android/app/google-services.json
+# Environment móvil local (IP emulador/LAN)
+src/environments/environment.mobile.ts
+# Capacitor live-reload con IP de tu red local
+capacitor.config.live.ts
+
+# Variables de entorno locales
+.env
+.env.*
+!.env.example
+
+# Firma de APK/AAB (release)
+*.jks
+*.keystore
+
+# Android: SDK local y artefactos de build (android/.gitignore cubre parte; refuerzo desde raíz frontend)
+android/local.properties
+android/.gradle/
+android/app/build/
+android/build/
+android/capacitor-cordova-android-plugins/build/
 
 # System files
 .DS_Store

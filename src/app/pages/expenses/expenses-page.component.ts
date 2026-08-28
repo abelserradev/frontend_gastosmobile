@@ -7,23 +7,39 @@ import {
   ElementRef,
   inject,
   Injector,
+  OnDestroy,
   OnInit,
   signal,
   viewChild,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { ChartData, ChartOptions } from 'chart.js';
 import { AppContextService } from '../../core/app-context.service';
+import { navigateFromExpensesMenu } from '../../core/app-navigation.util';
 import { AuthService } from '../../core/auth.service';
 import { formatApiHttpError } from '../../core/http-error.util';
-import { MeApiService, type MeExpense } from '../../core/me-api.service';
+import { writeBcvRateCache } from '../../core/bcv-rate-cache.util';
+import { MeApiService, type MeExpense, type MeIncome, type MeProfileMember } from '../../core/me-api.service';
+import {
+  getStateWithAutoRollover,
+  needsSetupScreen,
+} from '../../core/month-renewal.util';
 import type { ParseInvoiceResult } from '../../core/ocr-api.service';
+import { guessOcrDocumentKind } from '../../core/ocr-document-kind.util';
 import { ExpenseModalComponent } from './expense-modal.component';
+import { IncomeModalComponent } from './income-modal.component';
 import { ExpensePieChartComponent } from './expense-pie-chart.component';
 import { ExpenseTypeSelectorComponent, type ExpenseCreationMode } from './expense-type-selector.component';
 import { ImageUploadModalComponent, type ImageUploadMode } from './image-upload-modal.component';
 import { ReceiptViewerComponent } from './receipt-viewer.component';
+import { TelegramLinkPanelComponent } from './telegram-link-panel.component';
+import { HelpChatWidgetComponent } from '../../shared/help-chat/help-chat-widget.component';
+import { resolveExpenseCategoryIcon, type ExpenseCategoryIconKind } from './expense-category-icon.util';
+import {
+  buildLastSevenDaySpending,
+  sparklinePolyline,
+} from './expense-sparkline.util';
 
 const EXPENSES_PAGE_SIZE = 6;
 
@@ -52,27 +68,49 @@ function toExpenseItem(e: MeExpense) {
   };
 }
 
+function toIncomeItem(i: MeIncome) {
+  return {
+    id: i.id,
+    title: i.title,
+    description: i.description,
+    amount: i.amount,
+    source: i.source,
+    referenceMonth: i.referenceMonth,
+    receivedDate: i.receivedDate,
+    bcvRateApplied: i.bcvRateApplied,
+    bcvRateDate: i.bcvRateDate,
+  };
+}
+
 @Component({
   selector: 'app-expenses-page',
   standalone: true,
   imports: [
     CommonModule,
     FormsModule,
+    RouterLink,
     ExpenseModalComponent,
+    IncomeModalComponent,
     ExpensePieChartComponent,
     ExpenseTypeSelectorComponent,
     ImageUploadModalComponent,
     ReceiptViewerComponent,
+    TelegramLinkPanelComponent,
+    HelpChatWidgetComponent,
   ],
   templateUrl: './expenses-page.component.html',
   styleUrl: './expenses-page.component.scss',
 })
-export class ExpensesPageComponent implements OnInit {
+export class ExpensesPageComponent implements OnInit, OnDestroy {
   readonly ctx = inject(AppContextService);
   private readonly meApi = inject(MeApiService);
-  private readonly auth = inject(AuthService);
+  readonly auth = inject(AuthService);
   private readonly router = inject(Router);
   private readonly injector = inject(Injector);
+
+  /** Miniaturas OCR en hover; se liberan al destruir la vista. */
+  private readonly receiptBlobCache = new Map<string, string>();
+  private readonly receiptFetchInFlight = new Set<string>();
 
   readonly paidByDialog =
     viewChild<ElementRef<HTMLDialogElement>>('paidByDialog');
@@ -101,16 +139,47 @@ export class ExpensesPageComponent implements OnInit {
   readonly imageUploadOpen = signal(false);
   readonly imageUploadMode = signal<ImageUploadMode>('invoice');
   readonly modalOpen = signal(false);
+  readonly incomeModalOpen = signal(false);
+  readonly boardTab = signal<'expenses' | 'incomes'>('expenses');
   /** Datos del OCR que se pasan al formulario; null = sin prefill (gasto manual). */
   readonly ocrPrefill = signal<ParseInvoiceResult | null>(null);
+  /** Factura vs pago móvil: guía estadística tipo documento cuando hay OCR previo al formulario. */
+  readonly lastReceiptCaptureKind = signal<ImageUploadMode | null>(null);
 
   // --- Visor de comprobantes ---
   readonly receiptViewerOpen = signal(false);
   readonly receiptExpenseId = signal<string | null>(null);
   readonly showChart = signal(false);
+  readonly sidebarOpen = signal(false);
+  /** Invitaciones pendientes a perfiles comercio compartidos. */
+  readonly pendingInvitationsCount = signal(0);
+
+  /** Perfiles propios — excluye colaboraciones compartidas del flujo de gastos. */
+  readonly expenseProfiles = computed(() =>
+    this.ctx.profiles().filter((p) => (p.access ?? 'owner') === 'owner'),
+  );
+  /** Determina si mostrar el enlace de inventario en el sidebar (al menos un perfil comercio). */
+  readonly hasInventory = computed(() =>
+    this.ctx.profiles().some((p) => p.type === 'comercio'),
+  );
+  readonly hoveredReceiptId = signal<string | null>(null);
+  /** Fuerza repaint cuando llega una miniatura de recibo en caché. */
+  readonly receiptPreviewTick = signal(0);
   /** YYYY-MM-01 del mes de control activo (API, calendario Caracas). */
   readonly activeReferenceMonth = signal('');
+  /**
+   * FEAT-001: Label del periodo activo.
+   * Usa el label del backend si está disponible (ej: "16 May - 15 Jun"),
+   * fallback al label del mes calendario si no.
+   */
   readonly monthLabelActive = computed(() => {
+    // FEAT-001: Primero intentar usar el label del periodo activo del contexto
+    const periodLabel = this.ctx.activePeriodLabel();
+    if (periodLabel) {
+      return periodLabel;
+    }
+
+    // Fallback legacy: calcular desde activeReferenceMonth
     const ymd = this.activeReferenceMonth();
     if (!ymd || ymd.length < 7) {
       return '';
@@ -126,19 +195,60 @@ export class ExpensesPageComponent implements OnInit {
     });
   });
   readonly selectedExpenses = signal<Set<string>>(new Set());
+  readonly selectedIncomes = signal<Set<string>>(new Set());
   readonly paidByModalOpen = signal(false);
   /** Gastos a marcar como pagados al confirmar el modal (uno o varios). */
   readonly pendingPaidExpenseIds = signal<string[] | null>(null);
   /** Perfil (de la lista /profiles) que realizó el pago. */
   readonly paidByProfileId = signal<string>('');
+  /** Integrante específico dentro del perfil seleccionado (opcional). */
+  readonly paidByMemberId = signal<string>('');
+  readonly profileMembers = signal<MeProfileMember[]>([]);
+  readonly membersLoading = signal<boolean>(false);
 
   readonly totalExpenses = computed(() => {
     const ex = this.ctx.userData().expenses;
     return ex.filter((e) => e.isPaid).reduce((sum, e) => sum + e.amount, 0);
   });
 
-  readonly remaining = computed(() => {
-    return this.ctx.monthlyIncome() - this.totalExpenses();
+  readonly totalLoggedIncome = computed(() =>
+    this.ctx.incomes().reduce((sum, i) => sum + i.amount, 0),
+  );
+
+  readonly totalPeriodIncome = computed(
+    () => this.ctx.effectiveMonthlyIncome() + this.totalLoggedIncome(),
+  );
+
+  readonly remaining = computed(
+    () => this.totalPeriodIncome() - this.totalExpenses(),
+  );
+
+  readonly spendingSparklineValues = computed(() =>
+    buildLastSevenDaySpending(this.ctx.expenses()),
+  );
+
+  readonly spendingSparklinePath = computed(() =>
+    sparklinePolyline(this.spendingSparklineValues()),
+  );
+
+  readonly averageBcvRate = computed(() => {
+    const rows = this.ctx
+      .expenses()
+      .filter((e) => e.bcvRateApplied != null && e.isPaid);
+    if (rows.length === 0) {
+      return null;
+    }
+    const sum = rows.reduce((acc, e) => acc + (e.bcvRateApplied ?? 0), 0);
+    return sum / rows.length;
+  });
+
+  readonly userInitial = computed(() => {
+    const name = this.auth.displayName()?.trim();
+    if (name) {
+      return name.charAt(0).toUpperCase();
+    }
+    const mail = this.auth.email()?.trim();
+    return mail ? mail.charAt(0).toUpperCase() : '?';
   });
 
   readonly pieChartData = computed((): ChartData<'pie'> => {
@@ -228,21 +338,28 @@ export class ExpensesPageComponent implements OnInit {
       void this.router.navigate(['/login']);
       return;
     }
-    this.meApi.getState().subscribe({
+    getStateWithAutoRollover(this.meApi).subscribe({
       next: (s) => {
-        if (s.needsMonthlyIncomeSetup) {
+        if (needsSetupScreen(s)) {
           void this.router.navigate(['/setup']);
           return;
         }
         this.activeReferenceMonth.set(s.activeReferenceMonth);
+        // FEAT-001: Sincronizar periodo activo
+        this.ctx.syncActivePeriod(s.activePeriod ?? null);
         if (s.preferences) {
-          this.ctx.setCurrency(s.preferences.defaultCurrency);
-          this.ctx.setMonthlyIncome(s.preferences.monthlyIncome);
-          this.ctx.setBsIncomeContext({
-            incomeFixedBs: s.preferences.incomeFixedBs,
-            narrative: s.preferences.bsIncomeNarrative,
-            stale: s.preferences.bcvQuoteIsStale,
-          });
+          this.ctx.syncFromMePreferences(s.preferences);
+          if (
+            s.preferences.bcvVesPerUsdNow != null &&
+            s.preferences.bcvRateDateNow
+          ) {
+            writeBcvRateCache({
+              vesPerUsd: s.preferences.bcvVesPerUsdNow,
+              date: s.preferences.bcvRateDateNow,
+              rateDate: s.preferences.bcvRateDateNow,
+              stale: s.preferences.bcvQuoteIsStale,
+            });
+          }
         } else {
           this.ctx.setBsIncomeContext({
             incomeFixedBs: null,
@@ -255,6 +372,9 @@ export class ExpensesPageComponent implements OnInit {
         );
         this.ctx.setProfiles(s.profiles);
         this.ctx.setExpenses(s.expenses.map(toExpenseItem));
+        this.ctx.setIncomeSources(s.incomeSources ?? []);
+        this.ctx.setIncomes((s.incomes ?? []).map(toIncomeItem));
+        this.loadPendingInvitationsCount();
       },
       error: (err: unknown) => {
         globalThis.alert(formatApiHttpError(err));
@@ -278,16 +398,94 @@ export class ExpensesPageComponent implements OnInit {
     );
   }
 
-  /** Punto de entrada único: abre el selector de tipo de gasto. */
+  onIncomeModalOpenChange(open: boolean): void {
+    this.incomeModalOpen.set(open);
+  }
+
+  onAddIncome(payload: {
+    title: string;
+    description: string;
+    amount: number;
+    source: string;
+    receivedDate?: string;
+  }): void {
+    this.meApi
+      .createIncome({
+        title: payload.title,
+        description: payload.description,
+        amount: payload.amount,
+        sourceName: payload.source,
+        receivedDate: payload.receivedDate,
+      })
+      .subscribe({
+      next: (row) => {
+        this.ctx.setIncomes([toIncomeItem(row), ...this.ctx.incomes()]);
+        this.boardTab.set('incomes');
+      },
+      error: (err: unknown) => {
+        globalThis.alert(formatApiHttpError(err));
+      },
+    });
+  }
+
+  isIncomeSelected(id: string): boolean {
+    return this.selectedIncomes().has(id);
+  }
+
+  toggleIncomeSelection(id: string): void {
+    const next = new Set(this.selectedIncomes());
+    if (next.has(id)) {
+      next.delete(id);
+    } else {
+      next.add(id);
+    }
+    this.selectedIncomes.set(next);
+  }
+
+  handleDeleteIncomes(): void {
+    const sel = this.selectedIncomes();
+    if (sel.size === 0) {
+      globalThis.alert('Selecciona al menos un ingreso para eliminar');
+      return;
+    }
+    if (!globalThis.confirm(`¿Eliminar ${sel.size} ingreso(s)?`)) {
+      return;
+    }
+    const ids = [...sel];
+    this.meApi.deleteIncomes(ids).subscribe({
+      next: () => {
+        this.ctx.setIncomes(this.ctx.incomes().filter((i) => !ids.includes(i.id)));
+        this.selectedIncomes.set(new Set());
+      },
+      error: (err: unknown) => {
+        globalThis.alert(formatApiHttpError(err));
+      },
+    });
+  }
+
+  /** Punto de entrada único: gasto manual, OCR o ingreso del periodo. */
   openTypeSelector(): void {
     this.selectorOpen.set(true);
   }
 
   onSelectorOpenChange(open: boolean): void {
     this.selectorOpen.set(open);
+    if (open) {
+      this.lastReceiptCaptureKind.set(null);
+    }
   }
 
   onCreationModeSelected(mode: ExpenseCreationMode): void {
+    if (mode === 'income') {
+      this.lastReceiptCaptureKind.set(null);
+      this.incomeModalOpen.set(true);
+      return;
+    }
+    if (mode === 'invoice' || mode === 'payment') {
+      this.lastReceiptCaptureKind.set(mode);
+    } else {
+      this.lastReceiptCaptureKind.set(null);
+    }
     if (mode === 'manual') {
       this.ocrPrefill.set(null);
       this.modalOpen.set(true);
@@ -335,6 +533,8 @@ export class ExpensesPageComponent implements OnInit {
     category: string;
     paymentDate?: string;
   }): void {
+    const ocrSnapshot = this.ocrPrefill();
+    const flowKind = this.lastReceiptCaptureKind();
     this.meApi
       .createExpense({
         title: payload.title,
@@ -347,11 +547,59 @@ export class ExpensesPageComponent implements OnInit {
         next: (row) => {
           this.expensesPage.set(1);
           this.ctx.setExpenses([toExpenseItem(row), ...this.ctx.expenses()]);
+          const raw = (ocrSnapshot?.rawText ?? '').trim();
+          if (raw.length >= 8 && ocrSnapshot) {
+            this.enqueueOcrFeedbackAfterDetailForm(
+              row,
+              payload,
+              ocrSnapshot,
+              flowKind,
+            );
+          }
         },
         error: (err: unknown) => {
           globalThis.alert(formatApiHttpError(err));
         },
       });
+  }
+
+  /** Fire-and-forget opcional contra el servidor (v1.3). */
+  private enqueueOcrFeedbackAfterDetailForm(
+    expenseRow: MeExpense,
+    formPayload: {
+      title: string;
+      description: string;
+      amount: number;
+      category: string;
+      paymentDate?: string;
+    },
+    ocrSnapshot: ParseInvoiceResult,
+    receiptFlow: ImageUploadMode | null,
+  ): void {
+    const kind = guessOcrDocumentKind(receiptFlow ?? undefined, ocrSnapshot.rawText);
+    const parseSnapshot = {
+      ...ocrSnapshot,
+      rawText: (ocrSnapshot.rawText ?? '').slice(0, 7900),
+    };
+    const pay = expenseRow.paymentDate ?? formPayload.paymentDate?.trim();
+    this.meApi
+      .submitOcrFeedback({
+        source: 'IMAGE_UPLOAD_FLOW',
+        submissionVariant: 'detail_form',
+        documentKindGuess: kind,
+        parseSnapshot,
+        corrected: {
+          title: expenseRow.title,
+          description: expenseRow.description,
+          amountUsd: expenseRow.amount,
+          ...(pay ? { paymentDate: pay.slice(0, 10) } : {}),
+          currencyCapture:
+            this.ctx.currency() === 'BS' ? 'BS' : 'USD',
+          categoryName: expenseRow.category,
+        },
+        expenseId: expenseRow.id,
+      })
+      .subscribe({ error: () => {} });
   }
 
   toggleExpensePaid(id: string): void {
@@ -383,7 +631,7 @@ export class ExpensesPageComponent implements OnInit {
       );
       return;
     }
-    if (this.ctx.profiles().length === 0) {
+    if (this.expenseProfiles().length === 0) {
       globalThis.alert(
         'No hay perfiles. Ve a Perfiles, crea al menos uno y vuelve para indicar quién pagó.',
       );
@@ -391,6 +639,9 @@ export class ExpensesPageComponent implements OnInit {
     }
     this.pendingPaidExpenseIds.set(pendientes);
     this.paidByProfileId.set('');
+    this.paidByMemberId.set('');
+    this.profileMembers.set([]);
+    this.membersLoading.set(false);
     this.paidByModalOpen.set(true);
   }
 
@@ -398,6 +649,28 @@ export class ExpensesPageComponent implements OnInit {
     this.paidByModalOpen.set(false);
     this.pendingPaidExpenseIds.set(null);
     this.paidByProfileId.set('');
+    this.paidByMemberId.set('');
+    this.profileMembers.set([]);
+    this.membersLoading.set(false);
+  }
+
+  /** Al cambiar el perfil seleccionado se cargan sus integrantes (si tiene). */
+  onProfileChange(profileId: string): void {
+    this.paidByProfileId.set(profileId);
+    this.paidByMemberId.set('');
+    this.profileMembers.set([]);
+    if (!profileId) return;
+    this.membersLoading.set(true);
+    this.meApi.listProfileMembers(profileId).subscribe({
+      next: (members) => {
+        this.membersLoading.set(false);
+        this.profileMembers.set(members);
+      },
+      error: () => {
+        // Fallo silencioso: el usuario puede pagar como perfil sin integrante
+        this.membersLoading.set(false);
+      },
+    });
   }
 
   confirmPaidBy(): void {
@@ -411,14 +684,21 @@ export class ExpensesPageComponent implements OnInit {
       globalThis.alert('Selecciona qué perfil realizó el pago');
       return;
     }
-    const payer = this.ctx.profiles().find((p) => p.id === pid);
+    const payer = this.expenseProfiles().find((p) => p.id === pid);
     if (!payer) {
       globalThis.alert('Perfil no válido; recarga la página e intenta de nuevo');
       return;
     }
+    const mid = this.paidByMemberId().trim();
+    // El backend construye "Mamá (Familia García)" si hay memberId; aquí solo
+    // mandamos el nombre del perfil como fallback por si la resolución falla.
     const nombrePagador = payer.name.trim();
     this.meApi
-      .markExpensesPaid({ ids, paidByDisplayName: nombrePagador })
+      .markExpensesPaid({
+        ids,
+        paidByDisplayName: nombrePagador,
+        ...(mid ? { paidByMemberId: mid } : {}),
+      })
       .subscribe({
         next: (rows) => {
           for (const row of rows) {
@@ -549,7 +829,77 @@ export class ExpensesPageComponent implements OnInit {
   }
 
   goHistorial(): void {
+    this.closeSidebar();
     void this.router.navigate(['/historial']);
+  }
+
+  goProfiles(): void {
+    navigateFromExpensesMenu(this.router, '/profiles', () => this.closeSidebar());
+  }
+
+  goInvitations(): void {
+    navigateFromExpensesMenu(this.router, '/invitations', () => this.closeSidebar());
+  }
+
+  private loadPendingInvitationsCount(): void {
+    this.meApi.listInvitations().subscribe({
+      next: (list) => this.pendingInvitationsCount.set(list.length),
+      error: () => this.pendingInvitationsCount.set(0),
+    });
+  }
+
+  goSetup(): void {
+    navigateFromExpensesMenu(this.router, '/setup', () => this.closeSidebar());
+  }
+
+  toggleSidebar(): void {
+    this.sidebarOpen.update((v) => !v);
+  }
+
+  closeSidebar(): void {
+    this.sidebarOpen.set(false);
+  }
+
+  categoryIconKind(category: string): ExpenseCategoryIconKind {
+    return resolveExpenseCategoryIcon(category);
+  }
+
+  receiptPreviewUrl(expenseId: string): string | null {
+    this.receiptPreviewTick();
+    return this.receiptBlobCache.get(expenseId) ?? null;
+  }
+
+  onReceiptHover(expenseId: string): void {
+    this.hoveredReceiptId.set(expenseId);
+    if (
+      this.receiptBlobCache.has(expenseId) ||
+      this.receiptFetchInFlight.has(expenseId)
+    ) {
+      return;
+    }
+    this.receiptFetchInFlight.add(expenseId);
+    this.meApi.getExpenseReceipt(expenseId).subscribe({
+      next: (blob) => {
+        const url = URL.createObjectURL(blob);
+        this.receiptBlobCache.set(expenseId, url);
+        this.receiptFetchInFlight.delete(expenseId);
+        this.receiptPreviewTick.update((n) => n + 1);
+      },
+      error: () => {
+        this.receiptFetchInFlight.delete(expenseId);
+      },
+    });
+  }
+
+  onReceiptHoverEnd(): void {
+    this.hoveredReceiptId.set(null);
+  }
+
+  ngOnDestroy(): void {
+    for (const url of this.receiptBlobCache.values()) {
+      URL.revokeObjectURL(url);
+    }
+    this.receiptBlobCache.clear();
   }
 
   goPrevExpensePage(): void {

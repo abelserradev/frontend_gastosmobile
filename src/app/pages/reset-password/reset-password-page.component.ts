@@ -10,7 +10,6 @@ import { formatApiHttpError } from '../../core/http-error.util';
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './reset-password-page.component.html',
-  styleUrl: './reset-password-page.component.scss',
 })
 export class ResetPasswordPageComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);

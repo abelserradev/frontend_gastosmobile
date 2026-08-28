@@ -1,8 +1,12 @@
 import { computed, Injectable, signal } from '@angular/core';
+import type { ActivePeriod, BudgetCycle, MePreferences } from './me-api.service';
 
 export type CurrencyCode = 'BS' | 'USD';
 
-export type ProfileType = 'familiar' | 'grupal';
+/** Re-exportar tipos de ciclo presupuestario para conveniencia */
+export type { ActivePeriod, BudgetCycle };
+
+export type ProfileType = 'familiar' | 'grupal' | 'comercio';
 
 export interface CategoryDraft {
   id: string;
@@ -13,6 +17,8 @@ export interface UserProfile {
   id: string;
   name: string;
   type: ProfileType;
+  access?: 'owner' | 'collaborator';
+  ownerName?: string | null;
 }
 
 export interface ExpenseItem {
@@ -34,10 +40,24 @@ export interface ExpenseItem {
   hasReceipt?: boolean;
 }
 
+export interface IncomeItem {
+  id: string;
+  title: string;
+  description: string;
+  amount: number;
+  source: string;
+  referenceMonth?: string;
+  receivedDate?: string | null;
+  bcvRateApplied?: number | null;
+  bcvRateDate?: string | null;
+}
+
 @Injectable({ providedIn: 'root' })
 export class AppContextService {
   readonly currency = signal<CurrencyCode>('USD');
   readonly monthlyIncome = signal<number>(0);
+  readonly carryoverUsd = signal<number>(0);
+  readonly effectiveMonthlyIncome = signal<number>(0);
   /** Monto en Bs. fijado por el usuario cuando controla en bolívares. */
   readonly incomeFixedBs = signal<number | null>(null);
   readonly bsIncomeNarrative = signal<string | null>(null);
@@ -45,6 +65,15 @@ export class AppContextService {
   readonly categories = signal<CategoryDraft[]>([]);
   readonly profiles = signal<UserProfile[]>([]);
   readonly expenses = signal<ExpenseItem[]>([]);
+  readonly incomeSources = signal<{ id: string; name: string }[]>([]);
+  readonly incomes = signal<IncomeItem[]>([]);
+
+  /** FEAT-001: Periodo presupuestario activo calculado por el backend. */
+  readonly activePeriod = signal<ActivePeriod | null>(null);
+  /** FEAT-001: Etiqueta legible del periodo (ej: "16 May - 15 Jun"). */
+  readonly activePeriodLabel = computed(() => this.activePeriod()?.label ?? '');
+  /** FEAT-001: Configuración del ciclo presupuestario. */
+  readonly budgetCycle = signal<BudgetCycle>({ mode: 'calendar_month', cutoffDay: 1 });
 
   readonly userData = computed(() => ({
     currency: this.currency(),
@@ -74,6 +103,30 @@ export class AppContextService {
     this.bcvQuoteIsStale.set(p.stale);
   }
 
+  syncFromMePreferences(pref: MePreferences): void {
+    this.setCurrency(pref.defaultCurrency);
+    this.setMonthlyIncome(pref.monthlyIncome);
+    this.carryoverUsd.set(pref.carryoverUsd ?? 0);
+    this.effectiveMonthlyIncome.set(
+      pref.effectiveMonthlyIncomeUsd ?? pref.monthlyIncome,
+    );
+    this.setBsIncomeContext({
+      incomeFixedBs: pref.incomeFixedBs,
+      narrative: pref.bsIncomeNarrative,
+      stale: pref.bcvQuoteIsStale,
+    });
+    // FEAT-001: Sincronizar configuración del ciclo presupuestario
+    this.budgetCycle.set(pref.budgetCycle ?? { mode: 'calendar_month', cutoffDay: 1 });
+  }
+
+  /**
+   * FEAT-001: Actualiza el periodo activo desde la respuesta del backend.
+   * Usar después de sincronizar preferencias.
+   */
+  syncActivePeriod(period: ActivePeriod | null): void {
+    this.activePeriod.set(period);
+  }
+
   setCategories(list: CategoryDraft[]): void {
     this.categories.set(list);
   }
@@ -84,6 +137,14 @@ export class AppContextService {
 
   setExpenses(list: ExpenseItem[]): void {
     this.expenses.set(list);
+  }
+
+  setIncomeSources(list: { id: string; name: string }[]): void {
+    this.incomeSources.set(list);
+  }
+
+  setIncomes(list: IncomeItem[]): void {
+    this.incomes.set(list);
   }
 
   addProfile(profile: UserProfile): void {

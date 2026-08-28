@@ -113,7 +113,7 @@ export class ExpenseModalComponent implements OnChanges {
       return;
     }
     this.previewLoading = true;
-    this.meApi.getBcvOfficialRate(date).subscribe({
+    this.meApi.getBcvOfficialRateResilient(date).subscribe({
       next: (r) => {
         this.usdPreview = bs / r.vesPerUsd;
         this.previewLoading = false;
@@ -153,7 +153,7 @@ export class ExpenseModalComponent implements OnChanges {
       globalThis.alert('Monto en Bs. no válido');
       return;
     }
-    this.meApi.getBcvOfficialRate(date).subscribe({
+    this.meApi.getBcvOfficialRateResilient(date).subscribe({
       next: (r) => {
         const usd = bs / r.vesPerUsd;
         this.emitAndClose({
@@ -165,7 +165,9 @@ export class ExpenseModalComponent implements OnChanges {
         });
       },
       error: () => {
-        globalThis.alert('No se pudo obtener la tasa BCV para esa fecha.');
+        globalThis.alert(
+          'No se pudo obtener la tasa BCV para esa fecha (sin caché local).',
+        );
       },
     });
   }

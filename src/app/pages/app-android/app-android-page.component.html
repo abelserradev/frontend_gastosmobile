@@ -1,0 +1,107 @@
+<div class="min-h-screen bg-gradient-to-br from-[#FFD300]/20 to-background p-6">
+  <div class="max-w-md mx-auto">
+
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-6 mt-4">
+      <button
+        type="button"
+        (click)="goBack()"
+        class="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+      >
+        ← Volver
+      </button>
+    </div>
+
+    <!-- Card principal -->
+    <div class="bg-card rounded-2xl shadow-xl p-6">
+
+      <!-- Ícono + título -->
+      <div class="flex flex-col items-center text-center mb-6">
+        <div class="w-16 h-16 rounded-2xl bg-[#FFD300]/20 flex items-center justify-center mb-4">
+          <span class="text-3xl">📱</span>
+        </div>
+        <h1 class="text-2xl font-bold text-foreground">App Android</h1>
+        <p class="text-sm text-muted-foreground mt-1">{{ brandAppName }}</p>
+      </div>
+
+      <!-- Estado: correo habilitado -->
+      <div class="bg-green-50 border border-green-200 rounded-xl p-4 mb-6">
+        <p class="text-sm font-semibold text-green-800 mb-1">✅ Tu acceso está habilitado</p>
+        <p class="text-xs text-green-700 break-all">
+          {{ auth.email() }}
+        </p>
+      </div>
+
+      <!-- Descarga directa (respaldo si Firebase no manda el correo) -->
+      <div class="mb-6 text-center">
+        <a
+          href="/gastos-mobile.apk"
+          download="gastos-mobile.apk"
+          class="inline-flex items-center justify-center gap-2 w-full py-3.5 px-6 rounded-xl text-sm font-bold bg-primary text-primary-foreground hover:opacity-90 transition-opacity shadow-sm"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <rect width="14" height="20" x="5" y="2" rx="2" ry="2" />
+            <path d="M12 18h.01" />
+          </svg>
+          Descargar aplicación móvil
+        </a>
+        <p class="text-xs text-muted-foreground mt-2">
+          Abre este enlace desde tu teléfono Android para instalar.
+        </p>
+      </div>
+
+      <!-- Instrucciones -->
+      <div class="space-y-4 mb-6">
+        <p class="text-sm font-semibold text-foreground">Pasos de instalación</p>
+
+        <ol class="space-y-3">
+          <li class="flex gap-3">
+            <span class="flex-shrink-0 w-6 h-6 rounded-full bg-[#FFD300] text-xs font-bold flex items-center justify-center text-[#333]">1</span>
+            <div>
+              <p class="text-sm text-foreground font-medium">Descarga el APK en el teléfono</p>
+              <p class="text-xs text-muted-foreground mt-0.5">
+                Usa el botón de arriba desde Android, o el correo de invitación si te llegó.
+              </p>
+            </div>
+          </li>
+
+          <li class="flex gap-3">
+            <span class="flex-shrink-0 w-6 h-6 rounded-full bg-[#FFD300] text-xs font-bold flex items-center justify-center text-[#333]">2</span>
+            <div>
+              <p class="text-sm text-foreground font-medium">Instala la app</p>
+              <p class="text-xs text-muted-foreground mt-0.5">
+                Android puede pedir permiso para instalar apps de fuentes externas. Acepta solo para este archivo.
+              </p>
+            </div>
+          </li>
+
+          <li class="flex gap-3">
+            <span class="flex-shrink-0 w-6 h-6 rounded-full bg-[#FFD300] text-xs font-bold flex items-center justify-center text-[#333]">3</span>
+            <div>
+              <p class="text-sm text-foreground font-medium">Inicia sesión con la misma cuenta</p>
+              <p class="text-xs text-muted-foreground mt-0.5">
+                Usa el mismo correo con el que te registraste en la web: <strong class="break-all">{{ auth.email() }}</strong>
+              </p>
+            </div>
+          </li>
+        </ol>
+      </div>
+
+      <!-- Nota informativa -->
+      <div class="bg-muted/40 border border-border rounded-xl p-4 text-xs text-muted-foreground leading-relaxed">
+        <p class="font-medium text-foreground mb-1">ℹ️ Distribución directa</p>
+        <p>
+          {{ brandAppName }} aún no está en Google Play. Puedes descargar la app desde esta página
+          o por el correo de invitación.
+        </p>
+      </div>
+
+    </div>
+
+    <!-- Soporte -->
+    <p class="text-center text-xs text-muted-foreground mt-6">
+      ¿No recibiste el correo de invitación? Usa el botón de descarga directa arriba.
+    </p>
+
+  </div>
+</div>

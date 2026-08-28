@@ -1,8 +1,41 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, catchError, map, of, tap, throwError } from 'rxjs';
 import { environment } from '../../environments/environment';
+import {
+  readBcvRateCacheOrLatest,
+  writeBcvRateCache,
+} from './bcv-rate-cache.util';
 import type { CurrencyCode, ProfileType } from './app-context.service';
+import type { ParseInvoiceResult } from './ocr-api.service';
+
+export interface BcvOfficialRateResponse {
+  date: string;
+  vesPerUsd: number;
+  rateDate: string;
+  stale: boolean;
+  fromLocalCache: boolean;
+}
+
+/** Configuración del ciclo presupuestario (FEAT-001). */
+export interface BudgetCycle {
+  mode: 'calendar_month' | 'monthly_cutoff';
+  cutoffDay: number;
+}
+
+/** Periodo presupuestario activo (FEAT-001). */
+export interface ActivePeriod {
+  /** YYYY-MM-DD del inicio del periodo (día después del corte anterior). */
+  periodStart: string;
+  /** YYYY-MM-DD de la fecha de corte (fin del periodo). */
+  cutoffDate: string;
+  /** YYYY-MM-DD del inicio del siguiente periodo (día después del corte). */
+  nextPeriodStart: string;
+  /** Etiqueta legible para UI (ej: "16 May - 15 Jun"). */
+  label: string;
+  /** Si hoy es día de corte (mostrar renovación). */
+  isCutoffToday: boolean;
+}
 
 export interface MePreferences {
   defaultCurrency: CurrencyCode;
@@ -18,11 +51,26 @@ export interface MePreferences {
   usdEquivalentDelta: number | null;
   bsIncomeNarrative: string | null;
   bcvQuoteIsStale: boolean;
+  carryoverUsd: number;
+  effectiveMonthlyIncomeUsd: number;
+  /** Configuración del ciclo presupuestario (FEAT-001). */
+  budgetCycle: BudgetCycle;
 }
 
-export type MePreferencesPut =
+export type MePreferencesPut = (
   | { defaultCurrency: 'USD'; monthlyIncome: number }
-  | { defaultCurrency: 'BS'; monthlyIncomeBs: number };
+  | { defaultCurrency: 'BS'; monthlyIncomeBs: number }
+) & {
+  applySurplus?: boolean;
+  /** Configuración del ciclo presupuestario (FEAT-001). */
+  budgetCycle?: BudgetCycle;
+};
+
+export interface MeMonthRenewal {
+  closingMonthYmd: string;
+  surplusUsd: number;
+  requiresSurplusPrompt: boolean;
+}
 
 export interface MeCategory {
   id: string;
@@ -33,6 +81,31 @@ export interface MeProfile {
   id: string;
   name: string;
   type: ProfileType;
+  access?: 'owner' | 'collaborator';
+  ownerName?: string | null;
+}
+
+export interface ProfileCollaborator {
+  id: string;
+  profileId: string;
+  profileName: string;
+  userId: string;
+  userEmail: string;
+  userName: string;
+  invitedById: string;
+  status: 'pending' | 'accepted' | 'rejected' | 'revoked';
+  role: 'editor' | 'viewer';
+  createdAt: string;
+  acceptedAt: string | null;
+}
+
+export interface ProfileInvitation {
+  id: string;
+  profileId: string;
+  profileName: string;
+  invitedByName: string;
+  role: 'editor' | 'viewer';
+  createdAt: string;
 }
 
 export interface MeProfileMember {
@@ -61,10 +134,40 @@ export interface MeExpense {
   hasReceipt: boolean;
 }
 
+export interface MeIncomeSource {
+  id: string;
+  name: string;
+}
+
+export interface MeIncome {
+  id: string;
+  title: string;
+  description: string;
+  amount: number;
+  source: string;
+  referenceMonth: string;
+  receivedDate: string | null;
+  bcvRateApplied: number | null;
+  bcvRateDate: string | null;
+}
+
 export interface MeHistoryMonthSummary {
   month: string;
   expenseCount: number;
   totalAmountUsd: number;
+}
+
+export interface TelegramLinkCodeResponse {
+  code: string;
+  expiresAt: string;
+  botUsername: string | null;
+  deepLink: string | null;
+}
+
+export interface TelegramLinkStatusResponse {
+  linked: boolean;
+  username: string | null;
+  linkedAt: string | null;
 }
 
 export interface MeState {
@@ -72,9 +175,40 @@ export interface MeState {
   categories: MeCategory[];
   profiles: MeProfile[];
   expenses: MeExpense[];
-  /** Primer día del mes en curso (Caracas), YYYY-MM-DD. */
+  incomeSources: MeIncomeSource[];
+  incomes: MeIncome[];
+  /** Primer día del mes/periodo en curso (Caracas), YYYY-MM-DD. */
   activeReferenceMonth: string;
+  /** Periodo presupuestario activo calculado (FEAT-001). */
+  activePeriod: ActivePeriod;
   needsMonthlyIncomeSetup: boolean;
+  monthRenewal: MeMonthRenewal | null;
+}
+
+export type OcrFeedbackSourceApi = 'IMAGE_UPLOAD_FLOW' | 'EDIT_EXPENSE';
+
+export type MeOcrDocumentKindGuessApi =
+  | 'payment_screenshot'
+  | 'physical_receipt'
+  | 'fiscal_or_formal_invoice'
+  | 'unknown';
+
+/** Body de POST /me/ocr-feedback (v1.3). parseSnapshot debe alinear con ParseInvoiceResult. */
+export interface SubmitOcrFeedbackBody {
+  source: OcrFeedbackSourceApi;
+  submissionVariant?: 'quick_confirm' | 'detail_form';
+  documentKindGuess?: MeOcrDocumentKindGuessApi;
+  parseSnapshot: ParseInvoiceResult;
+  corrected: {
+    title: string;
+    description?: string;
+    amountUsd: number;
+    paymentDate?: string;
+    currencyCapture?: 'USD' | 'BS';
+    categoryName?: string;
+    bankLabel?: string;
+  };
+  expenseId?: string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -88,6 +222,10 @@ export class MeApiService {
 
   updatePreferences(body: MePreferencesPut): Observable<MePreferences> {
     return this.http.put<MePreferences>(`${this.base}/me/preferences`, body);
+  }
+
+  rolloverMonth(body: { applySurplus?: boolean }): Observable<MePreferences> {
+    return this.http.post<MePreferences>(`${this.base}/me/month-rollover`, body);
   }
 
   replaceCategories(names: string[]): Observable<MeCategory[]> {
@@ -131,6 +269,43 @@ export class MeApiService {
     return this.http.delete<void>(
       `${this.base}/me/profiles/${profileId}/members/${memberId}`,
     );
+  }
+
+  listCollaborators(profileId: string): Observable<ProfileCollaborator[]> {
+    return this.http.get<ProfileCollaborator[]>(
+      `${this.base}/me/profiles/${profileId}/collaborators`,
+    );
+  }
+
+  inviteCollaborator(
+    profileId: string,
+    email: string,
+  ): Observable<ProfileCollaborator> {
+    return this.http.post<ProfileCollaborator>(
+      `${this.base}/me/profiles/${profileId}/collaborators`,
+      { email },
+    );
+  }
+
+  revokeCollaborator(profileId: string, userId: string): Observable<void> {
+    return this.http.delete<void>(
+      `${this.base}/me/profiles/${profileId}/collaborators/${userId}`,
+    );
+  }
+
+  listInvitations(): Observable<ProfileInvitation[]> {
+    return this.http.get<ProfileInvitation[]>(`${this.base}/me/invitations`);
+  }
+
+  acceptInvitation(id: string): Observable<ProfileCollaborator> {
+    return this.http.post<ProfileCollaborator>(
+      `${this.base}/me/invitations/${id}/accept`,
+      {},
+    );
+  }
+
+  rejectInvitation(id: string): Observable<void> {
+    return this.http.post<void>(`${this.base}/me/invitations/${id}/reject`, {});
   }
 
   listExpenses(): Observable<MeExpense[]> {
@@ -193,7 +368,51 @@ export class MeApiService {
     });
   }
 
-  /** Tasa dólar oficial (Bs/USD) para un día; sin fecha = hoy Caracas. */
+  /**
+   * Tasa BCV con caché en localStorage: si el backend/DolarApi falla, usa la última tasa guardada.
+   */
+  getBcvOfficialRateResilient(date?: string): Observable<BcvOfficialRateResponse> {
+    const q = date ? `?date=${encodeURIComponent(date)}` : '';
+    return this.http
+      .get<{
+        date: string;
+        vesPerUsd: number;
+        rateDate: string;
+        stale?: boolean;
+      }>(`${this.base}/bcv/oficial-por-dia${q}`)
+      .pipe(
+        tap((r) => {
+          writeBcvRateCache({
+            vesPerUsd: r.vesPerUsd,
+            date: r.date,
+            rateDate: r.rateDate,
+            stale: r.stale ?? false,
+          });
+        }),
+        map((r) => ({
+          date: r.date,
+          vesPerUsd: r.vesPerUsd,
+          rateDate: r.rateDate,
+          stale: r.stale ?? false,
+          fromLocalCache: false,
+        })),
+        catchError((err: unknown) => {
+          const cached = readBcvRateCacheOrLatest(date);
+          if (cached) {
+            return of({
+              date: cached.date,
+              vesPerUsd: cached.vesPerUsd,
+              rateDate: cached.rateDate,
+              stale: true,
+              fromLocalCache: true,
+            });
+          }
+          return throwError(() => err);
+        }),
+      );
+  }
+
+  /** @deprecated Preferir getBcvOfficialRateResilient (caché local + flag stale). */
   getBcvOfficialRate(date?: string): Observable<{
     date: string;
     vesPerUsd: number;
@@ -243,6 +462,56 @@ export class MeApiService {
     return this.http.post<{ deleted: number }>(
       `${this.base}/me/expenses/delete-many`,
       { ids },
+    );
+  }
+
+  listIncomeSources(): Observable<MeIncomeSource[]> {
+    return this.http.get<MeIncomeSource[]>(`${this.base}/me/income-sources`);
+  }
+
+  listIncomes(): Observable<MeIncome[]> {
+    return this.http.get<MeIncome[]>(`${this.base}/me/incomes`);
+  }
+
+  createIncome(body: {
+    title: string;
+    description?: string;
+    amount: number;
+    sourceName: string;
+    receivedDate?: string;
+  }): Observable<MeIncome> {
+    return this.http.post<MeIncome>(`${this.base}/me/incomes`, body);
+  }
+
+  deleteIncomes(ids: string[]): Observable<{ deleted: number }> {
+    return this.http.post<{ deleted: number }>(
+      `${this.base}/me/incomes/delete-many`,
+      { ids },
+    );
+  }
+
+  createTelegramLinkCode(): Observable<TelegramLinkCodeResponse> {
+    return this.http.post<TelegramLinkCodeResponse>(
+      `${this.base}/me/telegram/link-code`,
+      {},
+    );
+  }
+
+  getTelegramLinkStatus(): Observable<TelegramLinkStatusResponse> {
+    return this.http.get<TelegramLinkStatusResponse>(
+      `${this.base}/me/telegram/status`,
+    );
+  }
+
+  unlinkTelegram(): Observable<{ ok: true }> {
+    return this.http.delete<{ ok: true }>(`${this.base}/me/telegram/link`);
+  }
+
+  /** v1.3 — feedback OCR; no debe bloquear UI (llamar con subscribe errores ignorados si aplica). */
+  submitOcrFeedback(body: SubmitOcrFeedbackBody): Observable<{ id: string }> {
+    return this.http.post<{ id: string }>(
+      `${this.base}/me/ocr-feedback`,
+      body,
     );
   }
 }

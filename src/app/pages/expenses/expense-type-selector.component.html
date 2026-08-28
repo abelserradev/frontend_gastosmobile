@@ -7,10 +7,10 @@
 >
   <div class="relative bg-card rounded-2xl p-6 w-full max-w-sm shadow-2xl">
     <h2 id="selector-title" class="text-xl font-bold text-foreground mb-1 text-center">
-      Agregar Gasto
+      Nuevo cuadro
     </h2>
     <p class="text-sm text-muted-foreground text-center mb-6">
-      ¿Cómo quieres registrarlo?
+      ¿Qué quieres registrar en el periodo?
     </p>
 
     <div class="flex flex-col gap-3">
@@ -73,6 +73,25 @@
         <div>
           <p class="font-semibold text-foreground">Comprobante de pago</p>
           <p class="text-xs text-muted-foreground">Pago móvil o transferencia bancaria</p>
+        </div>
+      </button>
+
+      <!-- Ingreso del periodo -->
+      <button
+        type="button"
+        (click)="select('income')"
+        class="flex items-center gap-4 w-full p-4 rounded-xl border-2 border-border hover:border-emerald-600 hover:bg-emerald-500/5 transition-all text-left group"
+      >
+        <span class="shrink-0 w-10 h-10 flex items-center justify-center rounded-full bg-emerald-500/10 group-hover:bg-emerald-500/20 transition-colors">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+            class="text-emerald-600">
+            <path d="M12 2v20"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+          </svg>
+        </span>
+        <div>
+          <p class="font-semibold text-foreground">Ingreso nuevo</p>
+          <p class="text-xs text-muted-foreground">Suma al ingreso del periodo, no resta del disponible</p>
         </div>
       </button>
     </div>

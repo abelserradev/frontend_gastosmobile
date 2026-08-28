@@ -3,9 +3,9 @@ name: CI
 
 on:
   pull_request:
-    branches: [main, master]
+    branches: [main, master, develop]
   push:
-    branches: [main, master]
+    branches: [main, master, develop]
 
 permissions:
   contents: read
@@ -20,26 +20,29 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - uses: step-security/harden-runner@v2
         with:
           egress-policy: audit
 
-      - uses: actions/setup-node@v6
+      - uses: pnpm/action-setup@v6.0.9
+
+      - uses: actions/setup-node@v7
         with:
           node-version: '22'
-          cache: npm
-          cache-dependency-path: package-lock.json
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
 
       - name: Instalar dependencias
-        run: npm ci
+        run: pnpm install --frozen-lockfile
 
-      - name: npm audit (informativo)
+      - name: pnpm audit (informativo)
         continue-on-error: true
-        run: npm audit --audit-level=moderate
+        run: pnpm audit --audit-level=moderate
 
       - name: Build producción
         env:
           FIREBASE_WEB_API_KEY: ${{ secrets.FIREBASE_WEB_API_KEY || 'ci-placeholder-firebase-web-api-key' }}
-        run: npm run build
+          GASTOS_API_KEY: ${{ secrets.GASTOS_API_KEY || 'ci-placeholder-gastos-api-key' }}
+        run: pnpm run build

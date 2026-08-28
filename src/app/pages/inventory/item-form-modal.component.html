@@ -1,0 +1,160 @@
+@if (isOpen()) {
+  <div
+    class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
+    (click)="onBackdropClick($event)"
+    (keydown.escape)="close()"
+    tabindex="-1"
+  >
+    <div class="bg-card text-card-foreground rounded-xl w-full max-w-md max-h-[90vh] overflow-y-auto border border-border shadow-xl">
+      <!-- Header -->
+      <div class="flex items-center justify-between px-4 py-3 border-b border-border">
+        <h2 class="text-lg font-semibold">
+          {{ itemToEdit() ? 'Editar Producto' : 'Nuevo Producto' }}
+        </h2>
+        <button
+          (click)="close()"
+          class="p-1 text-muted-foreground hover:text-foreground rounded-full hover:bg-muted"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Form -->
+      <div class="p-4 space-y-4">
+        <!-- Nombre -->
+        <div>
+          <label for="item-name" class="block text-sm font-medium text-gray-700 mb-1">
+            Nombre <span class="text-red-500">*</span>
+          </label>
+          <input
+            id="item-name"
+            type="text"
+            [(ngModel)]="formData().name"
+            placeholder="Ej: Coca-Cola 2L"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            [class.border-red-300]="errors()['name']"
+          />
+          @if (errors()['name']) {
+            <p class="mt-1 text-sm text-red-600">{{ errors()['name'] }}</p>
+          }
+        </div>
+
+        <!-- SKU -->
+        <div>
+          <label for="item-sku" class="block text-sm font-medium text-gray-700 mb-1">
+            SKU (opcional)
+          </label>
+          <input
+            id="item-sku"
+            type="text"
+            [(ngModel)]="formData().sku"
+            placeholder="Ej: CC-2L-001"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          />
+          <p class="mt-1 text-xs text-gray-500">Código único para identificar el producto</p>
+        </div>
+
+        <!-- Unidad -->
+        <div>
+          <label for="item-unit" class="block text-sm font-medium text-gray-700 mb-1">
+            Unidad
+          </label>
+          <select
+            id="item-unit"
+            [(ngModel)]="formData().unit"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          >
+            <option value="pieza">Pieza</option>
+            <option value="caja">Caja</option>
+            <option value="kg">Kilogramo (kg)</option>
+            <option value="litro">Litro</option>
+            <option value="metro">Metro</option>
+            <option value="par">Par</option>
+            <option value="docena">Docena</option>
+          </select>
+        </div>
+
+        <!-- Precio de venta (FEAT-004) -->
+        <div>
+          <label for="item-sale-price" class="block text-sm font-medium text-gray-700 mb-1">
+            Precio de venta (opcional)
+          </label>
+          <input
+            id="item-sale-price"
+            type="number"
+            step="0.01"
+            min="0"
+            [(ngModel)]="formData().salePrice"
+            placeholder="Ej: 2.50"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            [class.border-red-300]="errors()['salePrice']"
+          />
+          @if (errors()['salePrice']) {
+            <p class="mt-1 text-sm text-red-600">{{ errors()['salePrice'] }}</p>
+          }
+          <p class="mt-1 text-xs text-gray-500">Referencia de catálogo; no afecta el stock</p>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <!-- Stock Mínimo -->
+          <div>
+            <label for="item-min-stock" class="block text-sm font-medium text-gray-700 mb-1">
+              Stock Mínimo
+            </label>
+            <input
+              id="item-min-stock"
+              type="number"
+              [(ngModel)]="formData().minStock"
+              min="0"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              [class.border-red-300]="errors()['minStock']"
+            />
+            @if (errors()['minStock']) {
+              <p class="mt-1 text-sm text-red-600">{{ errors()['minStock'] }}</p>
+            }
+            <p class="mt-1 text-xs text-gray-500">Alerta cuando stock &le; este valor</p>
+          </div>
+
+          <!-- Stock Inicial (solo al crear) -->
+          @if (!itemToEdit()) {
+            <div>
+              <label for="item-initial-stock" class="block text-sm font-medium text-gray-700 mb-1">
+                Stock Inicial
+              </label>
+              <input
+                id="item-initial-stock"
+                type="number"
+                [(ngModel)]="formData().initialStock"
+                min="0"
+                placeholder="0"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                [class.border-red-300]="errors()['initialStock']"
+              />
+              @if (errors()['initialStock']) {
+                <p class="mt-1 text-sm text-red-600">{{ errors()['initialStock'] }}</p>
+              }
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="flex items-center justify-end gap-2 px-4 py-3 border-t border-gray-200">
+        <button
+          (click)="close()"
+          class="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+        >
+          Cancelar
+        </button>
+        <button
+          (click)="save()"
+          class="px-4 py-2 bg-primary text-primary-foreground font-semibold rounded-xl hover:opacity-90 transition-all"
+        >
+          {{ itemToEdit() ? 'Guardar Cambios' : 'Crear Producto' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

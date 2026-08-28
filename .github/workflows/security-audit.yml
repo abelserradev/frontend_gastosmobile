@@ -9,18 +9,24 @@ permissions:
   contents: read
 
 jobs:
-  npm-audit:
+  pnpm-audit:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6
+      - uses: actions/checkout@v7
+
+      - uses: pnpm/action-setup@v6.0.9
+
+      - uses: actions/setup-node@v7
         with:
           node-version: '22'
-          cache: npm
-          cache-dependency-path: package-lock.json
-      - run: npm ci
-      - name: npm audit
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: pnpm audit
         continue-on-error: true
-        run: npm audit --audit-level=moderate
+        run: pnpm audit --audit-level=moderate
+
       - name: Resumen dependencias
-        run: npm ls --depth=0 || true
+        run: pnpm ls --depth=0 || true

@@ -12,7 +12,7 @@ import {
   ViewEncapsulation,
 } from '@angular/core';
 
-export type ExpenseCreationMode = 'manual' | 'invoice' | 'payment';
+export type ExpenseCreationMode = 'manual' | 'invoice' | 'payment' | 'income';
 
 @Component({
   selector: 'app-expense-type-selector',

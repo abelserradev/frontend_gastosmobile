@@ -1,21 +1,26 @@
-# Angular 20.3+ exige Node >=20.19 o >=22.12; fijamos 22.12 para no depender de Nixpacks.
-FROM node:22.12.0-alpine AS build
+# Angular 20.3+ exige Node >=20.19 o >=22.12; pnpm 11.3+ exige Node >=22.13.
+FROM node:22.14.0-alpine AS build
 
 WORKDIR /app
 
-# Si el orquestador inyecta NODE_ENV=production, npm omitiría devDependencies y fallaría ng build.
+# Si el orquestador inyecta NODE_ENV=production, pnpm omitiría devDependencies y fallaría ng build.
 ENV NODE_ENV=development
 
-COPY package.json package-lock.json ./
-RUN npm ci --include=dev
+RUN corepack enable
+
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc ./
+RUN pnpm install --frozen-lockfile
 
 COPY . .
 
-# La API key web de Firebase no debe ir en el repo; Coolify/build debe pasar build-arg o env en tiempo de build.
 ARG FIREBASE_WEB_API_KEY
+ARG GASTOS_API_KEY
+ARG SECRET_API_KEY
 ENV FIREBASE_WEB_API_KEY=${FIREBASE_WEB_API_KEY}
+ENV GASTOS_API_KEY=${GASTOS_API_KEY}
+ENV SECRET_API_KEY=${SECRET_API_KEY}
 
-RUN npm run build
+RUN pnpm run build
 
 FROM nginx:1.27-alpine
 

@@ -12,7 +12,6 @@ import { routePathForMeState } from '../../core/me-route.util';
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './setup-password-page.component.html',
-  styleUrl: './setup-password-page.component.scss',
 })
 export class SetupPasswordPageComponent implements OnInit {
   private readonly router = inject(Router);

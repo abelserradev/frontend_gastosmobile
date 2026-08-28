@@ -1,7 +1,13 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, OnInit } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  inject,
+  OnInit,
+  ViewChild,
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import {
   AppContextService,
   ProfileType,
@@ -9,7 +15,19 @@ import {
 } from '../../core/app-context.service';
 import { AuthService } from '../../core/auth.service';
 import { formatApiHttpError } from '../../core/http-error.util';
-import { MeApiService, type MeProfileMember } from '../../core/me-api.service';
+import {
+  cameFromExpenses,
+  subpageBackTarget,
+} from '../../core/app-navigation.util';
+import {
+  MeApiService,
+  type MeProfileMember,
+  type ProfileCollaborator,
+} from '../../core/me-api.service';
+import {
+  getStateWithAutoRollover,
+  needsSetupScreen,
+} from '../../core/month-renewal.util';
 
 @Component({
   selector: 'app-profiles-page',
@@ -20,6 +38,7 @@ import { MeApiService, type MeProfileMember } from '../../core/me-api.service';
 })
 export class ProfilesPageComponent implements OnInit {
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
   private readonly appContext = inject(AppContextService);
   private readonly meApi = inject(MeApiService);
   private readonly auth = inject(AuthService);
@@ -36,14 +55,40 @@ export class ProfilesPageComponent implements OnInit {
   members: MeProfileMember[] = [];
   memberName = '';
 
+  teamModalOpen = false;
+  teamProfileId: string | null = null;
+  teamProfileName: string | null = null;
+  teamLoading = false;
+  collaborators: ProfileCollaborator[] = [];
+  inviteEmail = '';
+
+  @ViewChild('membersDialog') private membersDialog?: ElementRef<HTMLDialogElement>;
+  @ViewChild('teamDialog') private teamDialog?: ElementRef<HTMLDialogElement>;
+
+  get ownedProfiles(): UserProfile[] {
+    return this.profiles.filter((p) => (p.access ?? 'owner') === 'owner');
+  }
+
+  get sharedProfiles(): UserProfile[] {
+    return this.profiles.filter((p) => p.access === 'collaborator');
+  }
+
+  isProfileOwner(profile: UserProfile): boolean {
+    return (profile.access ?? 'owner') === 'owner';
+  }
+
+  get fromExpenses(): boolean {
+    return cameFromExpenses(this.route);
+  }
+
   ngOnInit(): void {
     if (!this.auth.hasSession()) {
       void this.router.navigate(['/login']);
       return;
     }
-    this.meApi.getState().subscribe({
+    getStateWithAutoRollover(this.meApi).subscribe({
       next: (s) => {
-        if (s.needsMonthlyIncomeSetup) {
+        if (needsSetupScreen(s)) {
           void this.router.navigate(['/setup']);
           return;
         }
@@ -117,9 +162,11 @@ export class ProfilesPageComponent implements OnInit {
     this.memberName = '';
     this.members = [];
     this.loadMembers();
+    this.queueShowModal(() => this.membersDialog);
   }
 
   closeMembers(): void {
+    this.membersDialog?.nativeElement.close();
     this.membersModalOpen = false;
     this.membersProfileId = null;
     this.membersProfileName = null;
@@ -185,6 +232,90 @@ export class ProfilesPageComponent implements OnInit {
     });
   }
 
+  openTeam(profile: UserProfile): void {
+    this.teamModalOpen = true;
+    this.teamProfileId = profile.id;
+    this.teamProfileName = profile.name;
+    this.inviteEmail = '';
+    this.collaborators = [];
+    this.loadCollaborators();
+    this.queueShowModal(() => this.teamDialog);
+  }
+
+  closeTeam(): void {
+    this.teamDialog?.nativeElement.close();
+    this.teamModalOpen = false;
+    this.teamProfileId = null;
+    this.teamProfileName = null;
+    this.inviteEmail = '';
+    this.collaborators = [];
+    this.teamLoading = false;
+  }
+
+  onTeamDialogClick(event: MouseEvent): void {
+    if (event.target === event.currentTarget) {
+      this.closeTeam();
+    }
+  }
+
+  loadCollaborators(): void {
+    if (!this.teamProfileId || this.teamLoading) return;
+    this.teamLoading = true;
+    this.meApi.listCollaborators(this.teamProfileId).subscribe({
+      next: (list) => {
+        this.teamLoading = false;
+        this.collaborators = list;
+      },
+      error: (err: unknown) => {
+        this.teamLoading = false;
+        globalThis.alert(formatApiHttpError(err));
+      },
+    });
+  }
+
+  sendInvite(): void {
+    if (!this.teamProfileId) return;
+    const email = this.inviteEmail.trim();
+    if (!email) {
+      globalThis.alert('Indica el email del usuario registrado');
+      return;
+    }
+    this.meApi.inviteCollaborator(this.teamProfileId, email).subscribe({
+      next: (row) => {
+        const idx = this.collaborators.findIndex((c) => c.userId === row.userId);
+        if (idx >= 0) {
+          this.collaborators = this.collaborators.map((c, i) =>
+            i === idx ? row : c,
+          );
+        } else {
+          this.collaborators = [...this.collaborators, row];
+        }
+        this.inviteEmail = '';
+      },
+      error: (err: unknown) => globalThis.alert(formatApiHttpError(err)),
+    });
+  }
+
+  revokeCollaborator(userId: string): void {
+    if (!this.teamProfileId) return;
+    this.meApi.revokeCollaborator(this.teamProfileId, userId).subscribe({
+      next: () => {
+        this.collaborators = this.collaborators.filter((c) => c.userId !== userId);
+      },
+      error: (err: unknown) => globalThis.alert(formatApiHttpError(err)),
+    });
+  }
+
+  collaboratorStatusLabel(status: ProfileCollaborator['status']): string {
+    const labels: Record<ProfileCollaborator['status'], string> = {
+      pending: 'Pendiente',
+      accepted: 'Activo',
+      rejected: 'Rechazado',
+      revoked: 'Revocado',
+    };
+    return labels[status] ?? status;
+  }
+
   handleLogout(): void {
     this.auth.logout().subscribe({
       next: () => {
@@ -193,8 +324,19 @@ export class ProfilesPageComponent implements OnInit {
     });
   }
 
-  /** Volver al ingreso inicial por si cambió el sueldo / disponibilidad mensual. */
-  goBackToIncomeSetup(): void {
-    void this.router.navigate(['/setup']);
+  goBack(): void {
+    void this.router.navigate([subpageBackTarget(this.fromExpenses)]);
+  }
+
+  /** El @if del template crea el <dialog> un tick después; showModal centra y activa backdrop en mobile. */
+  private queueShowModal(
+    resolveRef: () => ElementRef<HTMLDialogElement> | undefined,
+  ): void {
+    setTimeout(() => {
+      const host = resolveRef()?.nativeElement;
+      if (host && !host.open) {
+        host.showModal();
+      }
+    });
   }
 }
