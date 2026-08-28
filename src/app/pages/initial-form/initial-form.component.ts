@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { HttpErrorResponse } from '@angular/common/http';
 import { Router, ActivatedRoute } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import {
@@ -42,6 +43,9 @@ export class InitialFormComponent implements OnInit {
   bcvLoading = false;
   bcvError: string | null = null;
   bcvStale = false;
+  loadError: string | null = null;
+  saveError: string | null = null;
+  saving = false;
   categories: string[] = [
     'Comida',
     'Mantenimiento Vehicular',
@@ -79,6 +83,7 @@ export class InitialFormComponent implements OnInit {
     }
     getStateWithAutoRollover(this.meApi).subscribe({
       next: (s) => {
+        this.loadError = null;
         if (!needsSetupScreen(s) && !this.fromExpenses) {
           void this.router.navigate([routePathForMeState(s)]);
           return;
@@ -126,7 +131,9 @@ export class InitialFormComponent implements OnInit {
         }
       },
       error: (err: unknown) => {
-        globalThis.alert(formatApiHttpError(err));
+        this.loadError =
+          'No se pudo cargar tu configuración. Verifica que el backend esté activo en http://localhost:3088 y vuelve a intentar.';
+        this.loadError += ` (${formatApiHttpError(err)})`;
       },
     });
   }
@@ -203,25 +210,28 @@ export class InitialFormComponent implements OnInit {
   }
 
   handleSubmit(): void {
+    this.saveError = null;
     if (!this.income || (!this.preferencesOnly && this.categories.length === 0)) {
-      globalThis.alert('Por favor completa todos los campos requeridos');
+      this.saveError = 'Por favor completa todos los campos requeridos';
       return;
     }
     if (this.hasSurplusPrompt && this.applySurplus === null) {
-      globalThis.alert('Indica si deseas sumar el saldo sobrante al mes entrante');
+      this.saveError =
+        'Indica si deseas sumar el saldo sobrante al mes entrante';
       return;
     }
     let putBody: MePreferencesPut;
     if (this.currency === 'BS') {
       if (this.bcvVesPerUsd == null || this.bcvVesPerUsd <= 0) {
-        globalThis.alert('Espera la tasa BCV o revisa la conexión antes de guardar.');
+        this.saveError =
+          'Espera la tasa BCV o revisa la conexión antes de guardar.';
         return;
       }
       putBody = { defaultCurrency: 'BS', monthlyIncomeBs: this.incomeAmount };
     } else {
       const raw = Number.parseFloat(this.income);
       if (Number.isNaN(raw)) {
-        globalThis.alert('Ingreso mensual no válido');
+        this.saveError = 'Ingreso mensual no válido';
         return;
       }
       putBody = { defaultCurrency: 'USD', monthlyIncome: raw };
@@ -239,8 +249,10 @@ export class InitialFormComponent implements OnInit {
       },
     };
     if (this.preferencesOnly) {
+      this.saving = true;
       this.meApi.updatePreferences(putBody).subscribe({
         next: (pref) => {
+          this.saving = false;
           this.appContext.syncFromMePreferences(pref);
           if (this.fromExpenses) {
             void this.router.navigate(['/expenses']);
@@ -248,26 +260,47 @@ export class InitialFormComponent implements OnInit {
           }
           this.meApi.getState().subscribe({
             next: (st) => void this.router.navigate([routePathForMeState(st)]),
-            error: (err: unknown) => globalThis.alert(formatApiHttpError(err)),
+            error: (err: unknown) => this.handleSaveFailure(err),
           });
         },
-        error: (err: unknown) => globalThis.alert(formatApiHttpError(err)),
+        error: (err: unknown) => this.handleSaveFailure(err),
       });
       return;
     }
+    this.saving = true;
     forkJoin([
       this.meApi.updatePreferences(putBody),
       this.meApi.replaceCategories(this.categories),
     ]).subscribe({
       next: ([pref, cats]) => {
+        this.saving = false;
         this.appContext.syncFromMePreferences(pref);
         this.appContext.setCategories(
           cats.map((c) => ({ id: c.id, name: c.name })),
         );
         void this.router.navigate(['/profiles']);
       },
-      error: (err: unknown) => globalThis.alert(formatApiHttpError(err)),
+      error: (err: unknown) => this.handleSaveFailure(err),
     });
+  }
+
+  private handleSaveFailure(err: unknown): void {
+    this.saving = false;
+    if (err instanceof HttpErrorResponse && err.status === 401) {
+      this.auth.clearClientSession();
+      this.saveError =
+        'Tu sesión expiró. Inicia sesión de nuevo e intenta guardar otra vez.';
+      void this.router.navigate(['/login']);
+      return;
+    }
+    this.saveError = formatApiHttpError(err);
+    if (
+      err instanceof HttpErrorResponse &&
+      (err.status === 0 || err.message.includes('Unknown Error'))
+    ) {
+      this.saveError =
+        'No se pudo conectar con el backend (http://localhost:3088). Comprueba que esté en ejecución.';
+    }
   }
 
   goBack(): void {
