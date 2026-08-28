@@ -330,11 +330,32 @@
         }
 
         <!-- CTA principal -->
+        @if (loadError) {
+          <p
+            class="rounded-xl border border-destructive/40 bg-destructive/5 px-4 py-3 text-sm text-destructive"
+            role="alert"
+          >
+            {{ loadError }}
+          </p>
+        }
+        @if (saveError) {
+          <p
+            class="rounded-xl border border-destructive/40 bg-destructive/5 px-4 py-3 text-sm text-destructive"
+            role="alert"
+          >
+            {{ saveError }}
+          </p>
+        }
         <button
           type="submit"
-          class="w-full mt-2 py-3.5 bg-primary text-primary-foreground font-bold rounded-xl shadow-lg shadow-primary/20 hover:opacity-95 active:scale-[0.99] transition-all tracking-wide"
+          [disabled]="saving"
+          class="w-full mt-2 py-3.5 bg-primary text-primary-foreground font-bold rounded-xl shadow-lg shadow-primary/20 hover:opacity-95 active:scale-[0.99] transition-all tracking-wide disabled:opacity-60 disabled:cursor-not-allowed"
         >
-          {{ preferencesOnly ? (fromExpenses ? 'Guardar cambios' : 'Guardar ingreso del mes') : 'Guardar y Continuar' }}
+          @if (saving) {
+            Guardando…
+          } @else {
+            {{ preferencesOnly ? (fromExpenses ? 'Guardar cambios' : 'Guardar ingreso del mes') : 'Guardar y Continuar' }}
+          }
         </button>
 
       </form>
