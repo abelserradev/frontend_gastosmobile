@@ -19,6 +19,8 @@ import { AppContextService } from '../../core/app-context.service';
 import { navigateFromExpensesMenu } from '../../core/app-navigation.util';
 import { AuthService } from '../../core/auth.service';
 import { formatApiHttpError } from '../../core/http-error.util';
+import { buildExpensesCsv, type ExpenseCsvRow } from '../../core/csv-export.util';
+import { downloadCsvFile } from '../../core/file-download.util';
 import { writeBcvRateCache } from '../../core/bcv-rate-cache.util';
 import { MeApiService, type MeExpense, type MeIncome, type MeProfileMember } from '../../core/me-api.service';
 import {
@@ -162,6 +164,7 @@ export class ExpensesPageComponent implements OnInit, OnDestroy {
   readonly hasInventory = computed(() =>
     this.ctx.profiles().some((p) => p.type === 'comercio'),
   );
+  readonly canExportExpenses = computed(() => this.ctx.expenses().length > 0);
   readonly hoveredReceiptId = signal<string | null>(null);
   /** Fuerza repaint cuando llega una miniatura de recibo en caché. */
   readonly receiptPreviewTick = signal(0);
@@ -909,5 +912,29 @@ export class ExpensesPageComponent implements OnInit, OnDestroy {
   goNextExpensePage(): void {
     const max = this.expenseTotalPages();
     this.expensesPage.update((p) => Math.min(max, p + 1));
+  }
+
+  async downloadExpensesCsv(): Promise<void> {
+    const rows: ExpenseCsvRow[] = this.ctx.expenses().map((e) => ({
+      title: e.title,
+      amount: e.amount,
+      referenceMonth: e.referenceMonth ?? '',
+      paymentDate: e.paymentDate ?? null,
+      bcvRateApplied: e.bcvRateApplied ?? null,
+    }));
+    if (rows.length === 0) {
+      return;
+    }
+    const ym = (this.activeReferenceMonth() || new Date().toISOString()).slice(
+      0,
+      7,
+    );
+    try {
+      await downloadCsvFile(`gastos-${ym}`, buildExpensesCsv(rows));
+    } catch (err: unknown) {
+      globalThis.alert(
+        err instanceof Error ? err.message : 'Error al descargar CSV',
+      );
+    }
   }
 }

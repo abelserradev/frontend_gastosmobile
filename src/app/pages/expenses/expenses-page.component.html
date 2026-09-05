@@ -353,13 +353,27 @@
     </div>
 
     @if (boardTab() === 'expenses') {
-    <div class="flex items-center justify-between mb-4">
+    <div class="flex items-center justify-between mb-4 gap-2">
       <h2 class="text-lg font-bold text-foreground tracking-tight">Mis gastos</h2>
-      @if (selectedExpenses().size > 0) {
-        <span class="text-xs text-primary font-semibold px-2 py-1 rounded-full bg-primary/10">
-          {{ selectedExpenses().size }} seleccionado(s)
-        </span>
-      }
+      <div class="flex items-center gap-2 shrink-0">
+        <button
+          type="button"
+          (click)="downloadExpensesCsv()"
+          [disabled]="!canExportExpenses()"
+          class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg border border-border text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          title="Descargar gastos del periodo en CSV"
+        >
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+          </svg>
+          Descargar CSV
+        </button>
+        @if (selectedExpenses().size > 0) {
+          <span class="text-xs text-primary font-semibold px-2 py-1 rounded-full bg-primary/10">
+            {{ selectedExpenses().size }} seleccionado(s)
+          </span>
+        }
+      </div>
     </div>
 
     <div class="mb-6 space-y-2">

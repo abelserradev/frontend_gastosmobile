@@ -1,8 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../core/auth.service';
 import { formatApiHttpError } from '../../core/http-error.util';
+import { buildExpensesCsv } from '../../core/csv-export.util';
+import { downloadCsvFile } from '../../core/file-download.util';
 import {
   MeApiService,
   type MeExpense,
@@ -26,6 +28,9 @@ export class HistorialPageComponent implements OnInit {
   readonly detailYm = signal<string | null>(null);
   readonly detailExpenses = signal<MeExpense[]>([]);
   readonly detailLoading = signal(false);
+  readonly canExportHistorial = computed(
+    () => this.detailExpenses().length > 0,
+  );
 
   ngOnInit(): void {
     if (!this.auth.hasSession()) {
@@ -88,5 +93,20 @@ export class HistorialPageComponent implements OnInit {
   /** YYYY-MM-01 → YYYY-MM para la ruta /historial/:ym */
   ymRouteFromApiMonth(month: string): string {
     return month.slice(0, 7);
+  }
+
+  async downloadHistorialCsv(): Promise<void> {
+    const ym = this.detailYm();
+    const rows = this.detailExpenses();
+    if (!ym || rows.length === 0) {
+      return;
+    }
+    try {
+      await downloadCsvFile(`gastos-${ym}`, buildExpensesCsv(rows));
+    } catch (err: unknown) {
+      globalThis.alert(
+        err instanceof Error ? err.message : 'Error al descargar CSV',
+      );
+    }
   }
 }
