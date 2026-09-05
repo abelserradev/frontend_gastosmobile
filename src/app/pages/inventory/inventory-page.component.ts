@@ -7,6 +7,12 @@ import { AppContextService } from '../../core/app-context.service';
 import { AuthService } from '../../core/auth.service';
 import { formatApiHttpError } from '../../core/http-error.util';
 import {
+  buildInventoryCsv,
+  slugForFilename,
+  todayYmd,
+} from '../../core/csv-export.util';
+import { downloadCsvFile } from '../../core/file-download.util';
+import {
   InventoryApiService,
   type InventoryItem,
   type InventoryBranch,
@@ -80,6 +86,10 @@ export class InventoryPageComponent implements OnInit {
 
   readonly lowStockItems = computed(() =>
     this.items().filter((i) => i.isLowStock)
+  );
+
+  readonly canExportInventory = computed(
+    () => this.filteredItems().length > 0,
   );
 
   readonly selectedItem = signal<InventoryItem | null>(null);
@@ -428,6 +438,24 @@ export class InventoryPageComponent implements OnInit {
 
   goToProfiles(): void {
     void this.router.navigate(['/profiles']);
+  }
+
+  async downloadInventoryCsv(): Promise<void> {
+    const items = this.filteredItems();
+    if (items.length === 0) {
+      return;
+    }
+    const slug = slugForFilename(this.profileName() || 'inventario');
+    try {
+      await downloadCsvFile(
+        `inventario-${slug}-${todayYmd()}`,
+        buildInventoryCsv(items),
+      );
+    } catch (err: unknown) {
+      globalThis.alert(
+        err instanceof Error ? err.message : 'Error al descargar CSV',
+      );
+    }
   }
 }
 
