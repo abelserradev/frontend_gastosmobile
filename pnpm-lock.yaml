@@ -38,19 +38,19 @@ importers:
         version: 20.3.30(@angular/common@20.3.30(@angular/core@20.3.30(@angular/compiler@20.3.30)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2))(@angular/core@20.3.30(@angular/compiler@20.3.30)(rxjs@7.8.2)(zone.js@0.15.1))(@angular/platform-browser@20.3.30(@angular/common@20.3.30(@angular/core@20.3.30(@angular/compiler@20.3.30)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2))(@angular/core@20.3.30(@angular/compiler@20.3.30)(rxjs@7.8.2)(zone.js@0.15.1)))(rxjs@7.8.2)
       '@capacitor-firebase/authentication':
         specifier: ^8.3.0
-        version: 8.4.0(@capacitor/core@8.5.0)(firebase@12.18.0)
+        version: 8.4.0(@capacitor/core@8.5.1)(firebase@12.18.0)
       '@capacitor/android':
         specifier: ^8.5.1
-        version: 8.5.1(@capacitor/core@8.5.0)
+        version: 8.5.1(@capacitor/core@8.5.1)
       '@capacitor/cli':
         specifier: ^8.5.1
         version: 8.5.1
       '@capacitor/core':
-        specifier: ^8.4.0
-        version: 8.5.0
+        specifier: ^8.5.1
+        version: 8.5.1
       '@capacitor/share':
         specifier: ^8.0.1
-        version: 8.0.1(@capacitor/core@8.5.0)
+        version: 8.0.1(@capacitor/core@8.5.1)
       chart.js:
         specifier: ^4.4.7
         version: 4.5.1
@@ -912,8 +912,8 @@ packages:
     engines: {node: '>=22.0.0'}
     hasBin: true
 
-  '@capacitor/core@8.5.0':
-    resolution: {integrity: sha512-Ca4krtqH1hothjtBIwf2J2TW7IhYq1ujp8QeItTiJohNsqij8ja2DYYH3DU0l8RmxCWaBAFTGA2TgOgOMCSNsQ==}
+  '@capacitor/core@8.5.1':
+    resolution: {integrity: sha512-IOQ7ynG1qgrJ/RLuCO3WgyRGmkmmG/cdStRR4ftU2dWEN1FdtLrnI/XpZmZuUsOEHEnzBRJY/PmRH8eTLiXfhA==}
 
   '@capacitor/share@8.0.1':
     resolution: {integrity: sha512-3cSBKBCJVon54rKDROP2rqGyeGks4pBh9TbaEk9S375Kbek/ZHe72N50zIa0Vn9Eac/SuhwgehO/mmA4CsUOiw==}
@@ -6354,15 +6354,15 @@ snapshots:
       '@babel/helper-string-parser': 7.29.7
       '@babel/helper-validator-identifier': 7.29.7
 
-  '@capacitor-firebase/authentication@8.4.0(@capacitor/core@8.5.0)(firebase@12.18.0)':
+  '@capacitor-firebase/authentication@8.4.0(@capacitor/core@8.5.1)(firebase@12.18.0)':
     dependencies:
-      '@capacitor/core': 8.5.0
+      '@capacitor/core': 8.5.1
     optionalDependencies:
       firebase: 12.18.0
 
-  '@capacitor/android@8.5.1(@capacitor/core@8.5.0)':
+  '@capacitor/android@8.5.1(@capacitor/core@8.5.1)':
     dependencies:
-      '@capacitor/core': 8.5.0
+      '@capacitor/core': 8.5.1
 
   '@capacitor/cli@8.5.1':
     dependencies:
@@ -6387,13 +6387,13 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@capacitor/core@8.5.0':
+  '@capacitor/core@8.5.1':
     dependencies:
       tslib: 2.8.1
 
-  '@capacitor/share@8.0.1(@capacitor/core@8.5.0)':
+  '@capacitor/share@8.0.1(@capacitor/core@8.5.1)':
     dependencies:
-      '@capacitor/core': 8.5.0
+      '@capacitor/core': 8.5.1
 
   '@colors/colors@1.5.0': {}
 
