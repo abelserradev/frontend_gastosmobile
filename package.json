@@ -27,7 +27,7 @@
     "@angular/router": "^20.3.29",
     "@capacitor-firebase/authentication": "^8.3.0",
     "@capacitor/android": "^8.5.1",
-    "@capacitor/cli": "^8.5.1",
+    "@capacitor/cli": "^8.5.2",
     "@capacitor/core": "^8.4.0",
     "@capacitor/share": "^8.0.1",
     "chart.js": "^4.4.7",
