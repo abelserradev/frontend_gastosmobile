@@ -20,6 +20,10 @@ import {
   getStateWithAutoRollover,
   needsSetupScreen,
 } from '../../core/month-renewal.util';
+import {
+  effectiveCutoffDayForYmd,
+  todayYmdCaracas,
+} from '../../core/caracas-date';
 
 @Component({
   selector: 'app-initial-form',
@@ -58,10 +62,20 @@ export class InitialFormComponent implements OnInit {
   surplusUsd = 0;
   applySurplus: boolean | null = null;
 
-  /** FEAT-001: Opciones de días de corte (1-28, evitando 29-31 por inconsistencias de mes). */
-  readonly cutoffDayOptions = Array.from({ length: 28 }, (_, i) => i + 1);
+
+  /** FEAT-001: Opciones de días de corte (1-31). */
+  readonly cutoffDayOptions = Array.from({ length: 31 }, (_, i) => i + 1);
   /** FEAT-001: Día de corte seleccionado (default 1 = comportamiento calendario). */
   cutoffDay = 1;
+
+  get effectiveCutoffThisMonth(): number {
+    const configured = Number(this.cutoffDay);
+    return effectiveCutoffDayForYmd(todayYmdCaracas(), configured);
+  }
+
+  get cutoffDiffersFromEffectiveThisMonth(): boolean {
+    return Number(this.cutoffDay) !== this.effectiveCutoffThisMonth;
+  }
 
   get fromExpenses(): boolean {
     return cameFromExpenses(this.route);
@@ -99,7 +113,7 @@ export class InitialFormComponent implements OnInit {
           this.currency = s.preferences.defaultCurrency;
           this.appContext.syncFromMePreferences(s.preferences);
           // FEAT-001: Cargar día de corte configurado (default 1)
-          this.cutoffDay = s.preferences.budgetCycle?.cutoffDay ?? 1;
+          this.cutoffDay = Number(s.preferences.budgetCycle?.cutoffDay ?? 1);
           const incomeUsd = s.preferences.monthlyIncome;
           if (this.currency === 'BS') {
             const storedNominalBs = s.preferences.incomeFixedBs;

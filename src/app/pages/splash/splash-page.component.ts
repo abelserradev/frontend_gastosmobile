@@ -67,7 +67,7 @@ export class SplashPageComponent implements OnInit {
   private readonly auth = inject(AuthService);
   private readonly meApi = inject(MeApiService);
 
-  readonly version = '1.3.1';
+  readonly version = '1.5.2';
   readonly brandLogoSrc = BRAND_LOGO_SRC;
   readonly brandAppName = BRAND_APP_NAME;
   readonly isVisible = signal(false);

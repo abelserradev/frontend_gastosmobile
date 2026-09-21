@@ -7,3 +7,16 @@ export function todayYmdCaracas(): string {
     day: '2-digit',
   }).format(new Date());
 }
+
+function lastDayOfMonthFromYmd(ymd: string): number {
+  const [y, m] = ymd.split('-').map(Number);
+  return new Date(Date.UTC(y, m, 0, 12, 0, 0)).getUTCDate();
+}
+
+export function effectiveCutoffDayForYmd(
+  referenceYmd: string,
+  cutoffDay: number,
+): number {
+  const last = lastDayOfMonthFromYmd(referenceYmd);
+  return Math.min(cutoffDay, last);
+}
