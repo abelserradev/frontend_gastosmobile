@@ -239,17 +239,25 @@
                 class="px-3 py-2 bg-card border border-border rounded-lg text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
               >
                 @for (day of cutoffDayOptions; track day) {
-                  <option [value]="day">Día {{ day }}</option>
+                  <option [ngValue]="day">Día {{ day }}</option>
                 }
               </select>
 
-              <span class="text-xs text-muted-foreground">
+              <div class="text-xs text-muted-foreground space-y-1">
                 @if (cutoffDay === 1) {
-                  Periodo: 2 al 1 del mes siguiente
+                  <p>Periodo: del 2 al 1 del mes siguiente (modo calendario)</p>
+
                 } @else {
-                  Ejemplo con día {{ cutoffDay }}: período del {{ cutoffDay + 1 }} de un mes al {{ cutoffDay }} del siguiente
+                  <p>
+                    Cobras el día {{ cutoffDay }}: el periodo cierra ese día (o el último día del mes si el mes es más corto).
+                  </p>
+                  @if (cutoffDiffersFromEffectiveThisMonth) {
+                    <p class="text-foreground/80">
+                      El día de corte efectivo este mes es {{ effectiveCutoffThisMonth }}.
+                    </p>
+                  }
                 }
-              </span>
+              </div>
             </div>
           </div>
         </div>
