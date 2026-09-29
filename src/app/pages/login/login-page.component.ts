@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { Capacitor } from '@capacitor/core';
 import { AuthService } from '../../core/auth.service';
 import { FirebaseAuthService } from '../../core/firebase-auth.service';
@@ -19,7 +19,7 @@ import { NativeSessionTokenService } from '../../core/native/native-session-toke
 @Component({
   selector: 'app-login-page',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './login-page.component.html',
 })
 export class LoginPageComponent implements OnInit {

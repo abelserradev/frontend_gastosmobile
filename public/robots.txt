@@ -1,0 +1,16 @@
+User-agent: *
+Allow: /privacidad
+Allow: /terminos
+Allow: /cookies
+Allow: /aviso-legal
+Disallow: /expenses
+Disallow: /profiles
+Disallow: /setup
+Disallow: /historial
+Disallow: /inventory
+Disallow: /invitations
+Disallow: /app-android
+Disallow: /setup-password
+Disallow: /reset-password
+
+Sitemap: https://mobilegastos.buildforge.work/sitemap.xml

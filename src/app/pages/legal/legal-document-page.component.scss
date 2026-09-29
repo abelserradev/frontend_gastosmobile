@@ -1,0 +1,39 @@
+.legal-doc {
+  max-width: 42rem;
+}
+
+.legal-doc h1 {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--foreground, #281e15);
+  margin: 0 0 0.5rem;
+}
+
+.legal-doc h2 {
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 1.25rem 0 0.5rem;
+  color: var(--foreground, #281e15);
+}
+
+.legal-doc p {
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: var(--muted-foreground, #846662);
+  margin: 0 0 0.65rem;
+}
+
+.legal-doc-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border, #ebe5e0);
+  font-size: 0.75rem;
+}
+
+.legal-doc-nav a {
+  color: var(--primary, #ee8329);
+  text-decoration: underline;
+}

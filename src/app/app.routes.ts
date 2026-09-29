@@ -14,6 +14,7 @@ import { HistorialPageComponent } from './pages/historial/historial-page.compone
 import { InventoryPageComponent } from './pages/inventory/inventory-page.component';
 import { InvitationsPageComponent } from './pages/invitations/invitations-page.component';
 import { SplashPageComponent } from './pages/splash/splash-page.component';
+import { LegalDocumentPageComponent } from './pages/legal/legal-document-page.component';
 
 /**
  * Rutas de Spend$ave (mobile).
@@ -25,6 +26,26 @@ import { SplashPageComponent } from './pages/splash/splash-page.component';
 export const routes: Routes = [
   { path: '', component: SplashPageComponent },
   { path: 'login', component: LoginPageComponent },
+  {
+    path: 'privacidad',
+    component: LegalDocumentPageComponent,
+    data: { legalSlug: 'privacidad' },
+  },
+  {
+    path: 'terminos',
+    component: LegalDocumentPageComponent,
+    data: { legalSlug: 'terminos' },
+  },
+  {
+    path: 'cookies',
+    component: LegalDocumentPageComponent,
+    data: { legalSlug: 'cookies' },
+  },
+  {
+    path: 'aviso-legal',
+    component: LegalDocumentPageComponent,
+    data: { legalSlug: 'aviso-legal' },
+  },
   {
     path: 'setup-password',
     component: SetupPasswordPageComponent,
