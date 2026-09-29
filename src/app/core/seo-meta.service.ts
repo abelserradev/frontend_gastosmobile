@@ -14,12 +14,17 @@ export class SeoMetaService {
   private readonly title = inject(Title);
   private readonly meta = inject(Meta);
 
+  private static readonly CANONICAL_SELECTOR = 'rel="canonical"';
+
   setPublicPage(options: PublicPageSeoOptions): void {
     const pageTitle = `${options.title} | ${BRAND_APP_NAME}`;
     this.title.setTitle(pageTitle);
     this.meta.updateTag({ name: 'description', content: options.description });
     this.meta.updateTag({ name: 'robots', content: 'index, follow' });
     const canonical = `${environment.appOriginUrl.replace(/\/$/, '')}${options.path}`;
-    this.meta.updateTag({ rel: 'canonical', href: canonical });
+    this.meta.updateTag(
+      { rel: 'canonical', href: canonical },
+      SeoMetaService.CANONICAL_SELECTOR,
+    );
   }
 }
