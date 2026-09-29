@@ -16,6 +16,24 @@ export type LegalDocumentSlug =
   | 'cookies'
   | 'aviso-legal';
 
+export interface LegalNavEntry {
+  slug: LegalDocumentSlug;
+  path: `/${string}`;
+  label: string;
+}
+
+export const LEGAL_NAV_LINKS: LegalNavEntry[] = [
+  { slug: 'privacidad', path: '/privacidad', label: 'Privacidad' },
+  { slug: 'terminos', path: '/terminos', label: 'Términos' },
+  { slug: 'cookies', path: '/cookies', label: 'Cookies' },
+  { slug: 'aviso-legal', path: '/aviso-legal', label: 'Aviso legal' },
+];
+
+export function legalPathForSlug(slug: LegalDocumentSlug): string {
+  const match = LEGAL_NAV_LINKS.find((e) => e.slug === slug);
+  return match?.path ?? '/privacidad';
+}
+
 export interface LegalSection {
   heading?: string;
   paragraphs: string[];
