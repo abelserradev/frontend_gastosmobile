@@ -1,7 +1,16 @@
+// En móvil la barra flotante de gastos compite con el FAB en la esquina derecha
+:host {
+  --help-chat-fab-bottom: 1.25rem;
+
+  @media (max-width: 1023px) {
+    --help-chat-fab-bottom: 6rem;
+  }
+}
+
 .help-chat-fab {
   position: fixed;
   right: 1.25rem;
-  bottom: 1.25rem;
+  bottom: var(--help-chat-fab-bottom);
   z-index: 50;
   width: 3.25rem;
   height: 3.25rem;
@@ -18,7 +27,7 @@
 .help-chat-panel {
   position: fixed;
   right: 1.25rem;
-  bottom: 5.5rem;
+  bottom: calc(var(--help-chat-fab-bottom) + 3.25rem + 1rem);
   z-index: 50;
   width: min(100vw - 2rem, 22rem);
   max-height: min(70vh, 32rem);
