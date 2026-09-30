@@ -1,0 +1,11 @@
+{
+  "routes": [
+    { "path": "/", "priority": "1.0", "changefreq": "weekly" },
+    { "path": "/descargar", "priority": "0.9", "changefreq": "monthly" },
+    { "path": "/login", "priority": "0.6", "changefreq": "monthly" },
+    { "path": "/privacidad", "priority": "0.8", "changefreq": "monthly" },
+    { "path": "/terminos", "priority": "0.7", "changefreq": "monthly" },
+    { "path": "/cookies", "priority": "0.5", "changefreq": "yearly" },
+    { "path": "/aviso-legal", "priority": "0.5", "changefreq": "yearly" }
+  ]
+}

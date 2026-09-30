@@ -1,0 +1,67 @@
+<div class="min-h-screen bg-gradient-to-b from-[#FFD300]/30 to-background">
+  <header class="px-6 pt-10 pb-6 text-center max-w-lg mx-auto">
+    <img
+      [src]="brandLogoSrc"
+      [attr.alt]="brandAppName"
+      class="mx-auto w-full max-w-[280px] h-auto object-contain drop-shadow-lg mb-6"
+      width="280"
+      height="120"
+    />
+    <h1 class="text-2xl sm:text-3xl font-bold text-foreground leading-tight">
+      Control de gastos con tasa BCV, OCR e inventario
+    </h1>
+    <p class="mt-4 text-muted-foreground text-sm sm:text-base leading-relaxed">
+      {{ brandAppName }} ayuda a familias y comercios a registrar gastos, ingresos y stock con periodos de presupuesto personalizados y exportación CSV.
+    </p>
+    <div class="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
+      <a
+        routerLink="/login"
+        class="inline-flex justify-center py-3.5 px-6 rounded-xl text-sm font-bold bg-primary text-primary-foreground hover:opacity-90 transition-opacity"
+      >
+        Crear cuenta o iniciar sesión
+      </a>
+      <a
+        routerLink="/descargar"
+        class="inline-flex justify-center py-3.5 px-6 rounded-xl text-sm font-bold border border-border bg-card hover:bg-muted/50 transition-colors"
+      >
+        Descargar app Android
+      </a>
+    </div>
+  </header>
+
+  <section class="px-6 pb-10 max-w-lg mx-auto space-y-4" aria-label="Beneficios">
+    <article class="bg-card rounded-2xl p-5 shadow-sm border border-border/60">
+      <h2 class="font-semibold text-foreground">Tasa BCV del día</h2>
+      <p class="text-sm text-muted-foreground mt-1">
+        Consulta la referencia oficial y registra montos en bolívares y dólares en el mismo periodo.
+      </p>
+    </article>
+    <article class="bg-card rounded-2xl p-5 shadow-sm border border-border/60">
+      <h2 class="font-semibold text-foreground">OCR de comprobantes</h2>
+      <p class="text-sm text-muted-foreground mt-1">
+        Prefill de gastos desde fotos de facturas con revisión humana antes de guardar.
+      </p>
+    </article>
+    <article class="bg-card rounded-2xl p-5 shadow-sm border border-border/60">
+      <h2 class="font-semibold text-foreground">Inventario para comercios</h2>
+      <p class="text-sm text-muted-foreground mt-1">
+        Productos, movimientos, sucursales y colaboradores en perfiles tipo comercio.
+      </p>
+    </article>
+    <article class="bg-card rounded-2xl p-5 shadow-sm border border-border/60">
+      <h2 class="font-semibold text-foreground">Periodo de corte a tu medida</h2>
+      <p class="text-sm text-muted-foreground mt-1">
+        Presupuesto alineado a tu ciclo de pago, no solo al mes calendario.
+      </p>
+    </article>
+  </section>
+
+  <footer class="px-6 pb-10 text-center text-xs text-muted-foreground space-x-2">
+    @for (link of legalLinks; track link.slug) {
+      <a [routerLink]="link.path" class="underline hover:text-foreground">{{ link.label }}</a>
+      @if (!$last) {
+        <span aria-hidden="true">·</span>
+      }
+    }
+  </footer>
+</div>

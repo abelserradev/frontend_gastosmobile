@@ -211,6 +211,9 @@ export class AuthService {
   }
 
   private hydrateFromStorage(): void {
+    if (typeof globalThis.localStorage === 'undefined') {
+      return;
+    }
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) {
       return;

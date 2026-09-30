@@ -14,6 +14,8 @@ import { HistorialPageComponent } from './pages/historial/historial-page.compone
 import { InventoryPageComponent } from './pages/inventory/inventory-page.component';
 import { InvitationsPageComponent } from './pages/invitations/invitations-page.component';
 import { SplashPageComponent } from './pages/splash/splash-page.component';
+import { HomeEntryComponent } from './pages/home/home-entry.component';
+import { DescargarPageComponent } from './pages/descargar/descargar-page.component';
 import { legalPublicRoutes } from './pages/legal/legal.routes';
 
 /**
@@ -24,8 +26,10 @@ import { legalPublicRoutes } from './pages/legal/legal.routes';
  * - Rutas protegidas requieren sesión válida
  */
 export const routes: Routes = [
-  { path: '', component: SplashPageComponent },
+  { path: '', component: HomeEntryComponent },
+  { path: 'splash', component: SplashPageComponent },
   { path: 'login', component: LoginPageComponent },
+  { path: 'descargar', component: DescargarPageComponent },
   ...legalPublicRoutes,
   {
     path: 'setup-password',

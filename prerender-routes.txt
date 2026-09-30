@@ -1,0 +1,7 @@
+/
+/descargar
+/login
+/privacidad
+/terminos
+/cookies
+/aviso-legal

@@ -1,4 +1,7 @@
 User-agent: *
+Allow: /
+Allow: /descargar
+Allow: /login
 Allow: /privacidad
 Allow: /terminos
 Allow: /cookies
