@@ -15,6 +15,7 @@ import {
   BRAND_LOGO_SRC,
 } from '../../core/brand-assets';
 import { NativeSessionTokenService } from '../../core/native/native-session-token.service';
+import { SeoMetaService } from '../../core/seo-meta.service';
 
 @Component({
   selector: 'app-login-page',
@@ -28,6 +29,7 @@ export class LoginPageComponent implements OnInit {
   private readonly firebaseAuth = inject(FirebaseAuthService);
   private readonly meApi = inject(MeApiService);
   private readonly nativeToken = inject(NativeSessionTokenService);
+  private readonly seo = inject(SeoMetaService);
   readonly brandLogoSrc = BRAND_LOGO_SRC;
   readonly brandAppName = BRAND_APP_NAME;
   readonly isLogin = signal(true);
@@ -48,6 +50,12 @@ export class LoginPageComponent implements OnInit {
   };
 
   ngOnInit(): void {
+    this.seo.setPublicPage({
+      title: 'Iniciar sesión',
+      description:
+        'Accede a Spend$ave para registrar gastos, ingresos e inventario con tasa BCV y OCR de comprobantes.',
+      path: '/login',
+    });
     if (this.auth.hasSession()) {
       this.navigateByOnBoardingState();
       return;

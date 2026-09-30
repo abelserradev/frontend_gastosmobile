@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../core/auth.service';
 import { BRAND_APP_NAME } from '../../core/brand-assets';
@@ -17,10 +17,16 @@ import { BRAND_APP_NAME } from '../../core/brand-assets';
   imports: [CommonModule, RouterLink],
   templateUrl: './app-android-page.component.html',
 })
-export class AppAndroidPageComponent {
+export class AppAndroidPageComponent implements OnInit {
   private readonly router = inject(Router);
   protected readonly auth = inject(AuthService);
   protected readonly brandAppName = BRAND_APP_NAME;
+
+  ngOnInit(): void {
+    if (!this.auth.hasSession()) {
+      void this.router.navigate(['/descargar']);
+    }
+  }
 
   goBack(): void {
     this.router.navigate(['/expenses']);
