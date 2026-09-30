@@ -29,6 +29,14 @@ jobs:
       - name: Instalar dependencias
         run: pnpm install --frozen-lockfile
 
+      - name: Generar environments para tests (placeholders CI)
+        env:
+          FIREBASE_WEB_API_KEY: ${{ secrets.FIREBASE_WEB_API_KEY || 'ci-placeholder-firebase-web-api-key' }}
+          GASTOS_API_KEY: ${{ secrets.GASTOS_API_KEY || 'ci-placeholder-gastos-api-key' }}
+        run: |
+          node scripts/write-firebase-api-key.mjs
+          node scripts/write-api-key.mjs
+
       - name: Tests con cobertura
         run: pnpm exec ng test --no-watch --code-coverage --browsers=ChromeHeadlessNoSandbox
 

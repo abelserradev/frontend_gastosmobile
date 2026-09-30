@@ -6,6 +6,7 @@
     "ng": "ng",
     "prebuild": "node scripts/write-firebase-api-key.mjs && node scripts/write-api-key.mjs && node scripts/generate-sitemap.mjs",
     "build:staging": "node scripts/apply-staging-robots.mjs && pnpm run build",
+    "pretest": "node scripts/write-firebase-api-key.mjs && node scripts/write-api-key.mjs",
     "prestart": "node scripts/write-firebase-api-key.mjs && node scripts/write-api-key.mjs",
     "start": "ng serve",
     "build": "ng build",
