@@ -1,0 +1,4 @@
+User-agent: *
+Disallow: /
+
+Sitemap: https://developgastos.buildforge.work/sitemap.xml
