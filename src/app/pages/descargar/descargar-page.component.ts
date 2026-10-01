@@ -1,20 +1,23 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { BRAND_APP_NAME } from '../../core/brand-assets';
-import { MarketingFeatureIconComponent } from '../../shared/marketing-feature-icon/marketing-feature-icon.component';
+import {
+  BRAND_APP_ICON_SRC,
+  BRAND_APP_NAME,
+} from '../../core/brand-assets';
 import { SeoMetaService } from '../../core/seo-meta.service';
 import { LEGAL_NAV_LINKS } from '../legal/legal.constants';
 
 @Component({
   selector: 'app-descargar-page',
   standalone: true,
-  imports: [RouterLink, MarketingFeatureIconComponent],
+  imports: [RouterLink],
   templateUrl: './descargar-page.component.html',
 })
 export class DescargarPageComponent implements OnInit {
   private readonly seo = inject(SeoMetaService);
 
   readonly brandAppName = BRAND_APP_NAME;
+  readonly brandAppIconSrc = BRAND_APP_ICON_SRC;
   readonly legalLinks = LEGAL_NAV_LINKS;
 
   ngOnInit(): void {

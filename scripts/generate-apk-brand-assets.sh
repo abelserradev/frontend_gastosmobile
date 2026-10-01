@@ -49,4 +49,5 @@ rm -f "$RES/drawable/splash.png"
 find "$RES" -path '*/drawable-port-*' -name splash.png -delete
 find "$RES" -path '*/drawable-land-*' -name splash.png -delete
 
-echo "Launcher: isotipo (crop) | Splash: logo-completo1.png completo"
+cp "$RES/mipmap-xxxhdpi/ic_launcher.png" "$ROOT/public/app-icon.png"
+echo "Launcher: isotipo (crop) | Splash: logo-completo1.png | Web: public/app-icon.png"
