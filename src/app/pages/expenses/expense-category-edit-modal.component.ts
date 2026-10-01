@@ -12,8 +12,6 @@ import {
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import type { CategoryDraft } from '../../core/app-context.service';
-import type { MeExpense } from '../../core/me-api.service';
-
 @Component({
   selector: 'app-expense-category-edit-modal',
   standalone: true,
@@ -35,10 +33,19 @@ export class ExpenseCategoryEditModalComponent implements OnChanges {
   readonly saveCategory = output<{ expenseId: string; categoryName: string }>();
 
   categoryName = '';
+  /** Evita perder el id si el padre limpia el target al cerrar el dialog en el mismo tick. */
+  private lockedExpenseId: string | null = null;
+  fieldError: string | null = null;
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['open']?.currentValue === true) {
       this.categoryName = this.currentCategory().trim();
+      this.lockedExpenseId = this.expenseId();
+      this.fieldError = null;
+    }
+    if (changes['open']?.currentValue === false) {
+      this.lockedExpenseId = null;
+      this.fieldError = null;
     }
     if (changes['open']) {
       afterNextRender(() => this.syncDialog(), { injector: this.injector });
@@ -56,14 +63,19 @@ export class ExpenseCategoryEditModalComponent implements OnChanges {
   }
 
   handleSubmit(): void {
-    const id = this.expenseId();
+    const id = this.lockedExpenseId ?? this.expenseId();
     const name = this.categoryName.trim();
-    if (!id || !name) {
-      globalThis.alert('Indica una categoría válida');
+    if (!name) {
+      this.fieldError = 'Escribe el nombre de la categoría';
       return;
     }
+    if (!id) {
+      this.fieldError =
+        'No se pudo identificar el gasto. Cierra el cuadro e inténtalo de nuevo.';
+      return;
+    }
+    this.fieldError = null;
     this.saveCategory.emit({ expenseId: id, categoryName: name });
-    this.openChange.emit(false);
   }
 
   handleCancel(): void {
