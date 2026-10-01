@@ -9,6 +9,7 @@ import {
   BRAND_LOGO_SRC,
 } from '../../core/brand-assets';
 import { routePathForMeState } from '../../core/me-route.util';
+import { environment } from '../../../environments/environment';
 
 /**
  * Splash screen inicial para la app mobile.
@@ -67,7 +68,7 @@ export class SplashPageComponent implements OnInit {
   private readonly auth = inject(AuthService);
   private readonly meApi = inject(MeApiService);
 
-  readonly version = '1.5.2';
+  readonly version = environment.appVersion;
   readonly brandLogoSrc = BRAND_LOGO_SRC;
   readonly brandAppName = BRAND_APP_NAME;
   readonly isVisible = signal(false);
