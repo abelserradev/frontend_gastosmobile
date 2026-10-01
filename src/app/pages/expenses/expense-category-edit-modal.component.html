@@ -37,6 +37,9 @@
             <option [value]="cat.name"></option>
           }
         </datalist>
+        @if (fieldError) {
+          <p class="mt-1.5 text-xs text-destructive" role="alert">{{ fieldError }}</p>
+        }
       </div>
 
       <div class="flex gap-3 pt-2">

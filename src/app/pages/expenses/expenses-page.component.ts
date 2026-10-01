@@ -14,6 +14,7 @@ import {
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
+import { switchMap } from 'rxjs';
 import { ChartData, ChartOptions } from 'chart.js';
 import { AppContextService } from '../../core/app-context.service';
 import { navigateFromExpensesMenu } from '../../core/app-navigation.util';
@@ -531,18 +532,36 @@ export class ExpensesPageComponent implements OnInit, OnDestroy {
 
   onCategoryEditOpenChange(open: boolean): void {
     this.categoryEditOpen.set(open);
-    if (!open) this.categoryEditTarget.set(null);
+    if (!open) {
+      queueMicrotask(() => {
+        if (!this.categoryEditOpen()) {
+          this.categoryEditTarget.set(null);
+        }
+      });
+    }
   }
 
   onCategoryEditSave(payload: { expenseId: string; categoryName: string }): void {
+    const merged = mergeCategoryDraft(this.ctx.categories(), payload.categoryName);
+    const names = merged.map((c) => c.name);
     this.meApi
-      .updateExpenseFields(payload.expenseId, {
-        categoryName: payload.categoryName,
-      })
+      .replaceCategories(names)
+      .pipe(
+        switchMap((cats) => {
+          this.ctx.setCategories(
+            cats.map((c) => ({ id: c.id, name: c.name })),
+          );
+          return this.meApi.updateExpenseFields(payload.expenseId, {
+            categoryName: payload.categoryName,
+          });
+        }),
+      )
       .subscribe({
         next: (row) => {
           this.applyPatchedExpense(payload.expenseId, row);
           this.syncCategoryFromExpense(row.category);
+          this.categoryEditOpen.set(false);
+          this.categoryEditTarget.set(null);
         },
         error: (err: unknown) => {
           globalThis.alert(formatApiHttpError(err));
