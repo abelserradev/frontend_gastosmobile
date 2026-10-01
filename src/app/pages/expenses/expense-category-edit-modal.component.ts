@@ -6,6 +6,7 @@ import {
   Injector,
   input,
   OnChanges,
+  OnDestroy,
   output,
   SimpleChanges,
   viewChild,
@@ -17,8 +18,9 @@ import type { CategoryDraft } from '../../core/app-context.service';
   standalone: true,
   imports: [FormsModule],
   templateUrl: './expense-category-edit-modal.component.html',
+  styleUrl: './expense-category-edit-modal.component.scss',
 })
-export class ExpenseCategoryEditModalComponent implements OnChanges {
+export class ExpenseCategoryEditModalComponent implements OnChanges, OnDestroy {
   private readonly injector = inject(Injector);
 
   readonly dialog = viewChild<ElementRef<HTMLDialogElement>>('categoryDialog');
@@ -52,6 +54,10 @@ export class ExpenseCategoryEditModalComponent implements OnChanges {
     }
   }
 
+  ngOnDestroy(): void {
+    this.closeNativeDialog();
+  }
+
   private syncDialog(): void {
     const host = this.dialog()?.nativeElement;
     if (!host) return;
@@ -59,7 +65,18 @@ export class ExpenseCategoryEditModalComponent implements OnChanges {
       if (!host.open) host.showModal();
       return;
     }
-    if (host.open) host.close();
+    this.closeNativeDialog();
+  }
+
+  private closeNativeDialog(): void {
+    const host = this.dialog()?.nativeElement;
+    if (host?.open) {
+      host.close();
+    }
+  }
+
+  onNativeDialogClose(): void {
+    this.openChange.emit(false);
   }
 
   handleSubmit(): void {
@@ -79,6 +96,7 @@ export class ExpenseCategoryEditModalComponent implements OnChanges {
   }
 
   handleCancel(): void {
+    this.closeNativeDialog();
     this.openChange.emit(false);
   }
 

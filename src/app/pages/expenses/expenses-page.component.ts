@@ -540,13 +540,9 @@ export class ExpensesPageComponent implements OnInit, OnDestroy {
   }
 
   onCategoryEditOpenChange(open: boolean): void {
-    this.categoryEditOpen.set(open);
     if (!open) {
-      queueMicrotask(() => {
-        if (!this.categoryEditOpen()) {
-          this.categoryEditTarget.set(null);
-        }
-      });
+      this.categoryEditOpen.set(false);
+      this.categoryEditTarget.set(null);
     }
   }
 
