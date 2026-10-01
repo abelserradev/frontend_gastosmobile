@@ -130,18 +130,25 @@
           <label class="block text-sm font-medium text-foreground mb-1" for="rc-category">
             Categoría *
           </label>
-          <select
+          <input
             id="rc-category"
+            type="text"
             [(ngModel)]="confirmCategory"
+            list="receipt-category-suggestions"
+            autocomplete="off"
+            placeholder="Elige una existente o escribe una nueva"
             [disabled]="step() === STEP_SAVING"
             class="w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent"
             required
-          >
-            <option value="">Selecciona una categoría</option>
+          />
+          <datalist id="receipt-category-suggestions">
             @for (cat of categories(); track cat.id) {
-              <option [value]="cat.name">{{ cat.name }}</option>
+              <option [value]="cat.name"></option>
             }
-          </select>
+          </datalist>
+          <p class="text-xs text-muted-foreground mt-1">
+            Puedes escribir una categoría que aún no esté en la lista.
+          </p>
         </div>
 
         <!-- Fecha -->

@@ -1,0 +1,59 @@
+<dialog
+  #categoryDialog
+  class="fixed inset-0 z-50 flex items-center justify-center p-4 m-0 w-full max-w-none h-full max-h-none bg-transparent border-0 shadow-none open:flex"
+  (click)="onBackdropClick($event)"
+  (keydown)="onDialogKeydown($event)"
+  aria-labelledby="edit-category-title"
+>
+  <div
+    class="relative bg-card rounded-2xl p-6 w-full max-w-md shadow-2xl"
+    (click)="stopBubble($event)"
+  >
+    <h2 id="edit-category-title" class="text-xl font-bold text-foreground mb-1">
+      Cambiar categoría
+    </h2>
+    <p class="text-sm text-muted-foreground mb-4 truncate">
+      {{ expenseTitle() }}
+    </p>
+
+    <form (ngSubmit)="handleSubmit()" class="space-y-4">
+      <div>
+        <label class="block text-sm font-medium text-foreground mb-1" for="edit-expense-category">
+          Categoría *
+        </label>
+        <input
+          id="edit-expense-category"
+          name="categoryName"
+          type="text"
+          [(ngModel)]="categoryName"
+          list="edit-expense-category-suggestions"
+          autocomplete="off"
+          placeholder="Elige una existente o escribe una nueva"
+          class="w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent"
+          required
+        />
+        <datalist id="edit-expense-category-suggestions">
+          @for (cat of categories(); track cat.id) {
+            <option [value]="cat.name"></option>
+          }
+        </datalist>
+      </div>
+
+      <div class="flex gap-3 pt-2">
+        <button
+          type="button"
+          (click)="handleCancel()"
+          class="flex-1 px-4 py-2 border border-border rounded-lg font-medium hover:bg-muted transition-colors"
+        >
+          Cancelar
+        </button>
+        <button
+          type="submit"
+          class="flex-1 px-4 py-2 bg-primary text-primary-foreground rounded-lg font-medium hover:opacity-90 transition-colors"
+        >
+          Guardar
+        </button>
+      </div>
+    </form>
+  </div>
+</dialog>

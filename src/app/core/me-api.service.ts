@@ -426,6 +426,21 @@ export class MeApiService {
     }>(`${this.base}/bcv/oficial-por-dia${q}`);
   }
 
+  updateExpenseFields(
+    id: string,
+    body: {
+      title?: string;
+      amount?: number;
+      amountCurrency?: 'USD' | 'BS';
+      categoryName?: string;
+    },
+  ): Observable<MeExpense> {
+    return this.http.patch<MeExpense>(
+      `${this.base}/me/expenses/${id}/fields`,
+      body,
+    );
+  }
+
   patchExpensePaid(
     id: string,
     isPaid: boolean,

@@ -72,18 +72,25 @@
           class="block text-sm font-medium text-foreground mb-1"
           for="expense-category-select"
         >Categoría *</label>
-        <select
+        <input
           id="expense-category-select"
           name="category"
+          type="text"
           [(ngModel)]="category"
+          list="expense-category-suggestions"
+          autocomplete="off"
+          placeholder="Elige una existente o escribe una nueva"
           class="w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent"
           required
-        >
-          <option value="">Selecciona una categoría</option>
+        />
+        <datalist id="expense-category-suggestions">
           @for (cat of categories(); track cat.id) {
-            <option [value]="cat.name">{{ cat.name }}</option>
+            <option [value]="cat.name"></option>
           }
-        </select>
+        </datalist>
+        <p class="text-xs text-muted-foreground mt-1">
+          Puedes escribir una categoría que aún no esté en la lista.
+        </p>
       </div>
 
       <div>
