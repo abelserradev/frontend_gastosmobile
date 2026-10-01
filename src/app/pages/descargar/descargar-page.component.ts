@@ -1,13 +1,14 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { BRAND_APP_NAME } from '../../core/brand-assets';
+import { MarketingFeatureIconComponent } from '../../shared/marketing-feature-icon/marketing-feature-icon.component';
 import { SeoMetaService } from '../../core/seo-meta.service';
 import { LEGAL_NAV_LINKS } from '../legal/legal.constants';
 
 @Component({
   selector: 'app-descargar-page',
   standalone: true,
-  imports: [RouterLink],
+  imports: [RouterLink, MarketingFeatureIconComponent],
   templateUrl: './descargar-page.component.html',
 })
 export class DescargarPageComponent implements OnInit {

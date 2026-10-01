@@ -4,13 +4,14 @@ import {
   BRAND_APP_NAME,
   BRAND_LOGO_SRC,
 } from '../../core/brand-assets';
+import { MarketingFeatureIconComponent } from '../../shared/marketing-feature-icon/marketing-feature-icon.component';
 import { SeoMetaService } from '../../core/seo-meta.service';
 import { LEGAL_NAV_LINKS } from '../legal/legal.constants';
 
 @Component({
   selector: 'app-landing-page',
   standalone: true,
-  imports: [RouterLink],
+  imports: [RouterLink, MarketingFeatureIconComponent],
   templateUrl: './landing-page.component.html',
 })
 export class LandingPageComponent implements OnInit {
