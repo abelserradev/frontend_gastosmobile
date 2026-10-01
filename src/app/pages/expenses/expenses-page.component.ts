@@ -29,6 +29,7 @@ import {
 } from '../../core/month-renewal.util';
 import type { ParseInvoiceResult } from '../../core/ocr-api.service';
 import { guessOcrDocumentKind } from '../../core/ocr-document-kind.util';
+import { ExpenseCategoryEditModalComponent } from './expense-category-edit-modal.component';
 import { ExpenseModalComponent } from './expense-modal.component';
 import { IncomeModalComponent } from './income-modal.component';
 import { ExpensePieChartComponent } from './expense-pie-chart.component';
@@ -38,6 +39,7 @@ import { ReceiptViewerComponent } from './receipt-viewer.component';
 import { TelegramLinkPanelComponent } from './telegram-link-panel.component';
 import { HelpChatWidgetComponent } from '../../shared/help-chat/help-chat-widget.component';
 import { resolveExpenseCategoryIcon, type ExpenseCategoryIconKind } from './expense-category-icon.util';
+import { mergeCategoryDraft } from './merge-category-draft.util';
 import {
   buildLastSevenDaySpending,
   sparklinePolyline,
@@ -91,6 +93,7 @@ function toIncomeItem(i: MeIncome) {
     CommonModule,
     FormsModule,
     RouterLink,
+    ExpenseCategoryEditModalComponent,
     ExpenseModalComponent,
     IncomeModalComponent,
     ExpensePieChartComponent,
@@ -151,6 +154,13 @@ export class ExpensesPageComponent implements OnInit, OnDestroy {
   // --- Visor de comprobantes ---
   readonly receiptViewerOpen = signal(false);
   readonly receiptExpenseId = signal<string | null>(null);
+
+  readonly categoryEditOpen = signal(false);
+  readonly categoryEditTarget = signal<{
+    id: string;
+    title: string;
+    category: string;
+  } | null>(null);
   readonly showChart = signal(false);
   readonly sidebarOpen = signal(false);
   /** Invitaciones pendientes a perfiles comercio compartidos. */
@@ -511,6 +521,33 @@ export class ExpensesPageComponent implements OnInit, OnDestroy {
   onExpenseSavedFromReceipt(expense: MeExpense): void {
     this.expensesPage.set(1);
     this.ctx.setExpenses([toExpenseItem(expense), ...this.ctx.expenses()]);
+    this.syncCategoryFromExpense(expense.category);
+  }
+
+  openCategoryEdit(expense: { id: string; title: string; category: string }): void {
+    this.categoryEditTarget.set(expense);
+    this.categoryEditOpen.set(true);
+  }
+
+  onCategoryEditOpenChange(open: boolean): void {
+    this.categoryEditOpen.set(open);
+    if (!open) this.categoryEditTarget.set(null);
+  }
+
+  onCategoryEditSave(payload: { expenseId: string; categoryName: string }): void {
+    this.meApi
+      .updateExpenseFields(payload.expenseId, {
+        categoryName: payload.categoryName,
+      })
+      .subscribe({
+        next: (row) => {
+          this.applyPatchedExpense(payload.expenseId, row);
+          this.syncCategoryFromExpense(row.category);
+        },
+        error: (err: unknown) => {
+          globalThis.alert(formatApiHttpError(err));
+        },
+      });
   }
 
   /** El usuario eligió "Agregar más detalles" desde el ImageUploadModal. */
@@ -550,6 +587,7 @@ export class ExpensesPageComponent implements OnInit, OnDestroy {
         next: (row) => {
           this.expensesPage.set(1);
           this.ctx.setExpenses([toExpenseItem(row), ...this.ctx.expenses()]);
+          this.syncCategoryFromExpense(row.category);
           const raw = (ocrSnapshot?.rawText ?? '').trim();
           if (raw.length >= 8 && ocrSnapshot) {
             this.enqueueOcrFeedbackAfterDetailForm(
@@ -764,6 +802,9 @@ export class ExpensesPageComponent implements OnInit, OnDestroy {
             ? {
                 ...e,
                 isPaid: row.isPaid,
+                category: row.category ?? e.category,
+                title: row.title ?? e.title,
+                amount: row.amount ?? e.amount,
                 referenceMonth: row.referenceMonth ?? e.referenceMonth,
                 paymentDate: row.paymentDate ?? e.paymentDate,
                 bcvRateApplied: row.bcvRateApplied ?? e.bcvRateApplied,
@@ -865,6 +906,13 @@ export class ExpensesPageComponent implements OnInit, OnDestroy {
 
   categoryIconKind(category: string): ExpenseCategoryIconKind {
     return resolveExpenseCategoryIcon(category);
+  }
+
+  private syncCategoryFromExpense(categoryName: string): void {
+    const merged = mergeCategoryDraft(this.ctx.categories(), categoryName);
+    if (merged.length !== this.ctx.categories().length) {
+      this.ctx.setCategories(merged);
+    }
   }
 
   receiptPreviewUrl(expenseId: string): string | null {

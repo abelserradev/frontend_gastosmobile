@@ -450,6 +450,17 @@
                   <h3 class="font-bold text-sm sm:text-base text-foreground truncate">
                     {{ expense.category }}
                   </h3>
+                  <button
+                    type="button"
+                    (click)="openCategoryEdit(expense)"
+                    class="inline-flex items-center justify-center w-7 h-7 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors shrink-0"
+                    title="Cambiar categoría"
+                    aria-label="Cambiar categoría del gasto"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                      <path d="M12 20h9" /><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
+                    </svg>
+                  </button>
                   @if (expense.hasReceipt) {
                     <div
                       class="relative"
@@ -724,6 +735,16 @@
     [defaultCurrency]="ctx.currency()"
     [ocrPrefill]="ocrPrefill()"
     (addExpense)="onAddExpense($event)"
+  />
+
+  <app-expense-category-edit-modal
+    [open]="categoryEditOpen()"
+    (openChange)="onCategoryEditOpenChange($event)"
+    [categories]="ctx.categories()"
+    [expenseId]="categoryEditTarget()?.id ?? null"
+    [expenseTitle]="categoryEditTarget()?.title ?? ''"
+    [currentCategory]="categoryEditTarget()?.category ?? ''"
+    (saveCategory)="onCategoryEditSave($event)"
   />
 
   <app-income-modal

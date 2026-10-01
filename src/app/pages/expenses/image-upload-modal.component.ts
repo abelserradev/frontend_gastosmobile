@@ -221,8 +221,9 @@ export class ImageUploadModalComponent implements OnChanges {
       this.saveError.set('El monto no es válido');
       return;
     }
-    if (!this.confirmCategory) {
-      this.saveError.set('Selecciona una categoría');
+    const categoryName = this.confirmCategory.trim();
+    if (!categoryName) {
+      this.saveError.set('Indica una categoría');
       return;
     }
     if (!this.confirmDate) {
@@ -234,13 +235,13 @@ export class ImageUploadModalComponent implements OnChanges {
     this.step.set(STEP_SAVING);
 
     // UX: nombre del gasto = categoría elegida (no OCR de beneficiario / ruido bancario)
-    const title = this.confirmCategory.trim();
+    const title = categoryName;
 
     this.meApi.createExpenseWithReceipt({
       file: this.selectedFile,
       amount,
       amountCurrency: this.confirmCurrency,
-      categoryName: this.confirmCategory,
+      categoryName,
       paymentDate: this.confirmDate,
       title,
     }).subscribe({
@@ -267,7 +268,7 @@ export class ImageUploadModalComponent implements OnChanges {
                   : {}),
                 currencyCapture:
                   this.confirmCurrency === 'BS' ? 'BS' : 'USD',
-                categoryName: this.confirmCategory,
+                categoryName,
               },
               expenseId: expense.id,
             })

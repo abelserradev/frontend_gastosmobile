@@ -126,7 +126,8 @@ export class ExpenseModalComponent implements OnChanges {
   }
 
   handleSubmit(): void {
-    if (!this.title.trim() || !this.category) {
+    const categoryName = this.category.trim();
+    if (!this.title.trim() || !categoryName) {
       globalThis.alert('Por favor completa título y categoría');
       return;
     }
@@ -142,7 +143,7 @@ export class ExpenseModalComponent implements OnChanges {
         title: this.title.trim(),
         description: this.description.trim(),
         amount: n,
-        category: this.category,
+        category: categoryName,
         paymentDate: pay,
       });
       return;
@@ -160,7 +161,7 @@ export class ExpenseModalComponent implements OnChanges {
           title: this.title.trim(),
           description: this.description.trim(),
           amount: usd,
-          category: this.category,
+          category: categoryName,
           paymentDate: date,
         });
       },

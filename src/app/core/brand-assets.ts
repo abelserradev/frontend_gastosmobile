@@ -4,3 +4,6 @@ export const BRAND_APP_NAME = 'Spend$ave';
 /** Logo horizontal SPEND$AVE; en `public/` y copiado al bundle de Capacitor. */
 export const BRAND_LOGO_SRC = 'logo-completo1.png';
 
+/** Isotipo cuadrado (mismo asset que el icono del launcher Android). */
+export const BRAND_APP_ICON_SRC = 'app-icon.png';
+
