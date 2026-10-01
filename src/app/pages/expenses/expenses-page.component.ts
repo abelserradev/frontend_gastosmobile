@@ -245,6 +245,7 @@ export class ExpensesPageComponent implements OnInit, OnDestroy {
     sparklinePolyline(this.spendingSparklineValues()),
   );
 
+  /** Promedio simple de tasas guardadas en gastos pagados (no es la cotización BCV del día). */
   readonly averageBcvRate = computed(() => {
     const rows = this.ctx
       .expenses()
@@ -255,6 +256,13 @@ export class ExpensesPageComponent implements OnInit, OnDestroy {
     const sum = rows.reduce((acc, e) => acc + (e.bcvRateApplied ?? 0), 0);
     return sum / rows.length;
   });
+
+  /** Cotización oficial del día (DolarApi/BCV vía backend). */
+  readonly officialBcvToday = signal<{
+    vesPerUsd: number;
+    rateDate: string;
+    stale: boolean;
+  } | null>(null);
 
   readonly userInitial = computed(() => {
     const name = this.auth.displayName()?.trim();
@@ -352,6 +360,7 @@ export class ExpensesPageComponent implements OnInit, OnDestroy {
       void this.router.navigate(['/login']);
       return;
     }
+    this.loadOfficialBcvQuote();
     getStateWithAutoRollover(this.meApi).subscribe({
       next: (s) => {
         if (needsSetupScreen(s)) {
@@ -902,6 +911,21 @@ export class ExpensesPageComponent implements OnInit, OnDestroy {
 
   goInvitations(): void {
     navigateFromExpensesMenu(this.router, '/invitations', () => this.closeSidebar());
+  }
+
+  private loadOfficialBcvQuote(): void {
+    this.meApi.getBcvOfficialRateResilient().subscribe({
+      next: (r) => {
+        this.officialBcvToday.set({
+          vesPerUsd: r.vesPerUsd,
+          rateDate: r.rateDate,
+          stale: r.stale || r.fromLocalCache,
+        });
+      },
+      error: () => {
+        this.officialBcvToday.set(null);
+      },
+    });
   }
 
   private loadPendingInvitationsCount(): void {
