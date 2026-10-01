@@ -30,29 +30,61 @@
   </header>
 
   <section class="px-6 pb-10 max-w-lg mx-auto space-y-4" aria-label="Beneficios">
-    <article class="bg-card rounded-2xl p-5 shadow-sm border border-border/60">
-      <h2 class="font-semibold text-foreground">Tasa BCV del día</h2>
-      <p class="text-sm text-muted-foreground mt-1">
-        Consulta la referencia oficial y registra montos en bolívares y dólares en el mismo periodo.
-      </p>
+    <article class="bg-card rounded-2xl p-5 shadow-sm border border-border/60 flex gap-4">
+      <div
+        class="flex-shrink-0 w-11 h-11 rounded-xl bg-[#FFD300]/25 text-[#5c4a00] dark:text-[#FFD300] flex items-center justify-center"
+        aria-hidden="true"
+      >
+        <app-marketing-feature-icon kind="exchange-rate" [size]="22" />
+      </div>
+      <div class="min-w-0">
+        <h2 class="font-semibold text-foreground">Tasa BCV del día</h2>
+        <p class="text-sm text-muted-foreground mt-1">
+          Consulta la referencia oficial y registra montos en bolívares y dólares en el mismo periodo.
+        </p>
+      </div>
     </article>
-    <article class="bg-card rounded-2xl p-5 shadow-sm border border-border/60">
-      <h2 class="font-semibold text-foreground">OCR de comprobantes</h2>
-      <p class="text-sm text-muted-foreground mt-1">
-        Prefill de gastos desde fotos de facturas con revisión humana antes de guardar.
-      </p>
+    <article class="bg-card rounded-2xl p-5 shadow-sm border border-border/60 flex gap-4">
+      <div
+        class="flex-shrink-0 w-11 h-11 rounded-xl bg-[#FFD300]/25 text-[#5c4a00] dark:text-[#FFD300] flex items-center justify-center"
+        aria-hidden="true"
+      >
+        <app-marketing-feature-icon kind="receipt-scan" [size]="22" />
+      </div>
+      <div class="min-w-0">
+        <h2 class="font-semibold text-foreground">Lectura de comprobantes</h2>
+        <p class="text-sm text-muted-foreground mt-1">
+          Completa los gastos a partir de fotos de facturas; tú revisas antes de guardar.
+        </p>
+      </div>
     </article>
-    <article class="bg-card rounded-2xl p-5 shadow-sm border border-border/60">
-      <h2 class="font-semibold text-foreground">Inventario para comercios</h2>
-      <p class="text-sm text-muted-foreground mt-1">
-        Productos, movimientos, sucursales y colaboradores en perfiles tipo comercio.
-      </p>
+    <article class="bg-card rounded-2xl p-5 shadow-sm border border-border/60 flex gap-4">
+      <div
+        class="flex-shrink-0 w-11 h-11 rounded-xl bg-[#FFD300]/25 text-[#5c4a00] dark:text-[#FFD300] flex items-center justify-center"
+        aria-hidden="true"
+      >
+        <app-marketing-feature-icon kind="inventory" [size]="22" />
+      </div>
+      <div class="min-w-0">
+        <h2 class="font-semibold text-foreground">Inventario para comercios</h2>
+        <p class="text-sm text-muted-foreground mt-1">
+          Productos, movimientos, sucursales y colaboradores en perfiles de comercio.
+        </p>
+      </div>
     </article>
-    <article class="bg-card rounded-2xl p-5 shadow-sm border border-border/60">
-      <h2 class="font-semibold text-foreground">Periodo de corte a tu medida</h2>
-      <p class="text-sm text-muted-foreground mt-1">
-        Presupuesto alineado a tu ciclo de pago, no solo al mes calendario.
-      </p>
+    <article class="bg-card rounded-2xl p-5 shadow-sm border border-border/60 flex gap-4">
+      <div
+        class="flex-shrink-0 w-11 h-11 rounded-xl bg-[#FFD300]/25 text-[#5c4a00] dark:text-[#FFD300] flex items-center justify-center"
+        aria-hidden="true"
+      >
+        <app-marketing-feature-icon kind="budget-cycle" [size]="22" />
+      </div>
+      <div class="min-w-0">
+        <h2 class="font-semibold text-foreground">Periodo de corte a tu medida</h2>
+        <p class="text-sm text-muted-foreground mt-1">
+          Presupuesto alineado a tu ciclo de pago, no solo al mes calendario.
+        </p>
+      </div>
     </article>
   </section>
 
