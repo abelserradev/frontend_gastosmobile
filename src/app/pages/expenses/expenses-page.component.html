@@ -761,15 +761,17 @@
     (addExpense)="onAddExpense($event)"
   />
 
-  <app-expense-category-edit-modal
-    [open]="categoryEditOpen()"
-    (openChange)="onCategoryEditOpenChange($event)"
-    [categories]="ctx.categories()"
-    [expenseId]="categoryEditTarget()?.id ?? null"
-    [expenseTitle]="categoryEditTarget()?.title ?? ''"
-    [currentCategory]="categoryEditTarget()?.category ?? ''"
-    (saveCategory)="onCategoryEditSave($event)"
-  />
+  @if (categoryEditOpen() && categoryEditTarget(); as editTarget) {
+    <app-expense-category-edit-modal
+      [open]="true"
+      (openChange)="onCategoryEditOpenChange($event)"
+      [categories]="ctx.categories()"
+      [expenseId]="editTarget.id"
+      [expenseTitle]="editTarget.title"
+      [currentCategory]="editTarget.category"
+      (saveCategory)="onCategoryEditSave($event)"
+    />
+  }
 
   <app-income-modal
     [open]="incomeModalOpen()"
