@@ -41,6 +41,7 @@ export class InitialFormComponent implements OnInit {
   currency: CurrencyCode = 'USD';
   income = '';
   categoryInput = '';
+  categoryDraftError: string | null = null;
   /** Bs por 1 USD (DolarApi); solo cuando moneda es BS. */
   bcvVesPerUsd: number | null = null;
   bcvRateDisplayDate = '';
@@ -153,14 +154,26 @@ export class InitialFormComponent implements OnInit {
   }
 
   handleAddCategory(): void {
+    this.categoryDraftError = null;
     const trimmed = this.categoryInput.trim();
-    if (trimmed && !this.categories.includes(trimmed)) {
-      this.categories = [...this.categories, trimmed];
-      this.categoryInput = '';
+    if (!trimmed) {
+      this.categoryDraftError = 'Escribe un nombre para la categoría';
+      return;
     }
+    const duplicate = this.categories.some(
+      (c) =>
+        c.localeCompare(trimmed, 'es', { sensitivity: 'accent' }) === 0,
+    );
+    if (duplicate) {
+      this.categoryDraftError = 'Esa categoría ya está en la lista';
+      return;
+    }
+    this.categories = [...this.categories, trimmed];
+    this.categoryInput = '';
   }
 
   handleRemoveCategory(category: string): void {
+    this.categoryDraftError = null;
     this.categories = this.categories.filter((c) => c !== category);
   }
 
@@ -225,7 +238,7 @@ export class InitialFormComponent implements OnInit {
 
   handleSubmit(): void {
     this.saveError = null;
-    if (!this.income || (!this.preferencesOnly && this.categories.length === 0)) {
+    if (!this.income || this.categories.length === 0) {
       this.saveError = 'Por favor completa todos los campos requeridos';
       return;
     }
@@ -264,10 +277,16 @@ export class InitialFormComponent implements OnInit {
     };
     if (this.preferencesOnly) {
       this.saving = true;
-      this.meApi.updatePreferences(putBody).subscribe({
-        next: (pref) => {
+      forkJoin([
+        this.meApi.updatePreferences(putBody),
+        this.meApi.replaceCategories(this.categories),
+      ]).subscribe({
+        next: ([pref, cats]) => {
           this.saving = false;
           this.appContext.syncFromMePreferences(pref);
+          this.appContext.setCategories(
+            cats.map((c) => ({ id: c.id, name: c.name })),
+          );
           if (this.fromExpenses) {
             void this.router.navigate(['/expenses']);
             return;

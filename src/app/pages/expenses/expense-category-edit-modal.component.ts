@@ -6,21 +6,22 @@ import {
   Injector,
   input,
   OnChanges,
+  OnDestroy,
   output,
   SimpleChanges,
   viewChild,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import type { CategoryDraft } from '../../core/app-context.service';
-import type { MeExpense } from '../../core/me-api.service';
-
 @Component({
   selector: 'app-expense-category-edit-modal',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, RouterLink],
   templateUrl: './expense-category-edit-modal.component.html',
+  styleUrl: './expense-category-edit-modal.component.scss',
 })
-export class ExpenseCategoryEditModalComponent implements OnChanges {
+export class ExpenseCategoryEditModalComponent implements OnChanges, OnDestroy {
   private readonly injector = inject(Injector);
 
   readonly dialog = viewChild<ElementRef<HTMLDialogElement>>('categoryDialog');
@@ -35,14 +36,27 @@ export class ExpenseCategoryEditModalComponent implements OnChanges {
   readonly saveCategory = output<{ expenseId: string; categoryName: string }>();
 
   categoryName = '';
+  /** Evita perder el id si el padre limpia el target al cerrar el dialog en el mismo tick. */
+  private lockedExpenseId: string | null = null;
+  fieldError: string | null = null;
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['open']?.currentValue === true) {
       this.categoryName = this.currentCategory().trim();
+      this.lockedExpenseId = this.expenseId();
+      this.fieldError = null;
+    }
+    if (changes['open']?.currentValue === false) {
+      this.lockedExpenseId = null;
+      this.fieldError = null;
     }
     if (changes['open']) {
       afterNextRender(() => this.syncDialog(), { injector: this.injector });
     }
+  }
+
+  ngOnDestroy(): void {
+    this.closeNativeDialog();
   }
 
   private syncDialog(): void {
@@ -52,21 +66,43 @@ export class ExpenseCategoryEditModalComponent implements OnChanges {
       if (!host.open) host.showModal();
       return;
     }
-    if (host.open) host.close();
+    this.closeNativeDialog();
   }
 
-  handleSubmit(): void {
-    const id = this.expenseId();
-    const name = this.categoryName.trim();
-    if (!id || !name) {
-      globalThis.alert('Indica una categoría válida');
-      return;
+  private closeNativeDialog(): void {
+    const host = this.dialog()?.nativeElement;
+    if (host?.open) {
+      host.close();
     }
-    this.saveCategory.emit({ expenseId: id, categoryName: name });
+  }
+
+  onNativeDialogClose(): void {
     this.openChange.emit(false);
   }
 
+  handleSubmit(): void {
+    const id = this.lockedExpenseId ?? this.expenseId();
+    const name = this.categoryName.trim();
+    if (!name) {
+      this.fieldError = 'Selecciona una categoría';
+      return;
+    }
+    const known = this.categories().some((c) => c.name === name);
+    if (!known) {
+      this.fieldError = 'Elige una categoría de tu lista (Ingreso mensual para crear nuevas)';
+      return;
+    }
+    if (!id) {
+      this.fieldError =
+        'No se pudo identificar el gasto. Cierra el cuadro e inténtalo de nuevo.';
+      return;
+    }
+    this.fieldError = null;
+    this.saveCategory.emit({ expenseId: id, categoryName: name });
+  }
+
   handleCancel(): void {
+    this.closeNativeDialog();
     this.openChange.emit(false);
   }
 

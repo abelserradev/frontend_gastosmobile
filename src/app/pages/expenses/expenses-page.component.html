@@ -179,32 +179,46 @@
       </div>
     </div>
 
-    @if (ctx.bsIncomeNarrative() || averageBcvRate() != null) {
+    @if (officialBcvToday() || ctx.bsIncomeNarrative() || averageBcvRate() != null) {
       <div class="glass-panel bcv-ticker rounded-xl px-3 py-2 mb-5 text-xs font-mono text-muted-foreground">
         <div class="bcv-ticker__track">
           <span class="inline-flex items-center gap-2 shrink-0">
             <span class="text-primary font-bold">⚡ BCV</span>
-            @if (averageBcvRate() != null) {
+            @if (officialBcvToday(); as bcv) {
               <span class="text-foreground font-semibold">
-                Promedio mes: {{ averageBcvRate() | number: '1.2-2' }} Bs/USD
+                Oficial {{ bcv.rateDate }}:
+                {{ bcv.vesPerUsd | number: '1.2-4' }} Bs/USD
+              </span>
+            }
+            @if (averageBcvRate() != null) {
+              <span>
+                · Promedio en gastos pagados:
+                {{ averageBcvRate() | number: '1.2-2' }} Bs/USD
               </span>
             }
             @if (ctx.bsIncomeNarrative()) {
-              <span>{{ ctx.bsIncomeNarrative() }}</span>
+              <span>· {{ ctx.bsIncomeNarrative() }}</span>
             }
-            @if (ctx.bcvQuoteIsStale()) {
+            @if (officialBcvToday()?.stale || ctx.bcvQuoteIsStale()) {
               <span class="text-primary font-semibold">· última tasa en caché</span>
             }
           </span>
           <span class="inline-flex items-center gap-2 shrink-0" aria-hidden="true">
             <span class="text-primary font-bold">⚡ BCV</span>
-            @if (averageBcvRate() != null) {
+            @if (officialBcvToday(); as bcvDup) {
               <span class="text-foreground font-semibold">
-                Promedio mes: {{ averageBcvRate() | number: '1.2-2' }} Bs/USD
+                Oficial {{ bcvDup.rateDate }}:
+                {{ bcvDup.vesPerUsd | number: '1.2-4' }} Bs/USD
+              </span>
+            }
+            @if (averageBcvRate() != null) {
+              <span>
+                · Promedio en gastos pagados:
+                {{ averageBcvRate() | number: '1.2-2' }} Bs/USD
               </span>
             }
             @if (ctx.bsIncomeNarrative()) {
-              <span>{{ ctx.bsIncomeNarrative() }}</span>
+              <span>· {{ ctx.bsIncomeNarrative() }}</span>
             }
           </span>
         </div>
@@ -241,10 +255,20 @@
             </p>
           }
         </div>
-        <div class="text-right text-xs text-muted-foreground max-w-48">
-          Equivalente USD · tasa vigente
-          @if (ctx.bcvQuoteIsStale()) {
-            <span class="block text-primary font-medium mt-0.5">última tasa en caché</span>
+        <div class="text-right text-xs text-muted-foreground max-w-52">
+          @if (officialBcvToday(); as bcvHdr) {
+            <p class="font-mono text-foreground font-semibold tabular-nums">
+              {{ bcvHdr.vesPerUsd | number: '1.2-4' }} Bs/USD
+            </p>
+            <p class="mt-0.5">BCV oficial · {{ bcvHdr.rateDate }}</p>
+            @if (bcvHdr.stale) {
+              <span class="block text-primary font-medium mt-0.5">última tasa en caché</span>
+            }
+          } @else {
+            <p>Referencia BCV al registrar gastos</p>
+            @if (ctx.bcvQuoteIsStale()) {
+              <span class="block text-primary font-medium mt-0.5">última tasa en caché</span>
+            }
           }
         </div>
       </div>
@@ -737,15 +761,17 @@
     (addExpense)="onAddExpense($event)"
   />
 
-  <app-expense-category-edit-modal
-    [open]="categoryEditOpen()"
-    (openChange)="onCategoryEditOpenChange($event)"
-    [categories]="ctx.categories()"
-    [expenseId]="categoryEditTarget()?.id ?? null"
-    [expenseTitle]="categoryEditTarget()?.title ?? ''"
-    [currentCategory]="categoryEditTarget()?.category ?? ''"
-    (saveCategory)="onCategoryEditSave($event)"
-  />
+  @if (categoryEditOpen() && categoryEditTarget(); as editTarget) {
+    <app-expense-category-edit-modal
+      [open]="true"
+      (openChange)="onCategoryEditOpenChange($event)"
+      [categories]="ctx.categories()"
+      [expenseId]="editTarget.id"
+      [expenseTitle]="editTarget.title"
+      [currentCategory]="editTarget.category"
+      (saveCategory)="onCategoryEditSave($event)"
+    />
+  }
 
   <app-income-modal
     [open]="incomeModalOpen()"

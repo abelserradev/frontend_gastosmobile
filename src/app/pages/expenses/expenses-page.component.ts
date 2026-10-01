@@ -39,7 +39,6 @@ import { ReceiptViewerComponent } from './receipt-viewer.component';
 import { TelegramLinkPanelComponent } from './telegram-link-panel.component';
 import { HelpChatWidgetComponent } from '../../shared/help-chat/help-chat-widget.component';
 import { resolveExpenseCategoryIcon, type ExpenseCategoryIconKind } from './expense-category-icon.util';
-import { mergeCategoryDraft } from './merge-category-draft.util';
 import {
   buildLastSevenDaySpending,
   sparklinePolyline,
@@ -244,6 +243,7 @@ export class ExpensesPageComponent implements OnInit, OnDestroy {
     sparklinePolyline(this.spendingSparklineValues()),
   );
 
+  /** Promedio simple de tasas guardadas en gastos pagados (no es la cotización BCV del día). */
   readonly averageBcvRate = computed(() => {
     const rows = this.ctx
       .expenses()
@@ -254,6 +254,13 @@ export class ExpensesPageComponent implements OnInit, OnDestroy {
     const sum = rows.reduce((acc, e) => acc + (e.bcvRateApplied ?? 0), 0);
     return sum / rows.length;
   });
+
+  /** Cotización oficial del día (DolarApi/BCV vía backend). */
+  readonly officialBcvToday = signal<{
+    vesPerUsd: number;
+    rateDate: string;
+    stale: boolean;
+  } | null>(null);
 
   readonly userInitial = computed(() => {
     const name = this.auth.displayName()?.trim();
@@ -351,6 +358,7 @@ export class ExpensesPageComponent implements OnInit, OnDestroy {
       void this.router.navigate(['/login']);
       return;
     }
+    this.loadOfficialBcvQuote();
     getStateWithAutoRollover(this.meApi).subscribe({
       next: (s) => {
         if (needsSetupScreen(s)) {
@@ -521,7 +529,6 @@ export class ExpensesPageComponent implements OnInit, OnDestroy {
   onExpenseSavedFromReceipt(expense: MeExpense): void {
     this.expensesPage.set(1);
     this.ctx.setExpenses([toExpenseItem(expense), ...this.ctx.expenses()]);
-    this.syncCategoryFromExpense(expense.category);
   }
 
   openCategoryEdit(expense: { id: string; title: string; category: string }): void {
@@ -530,8 +537,10 @@ export class ExpensesPageComponent implements OnInit, OnDestroy {
   }
 
   onCategoryEditOpenChange(open: boolean): void {
-    this.categoryEditOpen.set(open);
-    if (!open) this.categoryEditTarget.set(null);
+    if (!open) {
+      this.categoryEditOpen.set(false);
+      this.categoryEditTarget.set(null);
+    }
   }
 
   onCategoryEditSave(payload: { expenseId: string; categoryName: string }): void {
@@ -542,7 +551,8 @@ export class ExpensesPageComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (row) => {
           this.applyPatchedExpense(payload.expenseId, row);
-          this.syncCategoryFromExpense(row.category);
+          this.categoryEditOpen.set(false);
+          this.categoryEditTarget.set(null);
         },
         error: (err: unknown) => {
           globalThis.alert(formatApiHttpError(err));
@@ -587,7 +597,6 @@ export class ExpensesPageComponent implements OnInit, OnDestroy {
         next: (row) => {
           this.expensesPage.set(1);
           this.ctx.setExpenses([toExpenseItem(row), ...this.ctx.expenses()]);
-          this.syncCategoryFromExpense(row.category);
           const raw = (ocrSnapshot?.rawText ?? '').trim();
           if (raw.length >= 8 && ocrSnapshot) {
             this.enqueueOcrFeedbackAfterDetailForm(
@@ -885,6 +894,21 @@ export class ExpensesPageComponent implements OnInit, OnDestroy {
     navigateFromExpensesMenu(this.router, '/invitations', () => this.closeSidebar());
   }
 
+  private loadOfficialBcvQuote(): void {
+    this.meApi.getBcvOfficialRateResilient().subscribe({
+      next: (r) => {
+        this.officialBcvToday.set({
+          vesPerUsd: r.vesPerUsd,
+          rateDate: r.rateDate,
+          stale: r.stale || r.fromLocalCache,
+        });
+      },
+      error: () => {
+        this.officialBcvToday.set(null);
+      },
+    });
+  }
+
   private loadPendingInvitationsCount(): void {
     this.meApi.listInvitations().subscribe({
       next: (list) => this.pendingInvitationsCount.set(list.length),
@@ -906,13 +930,6 @@ export class ExpensesPageComponent implements OnInit, OnDestroy {
 
   categoryIconKind(category: string): ExpenseCategoryIconKind {
     return resolveExpenseCategoryIcon(category);
-  }
-
-  private syncCategoryFromExpense(categoryName: string): void {
-    const merged = mergeCategoryDraft(this.ctx.categories(), categoryName);
-    if (merged.length !== this.ctx.categories().length) {
-      this.ctx.setCategories(merged);
-    }
   }
 
   receiptPreviewUrl(expenseId: string): string | null {
