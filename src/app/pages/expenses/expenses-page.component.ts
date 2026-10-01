@@ -14,7 +14,6 @@ import {
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { switchMap } from 'rxjs';
 import { ChartData, ChartOptions } from 'chart.js';
 import { AppContextService } from '../../core/app-context.service';
 import { navigateFromExpensesMenu } from '../../core/app-navigation.util';
@@ -40,7 +39,6 @@ import { ReceiptViewerComponent } from './receipt-viewer.component';
 import { TelegramLinkPanelComponent } from './telegram-link-panel.component';
 import { HelpChatWidgetComponent } from '../../shared/help-chat/help-chat-widget.component';
 import { resolveExpenseCategoryIcon, type ExpenseCategoryIconKind } from './expense-category-icon.util';
-import { mergeCategoryDraft } from './merge-category-draft.util';
 import {
   buildLastSevenDaySpending,
   sparklinePolyline,
@@ -531,7 +529,6 @@ export class ExpensesPageComponent implements OnInit, OnDestroy {
   onExpenseSavedFromReceipt(expense: MeExpense): void {
     this.expensesPage.set(1);
     this.ctx.setExpenses([toExpenseItem(expense), ...this.ctx.expenses()]);
-    this.syncCategoryFromExpense(expense.category);
   }
 
   openCategoryEdit(expense: { id: string; title: string; category: string }): void {
@@ -547,24 +544,13 @@ export class ExpensesPageComponent implements OnInit, OnDestroy {
   }
 
   onCategoryEditSave(payload: { expenseId: string; categoryName: string }): void {
-    const merged = mergeCategoryDraft(this.ctx.categories(), payload.categoryName);
-    const names = merged.map((c) => c.name);
     this.meApi
-      .replaceCategories(names)
-      .pipe(
-        switchMap((cats) => {
-          this.ctx.setCategories(
-            cats.map((c) => ({ id: c.id, name: c.name })),
-          );
-          return this.meApi.updateExpenseFields(payload.expenseId, {
-            categoryName: payload.categoryName,
-          });
-        }),
-      )
+      .updateExpenseFields(payload.expenseId, {
+        categoryName: payload.categoryName,
+      })
       .subscribe({
         next: (row) => {
           this.applyPatchedExpense(payload.expenseId, row);
-          this.syncCategoryFromExpense(row.category);
           this.categoryEditOpen.set(false);
           this.categoryEditTarget.set(null);
         },
@@ -611,7 +597,6 @@ export class ExpensesPageComponent implements OnInit, OnDestroy {
         next: (row) => {
           this.expensesPage.set(1);
           this.ctx.setExpenses([toExpenseItem(row), ...this.ctx.expenses()]);
-          this.syncCategoryFromExpense(row.category);
           const raw = (ocrSnapshot?.rawText ?? '').trim();
           if (raw.length >= 8 && ocrSnapshot) {
             this.enqueueOcrFeedbackAfterDetailForm(
@@ -945,13 +930,6 @@ export class ExpensesPageComponent implements OnInit, OnDestroy {
 
   categoryIconKind(category: string): ExpenseCategoryIconKind {
     return resolveExpenseCategoryIcon(category);
-  }
-
-  private syncCategoryFromExpense(categoryName: string): void {
-    const merged = mergeCategoryDraft(this.ctx.categories(), categoryName);
-    if (merged.length !== this.ctx.categories().length) {
-      this.ctx.setCategories(merged);
-    }
   }
 
   receiptPreviewUrl(expenseId: string): string | null {

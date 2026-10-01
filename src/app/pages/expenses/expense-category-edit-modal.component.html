@@ -34,22 +34,23 @@
         <label class="block text-sm font-medium text-foreground mb-1" for="edit-expense-category">
           Categoría *
         </label>
-        <input
+        <select
           id="edit-expense-category"
           name="categoryName"
-          type="text"
           [(ngModel)]="categoryName"
-          list="edit-expense-category-suggestions"
-          autocomplete="off"
-          placeholder="Elige una existente o escribe una nueva"
           class="w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent"
           required
-        />
-        <datalist id="edit-expense-category-suggestions">
+        >
           @for (cat of categories(); track cat.id) {
-            <option [value]="cat.name"></option>
+            <option [value]="cat.name">{{ cat.name }}</option>
           }
-        </datalist>
+        </select>
+        <p class="text-xs text-muted-foreground mt-1">
+          Categoría nueva:
+          <a routerLink="/setup" [queryParams]="{ from: 'expenses' }" class="text-primary font-medium underline">
+            Ingreso mensual
+          </a>
+        </p>
         @if (fieldError) {
           <p class="mt-1.5 text-xs text-destructive" role="alert">{{ fieldError }}</p>
         }
