@@ -12,11 +12,12 @@ import {
   viewChild,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import type { CategoryDraft } from '../../core/app-context.service';
 @Component({
   selector: 'app-expense-category-edit-modal',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, RouterLink],
   templateUrl: './expense-category-edit-modal.component.html',
   styleUrl: './expense-category-edit-modal.component.scss',
 })
@@ -83,7 +84,12 @@ export class ExpenseCategoryEditModalComponent implements OnChanges, OnDestroy {
     const id = this.lockedExpenseId ?? this.expenseId();
     const name = this.categoryName.trim();
     if (!name) {
-      this.fieldError = 'Escribe el nombre de la categoría';
+      this.fieldError = 'Selecciona una categoría';
+      return;
+    }
+    const known = this.categories().some((c) => c.name === name);
+    if (!known) {
+      this.fieldError = 'Elige una categoría de tu lista (Ingreso mensual para crear nuevas)';
       return;
     }
     if (!id) {

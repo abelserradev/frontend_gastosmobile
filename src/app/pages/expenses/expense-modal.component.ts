@@ -13,6 +13,7 @@ import {
   viewChild,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import type { CategoryDraft, CurrencyCode } from '../../core/app-context.service';
 import { todayYmdCaracas } from '../../core/caracas-date';
 import { MeApiService } from '../../core/me-api.service';
@@ -21,7 +22,7 @@ import type { ParseInvoiceResult } from '../../core/ocr-api.service';
 @Component({
   selector: 'app-expense-modal',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './expense-modal.component.html',
   styleUrl: './expense-modal.component.scss',
 })
