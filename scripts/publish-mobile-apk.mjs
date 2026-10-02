@@ -38,7 +38,8 @@ function javaMajor(dir) {
     encoding: 'utf8',
   });
   const verLine = `${probe.stderr ?? ''}${probe.stdout ?? ''}`;
-  return Number(verLine.match(/version "(\d+)/)?.[1] ?? 0);
+  const versionMatch = /version "(\d+)/.exec(verLine);
+  return Number(versionMatch?.[1] ?? 0);
 }
 
 function resolveJavaHome() {
