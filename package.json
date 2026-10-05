@@ -6,6 +6,10 @@
     "ng": "ng",
     "prebuild": "node scripts/write-firebase-api-key.mjs && node scripts/write-api-key.mjs && node scripts/generate-sitemap.mjs",
     "build:staging": "node scripts/apply-staging-robots.mjs && pnpm run build",
+    "format": "prettier --write \"src/**/*.{ts,js,mjs,json,scss,css,html}\"",
+    "format:check": "prettier --check \"src/**/*.{ts,js,mjs,json,scss,css,html}\"",
+    "lint": "ng lint web",
+    "lint:ci": "ng lint web --max-warnings=0",
     "pretest": "node scripts/write-firebase-api-key.mjs && node scripts/write-api-key.mjs",
     "prestart": "node scripts/write-firebase-api-key.mjs && node scripts/write-api-key.mjs",
     "start": "ng serve",
@@ -44,9 +48,17 @@
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "^20.3.37",
+    "@angular-eslint/builder": "^20.0.0",
+    "@angular-eslint/eslint-plugin": "^20.0.0",
+    "@angular-eslint/eslint-plugin-template": "^20.0.0",
+    "@angular-eslint/schematics": "^20.0.0",
+    "@angular-eslint/template-parser": "^20.0.0",
     "@angular/cli": "^20.3.37",
     "@angular/compiler-cli": "^20.3.32",
+    "@eslint/js": "^9.0.0",
     "@tailwindcss/postcss": "^4.3.0",
+    "angular-eslint": "^20.0.0",
+    "eslint": "^9.0.0",
     "@types/express": "^5.0.1",
     "@types/jasmine": "~6.0.0",
     "@types/node": "^20.17.19",
@@ -57,7 +69,9 @@
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.3.0",
     "postcss": "^8.5.28",
+    "prettier": "^3.0.0",
     "tailwindcss": "^4.1.11",
-    "typescript": "~5.9.3"
+    "typescript": "~5.9.3",
+    "typescript-eslint": "^8.0.0"
   }
 }
