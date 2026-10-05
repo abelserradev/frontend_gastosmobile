@@ -14,7 +14,7 @@ export class NativeGoogleAuthService {
     const firebaseIdToken = token?.trim();
     if (!firebaseIdToken) {
       throw new Error(
-        'Firebase no devolvió idToken tras Google. Verificá SHA-1, google-services.json y Google habilitado.',
+        'Firebase no devolvió idToken tras Google. Verifica SHA-1, google-services.json y Google habilitado.',
       );
     }
     return firebaseIdToken;
