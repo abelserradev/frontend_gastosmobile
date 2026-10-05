@@ -19,12 +19,33 @@ const apkSource = join(
 );
 const apkDest = join(root, 'public/gastos-mobile.apk');
 
+/** La APK embebe el bundle prod; sin clave real el backend responde X-API-KEY inválida. */
+function assertProductionApiKey() {
+  const envKey = (
+    process.env.GASTOS_API_KEY ??
+    process.env.SECRET_API_KEY ??
+    ''
+  ).trim();
+  if (!envKey || /ci-placeholder|YOUR_GASTOS_API_KEY/i.test(envKey)) {
+    console.error(
+      '❌ Falta GASTOS_API_KEY (o SECRET_API_KEY) con el valor de producción.\n' +
+        '   Debe coincidir con SECRET_API_KEY del backend en Coolify.\n' +
+        '   Ejemplo: export GASTOS_API_KEY="..." && pnpm run mobile:publish-apk',
+    );
+    process.exit(1);
+  }
+}
+
 function run(cmd, args, cwd = root) {
   const r = spawnSync(cmd, args, { cwd, stdio: 'inherit', shell: false });
   if (r.status !== 0) {
     process.exit(r.status ?? 1);
   }
 }
+
+console.log('🔑 API key producción…');
+assertProductionApiKey();
+run('node', ['scripts/write-api-key.mjs']);
 
 console.log('📦 Build Angular (production)…');
 run('pnpm', ['run', 'build', '--configuration=production']);
