@@ -76,7 +76,7 @@ export class LoginPageComponent implements OnInit {
   private navigateByOnBoardingState(): void {
     if (Capacitor.isNativePlatform() && !this.nativeToken.hasToken()) {
       globalThis.alert(
-        'El servidor no devolvió sesión para la APK. Redesplegá el backend en Coolify y probá de nuevo.',
+        'El servidor no devolvió sesión para la APK. Redespliega el backend en Coolify y prueba de nuevo.',
       );
       return;
     }
@@ -129,7 +129,7 @@ export class LoginPageComponent implements OnInit {
   submitUnlockRequest(): void {
     const email = this.formData.email.trim();
     if (!email) {
-      globalThis.alert('Ingresá tu correo electrónico.');
+      globalThis.alert('Ingresa tu correo electrónico.');
       return;
     }
     this.unlockSending.set(true);
@@ -152,7 +152,7 @@ export class LoginPageComponent implements OnInit {
     const email = this.formData.email.trim();
     const code = this.unlockCode.trim();
     if (!email || code.length !== 6) {
-      globalThis.alert('Ingresá tu correo y el código de 6 dígitos.');
+      globalThis.alert('Ingresa tu correo y el código de 6 dígitos.');
       return;
     }
     this.unlockVerifying.set(true);
@@ -163,7 +163,7 @@ export class LoginPageComponent implements OnInit {
         this.unlockCodeSent.set(false);
         this.unlockCode = '';
         globalThis.alert(
-          'Cuenta desbloqueada. Ya podés iniciar sesión con tu contraseña.',
+          'Cuenta desbloqueada. Ya puedes iniciar sesión con tu contraseña.',
         );
       },
       error: (err: unknown) => {
@@ -176,7 +176,7 @@ export class LoginPageComponent implements OnInit {
   submitForgotPassword(): void {
     const email = this.formData.email.trim();
     if (!email) {
-      globalThis.alert('Ingresá tu correo electrónico.');
+      globalThis.alert('Ingresa tu correo electrónico.');
       return;
     }
     this.forgotSending.set(true);

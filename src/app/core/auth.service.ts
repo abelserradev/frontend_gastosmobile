@@ -196,7 +196,7 @@ export class AuthService {
     }
     // Sin token el siguiente GET /me/state devuelve 401 en APK
     console.error(
-      '[AuthService] APK sin accessToken en respuesta de login; redesplegá el backend.',
+      '[AuthService] APK sin accessToken en respuesta de login; redespliega el backend.',
     );
   }
 

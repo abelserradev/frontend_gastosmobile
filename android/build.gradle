@@ -24,6 +24,17 @@ allprojects {
     }
 }
 
+// Capacitor pide source 21; en máquinas con solo JDK 17, el toolchain baja JDK 21 para javac
+subprojects { subproject ->
+    subproject.afterEvaluate {
+        subproject.tasks.withType(JavaCompile).configureEach {
+            javaCompiler = subproject.javaToolchains.compilerFor {
+                languageVersion.set(JavaLanguageVersion.of(21))
+            }
+        }
+    }
+}
+
 task clean(type: Delete) {
     delete rootProject.buildDir
 }

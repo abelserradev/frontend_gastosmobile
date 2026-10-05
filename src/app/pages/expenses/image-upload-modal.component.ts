@@ -14,6 +14,7 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import type {
   CategoryDraft,
   CurrencyCode,
@@ -46,7 +47,7 @@ type Step = typeof STEP_UPLOAD | typeof STEP_CONFIRM | typeof STEP_SAVING;
   selector: 'app-image-upload-modal',
   standalone: true,
   encapsulation: ViewEncapsulation.None,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './image-upload-modal.component.html',
   styles: [
     `
