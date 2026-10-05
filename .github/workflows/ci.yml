@@ -37,6 +37,23 @@ jobs:
       - name: Instalar dependencias
         run: pnpm install --frozen-lockfile
 
+      - name: Generar environments para CI
+        env:
+          FIREBASE_WEB_API_KEY: ${{ secrets.FIREBASE_WEB_API_KEY || 'ci-placeholder-firebase-web-api-key' }}
+          GASTOS_API_KEY: ${{ secrets.GASTOS_API_KEY || 'ci-placeholder-gastos-api-key' }}
+        run: |
+          node scripts/write-firebase-api-key.mjs
+          node scripts/write-api-key.mjs
+
+      - name: Verificar formato con Prettier
+        run: pnpm run format:check
+
+      - name: ESLint (max-warnings 0)
+        run: pnpm run lint:ci
+
+      - name: Tests unitarios headless
+        run: pnpm exec ng test --no-watch --browsers=ChromeHeadlessNoSandbox
+
       - name: pnpm audit (informativo)
         continue-on-error: true
         run: pnpm audit --audit-level=moderate
