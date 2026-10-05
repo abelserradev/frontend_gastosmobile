@@ -118,4 +118,4 @@ mkdirSync(join(root, 'public'), { recursive: true });
 copyFileSync(apkSource, apkDest);
 
 console.log(`✅ APK publicada: public/gastos-mobile.apk`);
-console.log('   Subí el archivo al repo y redeployá el frontend en Coolify.');
+console.log('   Sube el archivo al repo y redespliega el frontend en Coolify.');

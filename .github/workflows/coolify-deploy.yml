@@ -19,7 +19,7 @@ jobs:
         run: |
           set -euo pipefail
           if [ -z "${WEBHOOK:-}" ]; then
-            echo "::error::Definí el repository secret COOLIFY_WEBHOOK_FRONTEND."
+            echo "::error::Define el repository secret COOLIFY_WEBHOOK_FRONTEND."
             exit 1
           fi
           echo "Disparando deploy frontend..."
@@ -36,4 +36,4 @@ jobs:
             head -c 512 /tmp/coolify_body >&2 || true
             exit 1
           fi
-          echo "Deploy solicitado. Revisá Coolify."
+          echo "Deploy solicitado. Revisa Coolify."

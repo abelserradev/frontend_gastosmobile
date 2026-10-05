@@ -2,7 +2,7 @@
 
 `gastos-mobile.apk` se copia aquí con `pnpm run mobile:publish-apk` y viaja al contenedor nginx en cada deploy de Coolify.
 
-**Antes de publicar la APK** exportá la misma clave que el backend (`SECRET_API_KEY`):
+**Antes de publicar la APK** exporta la misma clave que el backend (`SECRET_API_KEY`):
 
 ```bash
 export GASTOS_API_KEY="<valor de SECRET_API_KEY en Coolify backend>"
