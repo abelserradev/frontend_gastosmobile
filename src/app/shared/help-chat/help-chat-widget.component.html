@@ -16,10 +16,20 @@
         </p>
       </div>
       <div class="help-chat-actions">
-        <button type="button" class="icon-btn" (click)="reiniciar()" title="Nueva conversación">
+        <button
+          type="button"
+          class="icon-btn"
+          (click)="reiniciar()"
+          title="Nueva conversación"
+        >
           ↺
         </button>
-        <button type="button" class="icon-btn" (click)="toggle()" aria-label="Cerrar">
+        <button
+          type="button"
+          class="icon-btn"
+          (click)="toggle()"
+          aria-label="Cerrar"
+        >
           ✕
         </button>
       </div>
@@ -27,9 +37,7 @@
 
     <div class="help-chat-body">
       @if (mensajes().length === 0) {
-        <p class="help-chat-hint">
-          Pregunta cómo usar la app. Ejemplos:
-        </p>
+        <p class="help-chat-hint">Pregunta cómo usar la app. Ejemplos:</p>
         <div class="help-chat-suggestions">
           @for (s of sugerencias(); track s) {
             <button type="button" class="suggestion-chip" (click)="enviar(s)">

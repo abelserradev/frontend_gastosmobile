@@ -10,7 +10,9 @@ export class NativeGoogleAuthService {
   async signInAndGetIdToken(): Promise<string> {
     await FirebaseAuthentication.signInWithGoogle();
     // credential.idToken es OAuth de Google; Nest necesita el JWT de Firebase Auth.
-    const { token } = await FirebaseAuthentication.getIdToken({ forceRefresh: true });
+    const { token } = await FirebaseAuthentication.getIdToken({
+      forceRefresh: true,
+    });
     const firebaseIdToken = token?.trim();
     if (!firebaseIdToken) {
       throw new Error(

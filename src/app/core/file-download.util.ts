@@ -40,9 +40,7 @@ export async function downloadCsvFile(
       if (isShareCancelled(err)) {
         return;
       }
-      throw new Error(
-        'No se pudo compartir el archivo CSV. Intenta de nuevo.',
-      );
+      throw new Error('No se pudo compartir el archivo CSV. Intenta de nuevo.');
     }
     return;
   }

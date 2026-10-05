@@ -63,7 +63,6 @@ export class InitialFormComponent implements OnInit {
   surplusUsd = 0;
   applySurplus: boolean | null = null;
 
-
   /** FEAT-001: Opciones de días de corte (1-31). */
   readonly cutoffDayOptions = Array.from({ length: 31 }, (_, i) => i + 1);
   /** FEAT-001: Día de corte seleccionado (default 1 = comportamiento calendario). */
@@ -161,8 +160,7 @@ export class InitialFormComponent implements OnInit {
       return;
     }
     const duplicate = this.categories.some(
-      (c) =>
-        c.localeCompare(trimmed, 'es', { sensitivity: 'accent' }) === 0,
+      (c) => c.localeCompare(trimmed, 'es', { sensitivity: 'accent' }) === 0,
     );
     if (duplicate) {
       this.categoryDraftError = 'Esa categoría ya está en la lista';
@@ -230,7 +228,11 @@ export class InitialFormComponent implements OnInit {
 
   /** Equivalente en USD si el ingreso está en Bs (mismo día que la tasa). */
   get incomeUsdEquivalent(): number | null {
-    if (this.currency !== 'BS' || this.bcvVesPerUsd == null || this.bcvVesPerUsd <= 0) {
+    if (
+      this.currency !== 'BS' ||
+      this.bcvVesPerUsd == null ||
+      this.bcvVesPerUsd <= 0
+    ) {
       return null;
     }
     return this.incomeAmount / this.bcvVesPerUsd;

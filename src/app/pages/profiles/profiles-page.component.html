@@ -6,7 +6,9 @@
           type="button"
           (click)="goBack()"
           class="inline-flex items-center justify-self-start text-sm font-medium text-muted-foreground hover:text-foreground transition-colors shrink-0"
-          [attr.aria-label]="fromExpenses ? 'Volver a gastos' : 'Volver a ingreso mensual'"
+          [attr.aria-label]="
+            fromExpenses ? 'Volver a gastos' : 'Volver a ingreso mensual'
+          "
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -67,13 +69,16 @@
 
       <div class="space-y-6">
         <div>
-          <p class="block text-sm font-medium text-foreground mb-2">Tipo de Perfil</p>
+          <p class="block text-sm font-medium text-foreground mb-2">
+            Tipo de Perfil
+          </p>
           <div class="grid grid-cols-3 gap-3">
             <button
               type="button"
               (click)="profileType = 'familiar'"
               [ngClass]="{
-                'bg-primary text-primary-foreground shadow-md': profileType === 'familiar',
+                'bg-primary text-primary-foreground shadow-md':
+                  profileType === 'familiar',
                 'bg-muted text-muted-foreground hover:opacity-90':
                   profileType !== 'familiar',
               }"
@@ -101,7 +106,8 @@
               type="button"
               (click)="profileType = 'grupal'"
               [ngClass]="{
-                'bg-primary text-primary-foreground shadow-md': profileType === 'grupal',
+                'bg-primary text-primary-foreground shadow-md':
+                  profileType === 'grupal',
                 'bg-muted text-muted-foreground hover:opacity-90':
                   profileType !== 'grupal',
               }"
@@ -129,7 +135,8 @@
               type="button"
               (click)="profileType = 'comercio'"
               [ngClass]="{
-                'bg-primary text-primary-foreground shadow-md': profileType === 'comercio',
+                'bg-primary text-primary-foreground shadow-md':
+                  profileType === 'comercio',
                 'bg-muted text-muted-foreground hover:opacity-90':
                   profileType !== 'comercio',
               }"
@@ -199,14 +206,18 @@
 
         @if (profiles.length > 0) {
           <div>
-            <p class="block text-sm font-medium text-foreground mb-2">Mis perfiles</p>
+            <p class="block text-sm font-medium text-foreground mb-2">
+              Mis perfiles
+            </p>
             <div class="space-y-2">
               @for (profile of ownedProfiles; track profile.id) {
                 <div
                   class="flex items-center justify-between bg-linear-to-r from-muted to-muted px-4 py-3 rounded-lg border border-border"
                 >
                   <div>
-                    <p class="font-medium text-card-foreground">{{ profile.name }}</p>
+                    <p class="font-medium text-card-foreground">
+                      {{ profile.name }}
+                    </p>
                     <p class="text-sm text-muted-foreground capitalize">
                       {{ profile.type }}
                     </p>
@@ -277,9 +288,13 @@
                     class="flex items-center justify-between bg-muted/60 px-4 py-3 rounded-lg border border-border"
                   >
                     <div>
-                      <p class="font-medium text-card-foreground flex items-center gap-2">
+                      <p
+                        class="font-medium text-card-foreground flex items-center gap-2"
+                      >
                         {{ profile.name }}
-                        <span class="text-[10px] uppercase tracking-wide bg-primary/15 text-primary px-2 py-0.5 rounded-full">
+                        <span
+                          class="text-[10px] uppercase tracking-wide bg-primary/15 text-primary px-2 py-0.5 rounded-full"
+                        >
                           Compartido
                         </span>
                       </p>
@@ -315,9 +330,15 @@
             >
               <div class="flex items-start justify-between gap-2 mb-4">
                 <div>
-                  <h2 id="members-modal-title" class="text-xl font-bold text-card-foreground">Integrantes</h2>
+                  <h2
+                    id="members-modal-title"
+                    class="text-xl font-bold text-card-foreground"
+                  >
+                    Integrantes
+                  </h2>
                   <p class="text-sm text-muted-foreground">
-                    Perfil: <span class="font-medium">{{ membersProfileName }}</span>
+                    Perfil:
+                    <span class="font-medium">{{ membersProfileName }}</span>
                   </p>
                 </div>
                 <button
@@ -351,13 +372,18 @@
                   <p class="text-sm text-muted-foreground">Cargando…</p>
                 } @else if (members.length === 0) {
                   <p class="text-sm text-muted-foreground">
-                    Aún no hay integrantes. Agrega al menos uno para poder marcar pagos.
+                    Aún no hay integrantes. Agrega al menos uno para poder
+                    marcar pagos.
                   </p>
                 } @else {
                   <div class="space-y-2">
                     @for (m of members; track m.id) {
-                      <div class="flex items-center justify-between px-3 py-2 rounded-lg bg-muted border border-border">
-                        <span class="text-card-foreground">{{ m.displayName }}</span>
+                      <div
+                        class="flex items-center justify-between px-3 py-2 rounded-lg bg-muted border border-border"
+                      >
+                        <span class="text-card-foreground">{{
+                          m.displayName
+                        }}</span>
                         <button
                           type="button"
                           (click)="removeMember(m.id)"
@@ -388,9 +414,15 @@
             >
               <div class="flex items-start justify-between gap-2 mb-4">
                 <div>
-                  <h2 id="team-modal-title" class="text-xl font-bold text-card-foreground">Equipo</h2>
+                  <h2
+                    id="team-modal-title"
+                    class="text-xl font-bold text-card-foreground"
+                  >
+                    Equipo
+                  </h2>
                   <p class="text-sm text-muted-foreground">
-                    Perfil: <span class="font-medium">{{ teamProfileName }}</span>
+                    Perfil:
+                    <span class="font-medium">{{ teamProfileName }}</span>
                   </p>
                   <p class="text-xs text-muted-foreground mt-1">
                     Colaboradores con acceso al inventario
@@ -427,28 +459,41 @@
                   <p class="text-sm text-muted-foreground">Cargando…</p>
                 } @else if (collaborators.length === 0) {
                   <p class="text-sm text-muted-foreground">
-                    Aún no hay colaboradores. Invita a alguien que ya tenga cuenta.
+                    Aún no hay colaboradores. Invita a alguien que ya tenga
+                    cuenta.
                   </p>
                 } @else {
                   <div class="space-y-2">
                     @for (c of collaborators; track c.id) {
-                      <div class="flex items-center justify-between px-3 py-2 rounded-lg bg-muted border border-border gap-2">
+                      <div
+                        class="flex items-center justify-between px-3 py-2 rounded-lg bg-muted border border-border gap-2"
+                      >
                         <div class="min-w-0">
-                          <p class="text-sm font-medium text-card-foreground truncate">
+                          <p
+                            class="text-sm font-medium text-card-foreground truncate"
+                          >
                             {{ c.userName || c.userEmail }}
                           </p>
-                          <p class="text-xs text-muted-foreground truncate">{{ c.userEmail }}</p>
-                          <span class="text-[10px] uppercase tracking-wide text-muted-foreground">
+                          <p class="text-xs text-muted-foreground truncate">
+                            {{ c.userEmail }}
+                          </p>
+                          <span
+                            class="text-[10px] uppercase tracking-wide text-muted-foreground"
+                          >
                             {{ collaboratorStatusLabel(c.status) }}
                           </span>
                         </div>
-                        @if (c.status === 'accepted' || c.status === 'pending') {
+                        @if (
+                          c.status === 'accepted' || c.status === 'pending'
+                        ) {
                           <button
                             type="button"
                             (click)="revokeCollaborator(c.userId)"
                             class="text-destructive hover:opacity-80 text-sm font-medium shrink-0"
                           >
-                            {{ c.status === 'pending' ? 'Cancelar' : 'Revocar' }}
+                            {{
+                              c.status === 'pending' ? 'Cancelar' : 'Revocar'
+                            }}
                           </button>
                         }
                       </div>

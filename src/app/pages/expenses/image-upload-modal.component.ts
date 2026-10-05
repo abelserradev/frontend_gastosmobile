@@ -14,11 +14,17 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import type { CategoryDraft, CurrencyCode } from '../../core/app-context.service';
+import type {
+  CategoryDraft,
+  CurrencyCode,
+} from '../../core/app-context.service';
 import { todayYmdCaracas } from '../../core/caracas-date';
 import { guessOcrDocumentKind } from '../../core/ocr-document-kind.util';
 import { MeApiService, type MeExpense } from '../../core/me-api.service';
-import { OcrApiService, type ParseInvoiceResult } from '../../core/ocr-api.service';
+import {
+  OcrApiService,
+  type ParseInvoiceResult,
+} from '../../core/ocr-api.service';
 import { formatApiHttpError } from '../../core/http-error.util';
 
 export type ImageUploadMode = 'invoice' | 'payment';
@@ -42,14 +48,20 @@ type Step = typeof STEP_UPLOAD | typeof STEP_CONFIRM | typeof STEP_SAVING;
   encapsulation: ViewEncapsulation.None,
   imports: [CommonModule, FormsModule],
   templateUrl: './image-upload-modal.component.html',
-  styles: [`
-    dialog.image-upload-dialog::backdrop {
-      background-color: color-mix(in srgb, var(--foreground) 45%, transparent);
-    }
-    dialog.image-upload-dialog:not([open]) {
-      display: none;
-    }
-  `],
+  styles: [
+    `
+      dialog.image-upload-dialog::backdrop {
+        background-color: color-mix(
+          in srgb,
+          var(--foreground) 45%,
+          transparent
+        );
+      }
+      dialog.image-upload-dialog:not([open]) {
+        display: none;
+      }
+    `,
+  ],
 })
 export class ImageUploadModalComponent implements OnChanges {
   private readonly injector = inject(Injector);
@@ -189,7 +201,8 @@ export class ImageUploadModalComponent implements OnChanges {
 
   private prefillFromOcr(r: ParseInvoiceResult): void {
     this.confirmDate = r.date ?? todayYmdCaracas();
-    this.confirmCurrency = (r.currency as CurrencyCode) ?? this.defaultCurrency();
+    this.confirmCurrency =
+      (r.currency as CurrencyCode) ?? this.defaultCurrency();
 
     if (r.amount != null && r.amount > 0) {
       this.confirmAmountStr = String(r.amount);
@@ -237,51 +250,52 @@ export class ImageUploadModalComponent implements OnChanges {
     // UX: nombre del gasto = categoría elegida (no OCR de beneficiario / ruido bancario)
     const title = categoryName;
 
-    this.meApi.createExpenseWithReceipt({
-      file: this.selectedFile,
-      amount,
-      amountCurrency: this.confirmCurrency,
-      categoryName,
-      paymentDate: this.confirmDate,
-      title,
-    }).subscribe({
-      next: (expense) => {
-        const ocr = this.ocrResult();
-        const rt = (ocr?.rawText ?? '').trim();
-        if (ocr && rt.length >= 8) {
-          const guess = guessOcrDocumentKind(this.mode(), rt);
-          this.meApi
-            .submitOcrFeedback({
-              source: 'IMAGE_UPLOAD_FLOW',
-              submissionVariant: 'quick_confirm',
-              documentKindGuess: guess,
-              parseSnapshot: {
-                ...ocr,
-                rawText: rt.slice(0, 7900),
-              },
-              corrected: {
-                title: expense.title,
-                description: expense.description?.trim() ?? '',
-                amountUsd: expense.amount,
-                ...(expense.paymentDate
-                  ? { paymentDate: expense.paymentDate.slice(0, 10) }
-                  : {}),
-                currencyCapture:
-                  this.confirmCurrency === 'BS' ? 'BS' : 'USD',
-                categoryName,
-              },
-              expenseId: expense.id,
-            })
-            .subscribe({ error: () => {} });
-        }
-        this.expenseSaved.emit(expense);
-        this.openChange.emit(false);
-      },
-      error: (err: unknown) => {
-        this.step.set(STEP_CONFIRM);
-        this.saveError.set(formatApiHttpError(err));
-      },
-    });
+    this.meApi
+      .createExpenseWithReceipt({
+        file: this.selectedFile,
+        amount,
+        amountCurrency: this.confirmCurrency,
+        categoryName,
+        paymentDate: this.confirmDate,
+        title,
+      })
+      .subscribe({
+        next: (expense) => {
+          const ocr = this.ocrResult();
+          const rt = (ocr?.rawText ?? '').trim();
+          if (ocr && rt.length >= 8) {
+            const guess = guessOcrDocumentKind(this.mode(), rt);
+            this.meApi
+              .submitOcrFeedback({
+                source: 'IMAGE_UPLOAD_FLOW',
+                submissionVariant: 'quick_confirm',
+                documentKindGuess: guess,
+                parseSnapshot: {
+                  ...ocr,
+                  rawText: rt.slice(0, 7900),
+                },
+                corrected: {
+                  title: expense.title,
+                  description: expense.description?.trim() ?? '',
+                  amountUsd: expense.amount,
+                  ...(expense.paymentDate
+                    ? { paymentDate: expense.paymentDate.slice(0, 10) }
+                    : {}),
+                  currencyCapture: this.confirmCurrency === 'BS' ? 'BS' : 'USD',
+                  categoryName,
+                },
+                expenseId: expense.id,
+              })
+              .subscribe({ error: () => undefined });
+          }
+          this.expenseSaved.emit(expense);
+          this.openChange.emit(false);
+        },
+        error: (err: unknown) => {
+          this.step.set(STEP_CONFIRM);
+          this.saveError.set(formatApiHttpError(err));
+        },
+      });
   }
 
   /** El usuario prefiere el formulario completo con todos los campos. */

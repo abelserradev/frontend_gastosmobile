@@ -4,10 +4,7 @@ import { Router } from '@angular/router';
 import { AuthService } from '../../core/auth.service';
 import { getStateWithAutoRollover } from '../../core/month-renewal.util';
 import { MeApiService } from '../../core/me-api.service';
-import {
-  BRAND_APP_NAME,
-  BRAND_LOGO_SRC,
-} from '../../core/brand-assets';
+import { BRAND_APP_NAME, BRAND_LOGO_SRC } from '../../core/brand-assets';
 import { routePathForMeState } from '../../core/me-route.util';
 
 /**
@@ -22,17 +19,21 @@ import { routePathForMeState } from '../../core/me-route.util';
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div class="min-h-screen bg-[#FFD300] flex flex-col items-center justify-center px-6">
+    <div
+      class="min-h-screen bg-[#FFD300] flex flex-col items-center justify-center px-6"
+    >
       <!-- Logo con animación de pulso sutil -->
       <div class="relative">
-        <div class="absolute inset-0 bg-white/20 rounded-full blur-2xl animate-pulse"></div>
+        <div
+          class="absolute inset-0 bg-white/20 rounded-full blur-2xl animate-pulse"
+        ></div>
         <img
           [src]="brandLogoSrc"
           [attr.alt]="brandAppName"
           class="relative w-72 max-w-[90vw] h-auto object-contain drop-shadow-2xl transition-opacity duration-700"
           [class.opacity-0]="!isVisible()"
           [class.opacity-100]="isVisible()"
-        >
+        />
       </div>
 
       <!-- Tagline -->
@@ -60,7 +61,7 @@ import { routePathForMeState } from '../../core/me-route.util';
         v{{ version }}
       </p>
     </div>
-  `
+  `,
 })
 export class SplashPageComponent implements OnInit {
   private readonly router = inject(Router);
@@ -118,7 +119,7 @@ export class SplashPageComponent implements OnInit {
       },
       error: () => {
         this.router.navigate(['/setup']).catch(() => undefined);
-      }
+      },
     });
   }
 
@@ -126,4 +127,3 @@ export class SplashPageComponent implements OnInit {
     this.router.navigate(['/login']).catch(() => undefined);
   }
 }
-

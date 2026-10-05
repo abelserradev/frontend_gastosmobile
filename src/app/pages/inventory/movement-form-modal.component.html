@@ -5,16 +5,30 @@
     (keydown.escape)="close()"
     tabindex="-1"
   >
-    <div class="bg-white rounded-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+    <div
+      class="bg-white rounded-xl w-full max-w-md max-h-[90vh] overflow-y-auto"
+    >
       <!-- Header -->
-      <div class="flex items-center justify-between px-4 py-3 border-b border-gray-200">
+      <div
+        class="flex items-center justify-between px-4 py-3 border-b border-gray-200"
+      >
         <h2 class="text-lg font-semibold text-gray-900">{{ modalTitle() }}</h2>
         <button
           (click)="close()"
           class="p-1 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100"
         >
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          <svg
+            class="w-5 h-5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M6 18L18 6M6 6l12 12"
+            ></path>
           </svg>
         </button>
       </div>
@@ -47,7 +61,10 @@
       <div class="p-4 space-y-4">
         @if (showExitCategory()) {
           <div>
-            <label for="exit-category" class="block text-sm font-medium text-foreground mb-1">
+            <label
+              for="exit-category"
+              class="block text-sm font-medium text-foreground mb-1"
+            >
               Tipo de salida
             </label>
             <select
@@ -65,7 +82,11 @@
           @if (canTransferBetweenBranches()) {
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label for="source-branch" class="block text-sm font-medium text-foreground mb-1">Desde</label>
+                <label
+                  for="source-branch"
+                  class="block text-sm font-medium text-foreground mb-1"
+                  >Desde</label
+                >
                 <select
                   id="source-branch"
                   [ngModel]="sourceBranchId()"
@@ -79,11 +100,17 @@
                   }
                 </select>
                 @if (errors()['sourceBranchId']) {
-                  <p class="mt-1 text-sm text-red-600">{{ errors()['sourceBranchId'] }}</p>
+                  <p class="mt-1 text-sm text-red-600">
+                    {{ errors()['sourceBranchId'] }}
+                  </p>
                 }
               </div>
               <div>
-                <label for="target-branch" class="block text-sm font-medium text-foreground mb-1">Hacia</label>
+                <label
+                  for="target-branch"
+                  class="block text-sm font-medium text-foreground mb-1"
+                  >Hacia</label
+                >
                 <select
                   id="target-branch"
                   [ngModel]="targetBranchId()"
@@ -97,20 +124,28 @@
                   }
                 </select>
                 @if (errors()['targetBranchId']) {
-                  <p class="mt-1 text-sm text-red-600">{{ errors()['targetBranchId'] }}</p>
+                  <p class="mt-1 text-sm text-red-600">
+                    {{ errors()['targetBranchId'] }}
+                  </p>
                 }
               </div>
             </div>
           } @else if (isTransferExit() && branches().length < 2) {
-            <p class="text-xs text-muted-foreground bg-muted/50 border border-border rounded-lg px-3 py-2">
-              Crea al menos dos sucursales en el inventario para registrar traslados entre locales.
+            <p
+              class="text-xs text-muted-foreground bg-muted/50 border border-border rounded-lg px-3 py-2"
+            >
+              Crea al menos dos sucursales en el inventario para registrar
+              traslados entre locales.
             </p>
           }
         }
 
         <!-- Cantidad -->
         <div>
-          <label for="movement-quantity" class="block text-sm font-medium text-foreground mb-1">
+          <label
+            for="movement-quantity"
+            class="block text-sm font-medium text-foreground mb-1"
+          >
             Cantidad
             @if (isNegativeMovement()) {
               <span class="text-muted-foreground">(a descontar)</span>
@@ -124,8 +159,18 @@
               (click)="decrementQuantity()"
               class="w-10 h-10 flex items-center justify-center border border-gray-300 rounded-lg hover:bg-gray-100"
             >
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path>
+              <svg
+                class="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M20 12H4"
+                ></path>
               </svg>
             </button>
             <input
@@ -140,8 +185,18 @@
               (click)="incrementQuantity()"
               class="w-10 h-10 flex items-center justify-center border border-gray-300 rounded-lg hover:bg-gray-100"
             >
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+              <svg
+                class="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M12 4v16m8-8H4"
+                ></path>
               </svg>
             </button>
           </div>
@@ -152,7 +207,10 @@
 
         @if (showUnitPriceField()) {
           <div>
-            <label for="unit-price" class="block text-sm font-medium text-foreground mb-1">
+            <label
+              for="unit-price"
+              class="block text-sm font-medium text-foreground mb-1"
+            >
               Precio unitario (opcional)
             </label>
             <input
@@ -166,9 +224,13 @@
               [class.border-red-300]="errors()['unitPrice']"
             />
             @if (errors()['unitPrice']) {
-              <p class="mt-1 text-sm text-red-600">{{ errors()['unitPrice'] }}</p>
+              <p class="mt-1 text-sm text-red-600">
+                {{ errors()['unitPrice'] }}
+              </p>
             }
-            <p class="mt-1 text-xs text-muted-foreground">{{ unitPriceHint() }}</p>
+            <p class="mt-1 text-xs text-muted-foreground">
+              {{ unitPriceHint() }}
+            </p>
           </div>
         }
 
@@ -187,7 +249,11 @@
               [class.text-accent]="!isNegativeMovement()"
               [class.text-secondary]="isNegativeMovement()"
             >
-              {{ isNegativeMovement() ? it.currentStock - formData().quantity : it.currentStock + formData().quantity }}
+              {{
+                isNegativeMovement()
+                  ? it.currentStock - formData().quantity
+                  : it.currentStock + formData().quantity
+              }}
               {{ it.unit }}
             </p>
           </div>
@@ -195,7 +261,10 @@
 
         <!-- Motivo/Nota -->
         <div>
-          <label for="movement-reason" class="block text-sm font-medium text-foreground mb-1">
+          <label
+            for="movement-reason"
+            class="block text-sm font-medium text-foreground mb-1"
+          >
             Detalle / Nota
           </label>
           <input
@@ -209,7 +278,9 @@
       </div>
 
       <!-- Footer -->
-      <div class="flex items-center justify-end gap-2 px-4 py-3 border-t border-gray-200">
+      <div
+        class="flex items-center justify-end gap-2 px-4 py-3 border-t border-gray-200"
+      >
         <button
           (click)="close()"
           class="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"

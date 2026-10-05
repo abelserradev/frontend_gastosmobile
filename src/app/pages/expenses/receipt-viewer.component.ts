@@ -22,14 +22,20 @@ import { MeApiService } from '../../core/me-api.service';
   encapsulation: ViewEncapsulation.None,
   imports: [CommonModule],
   templateUrl: './receipt-viewer.component.html',
-  styles: [`
-    dialog.receipt-viewer-dialog::backdrop {
-      background-color: color-mix(in srgb, var(--foreground) 60%, transparent);
-    }
-    dialog.receipt-viewer-dialog:not([open]) {
-      display: none;
-    }
-  `],
+  styles: [
+    `
+      dialog.receipt-viewer-dialog::backdrop {
+        background-color: color-mix(
+          in srgb,
+          var(--foreground) 60%,
+          transparent
+        );
+      }
+      dialog.receipt-viewer-dialog:not([open]) {
+        display: none;
+      }
+    `,
+  ],
 })
 export class ReceiptViewerComponent implements OnChanges, OnDestroy {
   private readonly injector = inject(Injector);

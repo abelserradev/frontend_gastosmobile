@@ -7,13 +7,13 @@ import { AuthService } from '../../core/auth.service';
 import { FirebaseAuthService } from '../../core/firebase-auth.service';
 import { routePathForMeState } from '../../core/me-route.util';
 import { getStateWithAutoRollover } from '../../core/month-renewal.util';
-import { formatApiHttpError, isAccountLockedError } from '../../core/http-error.util';
+import {
+  formatApiHttpError,
+  isAccountLockedError,
+} from '../../core/http-error.util';
 import { switchMap } from 'rxjs';
 import { MeApiService, type MeState } from '../../core/me-api.service';
-import {
-  BRAND_APP_NAME,
-  BRAND_LOGO_SRC,
-} from '../../core/brand-assets';
+import { BRAND_APP_NAME, BRAND_LOGO_SRC } from '../../core/brand-assets';
 import { NativeSessionTokenService } from '../../core/native/native-session-token.service';
 import { SeoMetaService } from '../../core/seo-meta.service';
 
@@ -60,9 +60,9 @@ export class LoginPageComponent implements OnInit {
       this.navigateByOnBoardingState();
       return;
     }
-    
+
     const skipRestoreOnce =
-    globalThis.sessionStorage.getItem('gastos_skip_restore_once') === '1';
+      globalThis.sessionStorage.getItem('gastos_skip_restore_once') === '1';
     if (skipRestoreOnce) {
       globalThis.sessionStorage.removeItem('gastos_skip_restore_once');
       return;
@@ -213,7 +213,10 @@ export class LoginPageComponent implements OnInit {
 
   handleSubmit(): void {
     const loginMode = this.isLogin();
-    if (!loginMode && this.formData.password !== this.formData.confirmPassword) {
+    if (
+      !loginMode &&
+      this.formData.password !== this.formData.confirmPassword
+    ) {
       globalThis.alert('Las contraseñas no coinciden');
       return;
     }
@@ -255,7 +258,9 @@ export class LoginPageComponent implements OnInit {
   handleGoogleLogin(): void {
     this.firebaseAuth
       .signInWithGoogle()
-      .pipe(switchMap((idToken: string) => this.auth.loginWithFirebase(idToken)))
+      .pipe(
+        switchMap((idToken: string) => this.auth.loginWithFirebase(idToken)),
+      )
       .subscribe({
         next: () => {
           this.navigateByOnBoardingState();

@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, input, output } from '@angular/core';
-import type { InventoryItem, MovementType } from '../../core/inventory-api.service';
+import type { InventoryItem } from '../../core/inventory-api.service';
 
 @Component({
   selector: 'app-stock-list',

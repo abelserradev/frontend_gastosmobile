@@ -1,8 +1,10 @@
-<div class="min-h-screen bg-background text-foreground flex items-center justify-center p-4 antialiased">
+<div
+  class="min-h-screen bg-background text-foreground flex items-center justify-center p-4 antialiased"
+>
   <div class="w-full max-w-xl">
-
-    <div class="bg-card text-card-foreground rounded-2xl border border-border shadow-xl p-6 md:p-8">
-
+    <div
+      class="bg-card text-card-foreground rounded-2xl border border-border shadow-xl p-6 md:p-8"
+    >
       @if (fromExpenses) {
         <div class="mb-4">
           <button
@@ -11,7 +13,18 @@
             class="inline-flex items-center gap-1 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
             aria-label="Volver a gastos"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
               <path d="M15 18l-6-6 6-6" />
             </svg>
             Volver a gastos
@@ -21,7 +34,9 @@
 
       <!-- Encabezado -->
       <div class="text-center mb-8">
-        <h1 class="text-2xl md:text-3xl font-extrabold tracking-tight text-foreground">
+        <h1
+          class="text-2xl md:text-3xl font-extrabold tracking-tight text-foreground"
+        >
           @if (fromExpenses) {
             Ingreso mensual
           } @else {
@@ -31,16 +46,19 @@
         @if (monthlyRenewal) {
           <p class="text-sm text-muted-foreground mt-2 max-w-sm mx-auto">
             @if (hasSurplusPrompt) {
-              Te sobraron <strong>${{ surplusUsd | number: '1.2-2' }}</strong> del mes anterior.
-              Confirma tu ingreso y decide si sumarlos al mes que comienza.
+              Te sobraron
+              <strong>${{ surplusUsd | number: '1.2-2' }}</strong> del mes
+              anterior. Confirma tu ingreso y decide si sumarlos al mes que
+              comienza.
             } @else {
-              Nuevo mes: confirma tu ingreso para seguir registrando gastos.
-              El historial de meses anteriores no se pierde.
+              Nuevo mes: confirma tu ingreso para seguir registrando gastos. El
+              historial de meses anteriores no se pierde.
             }
           </p>
         } @else if (fromExpenses) {
           <p class="text-sm text-muted-foreground mt-2 max-w-sm mx-auto">
-            Actualiza ingreso, moneda o categorías de gasto. El historial de meses anteriores no cambia.
+            Actualiza ingreso, moneda o categorías de gasto. El historial de
+            meses anteriores no cambia.
           </p>
         } @else {
           <p class="text-sm text-muted-foreground mt-1">
@@ -50,19 +68,24 @@
       </div>
 
       <form (ngSubmit)="handleSubmit()" class="space-y-6">
-
         <!-- Selector de moneda -->
         <fieldset class="border-0 p-0 m-0 min-w-0">
-          <legend class="float-none block w-full px-0 text-xs font-bold uppercase tracking-wider text-muted-foreground mb-3">
+          <legend
+            class="float-none block w-full px-0 text-xs font-bold uppercase tracking-wider text-muted-foreground mb-3"
+          >
             Tipo de Moneda Principal
           </legend>
-          <div class="grid grid-cols-2 gap-3 p-1 bg-muted rounded-xl border border-border">
+          <div
+            class="grid grid-cols-2 gap-3 p-1 bg-muted rounded-xl border border-border"
+          >
             <button
               type="button"
               (click)="selectCurrency('USD')"
               [ngClass]="{
-                'bg-card text-foreground shadow-sm border border-border': currency === 'USD',
-                'text-muted-foreground hover:text-foreground': currency !== 'USD'
+                'bg-card text-foreground shadow-sm border border-border':
+                  currency === 'USD',
+                'text-muted-foreground hover:text-foreground':
+                  currency !== 'USD',
               }"
               class="py-2.5 text-sm font-bold rounded-lg transition-all duration-200"
             >
@@ -72,8 +95,10 @@
               type="button"
               (click)="selectCurrency('BS')"
               [ngClass]="{
-                'bg-primary text-primary-foreground shadow-md': currency === 'BS',
-                'text-muted-foreground hover:text-foreground': currency !== 'BS'
+                'bg-primary text-primary-foreground shadow-md':
+                  currency === 'BS',
+                'text-muted-foreground hover:text-foreground':
+                  currency !== 'BS',
               }"
               class="py-2.5 text-sm font-bold rounded-lg transition-all duration-200"
             >
@@ -84,34 +109,53 @@
 
         <!-- Nota sobre el anclaje en Bs — solo cuando aplica -->
         @if (currency === 'BS') {
-          <div class="p-4 bg-muted/60 rounded-xl border border-border/60 text-xs text-muted-foreground leading-relaxed">
+          <div
+            class="p-4 bg-muted/60 rounded-xl border border-border/60 text-xs text-muted-foreground leading-relaxed"
+          >
             <span class="font-bold text-foreground">Nota de conversión:</span>
             Los gastos se anclan en
             <span class="font-semibold text-foreground">Bolívares (BsD.)</span>
-            como valor nominal fijo. El equivalente en USD fluctúa automáticamente
-            con la tasa oficial, reflejando los cambios reales en tu poder adquisitivo.
+            como valor nominal fijo. El equivalente en USD fluctúa
+            automáticamente con la tasa oficial, reflejando los cambios reales
+            en tu poder adquisitivo.
           </div>
         }
 
         <!-- Tasa BCV del día -->
         @if (currency === 'BS') {
           @if (bcvLoading) {
-            <div class="flex items-center justify-between p-3.5 bg-card border border-border rounded-xl animate-pulse">
+            <div
+              class="flex items-center justify-between p-3.5 bg-card border border-border rounded-xl animate-pulse"
+            >
               <div class="flex items-center gap-2">
-                <span class="h-2 w-2 rounded-full bg-muted-foreground/40"></span>
-                <span class="text-xs font-mono text-muted-foreground">Consultando tasa BCV…</span>
+                <span
+                  class="h-2 w-2 rounded-full bg-muted-foreground/40"
+                ></span>
+                <span class="text-xs font-mono text-muted-foreground"
+                  >Consultando tasa BCV…</span
+                >
               </div>
-              <span class="text-sm font-bold font-mono text-muted-foreground">— Bs / USD</span>
+              <span class="text-sm font-bold font-mono text-muted-foreground"
+                >— Bs / USD</span
+              >
             </div>
           } @else if (bcvVesPerUsd != null) {
-            <div class="flex items-center justify-between p-3.5 bg-card border border-border rounded-xl">
+            <div
+              class="flex items-center justify-between p-3.5 bg-card border border-border rounded-xl"
+            >
               <div class="flex items-center gap-2">
                 <span class="relative flex h-2 w-2 shrink-0">
                   @if (bcvStale) {
-                    <span class="relative inline-flex rounded-full h-2 w-2 bg-secondary"></span>
+                    <span
+                      class="relative inline-flex rounded-full h-2 w-2 bg-secondary"
+                    ></span>
                   } @else {
-                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75"></span>
-                    <span class="relative inline-flex rounded-full h-2 w-2 bg-accent"></span>
+                    <span
+                      class="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75"
+                    ></span>
+                    <span
+                      class="relative inline-flex rounded-full h-2 w-2 bg-accent"
+                    ></span>
                   }
                 </span>
                 <span class="text-xs font-mono text-muted-foreground">
@@ -121,17 +165,23 @@
                   }
                 </span>
               </div>
-              <span class="text-sm font-bold font-mono text-foreground tabular-nums">
+              <span
+                class="text-sm font-bold font-mono text-foreground tabular-nums"
+              >
                 {{ bcvVesPerUsd | number: '1.2-4' }} Bs / USD
               </span>
             </div>
             @if (bcvError && bcvStale) {
-              <p class="mt-2 text-xs text-muted-foreground border border-border/70 rounded-lg px-3 py-2 bg-muted/40">
+              <p
+                class="mt-2 text-xs text-muted-foreground border border-border/70 rounded-lg px-3 py-2 bg-muted/40"
+              >
                 {{ bcvError }}
               </p>
             }
           } @else if (bcvError) {
-            <div class="p-3.5 bg-card border border-destructive/40 rounded-xl text-xs text-destructive">
+            <div
+              class="p-3.5 bg-card border border-destructive/40 rounded-xl text-xs text-destructive"
+            >
               {{ bcvError }}
             </div>
           }
@@ -146,7 +196,9 @@
             Ingreso Mensual Estimado
           </label>
           <div class="relative">
-            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground font-mono text-sm pointer-events-none">
+            <span
+              class="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground font-mono text-sm pointer-events-none"
+            >
               {{ currency === 'USD' ? '$' : 'Bs.' }}
             </span>
             <input
@@ -162,20 +214,32 @@
           </div>
 
           <!-- Equivalente referencial en USD (solo BS con tasa disponible) -->
-          @if (currency === 'BS' && bcvVesPerUsd != null && incomeUsdEquivalent != null && incomeAmount > 0) {
-            <div class="mt-3 p-4 rounded-xl border border-dashed border-accent/40 bg-accent/5 flex flex-col gap-1">
-              <span class="text-[10px] font-bold uppercase tracking-widest text-accent/80">
+          @if (
+            currency === 'BS' &&
+            bcvVesPerUsd != null &&
+            incomeUsdEquivalent != null &&
+            incomeAmount > 0
+          ) {
+            <div
+              class="mt-3 p-4 rounded-xl border border-dashed border-accent/40 bg-accent/5 flex flex-col gap-1"
+            >
+              <span
+                class="text-[10px] font-bold uppercase tracking-widest text-accent/80"
+              >
                 Equivalente Referencial
               </span>
               <div class="flex items-baseline gap-1.5">
-                <span class="text-2xl font-black tracking-tight text-foreground">
+                <span
+                  class="text-2xl font-black tracking-tight text-foreground"
+                >
                   ≈ ${{ incomeUsdEquivalent | number: '1.2-2' }}
                 </span>
                 <span class="text-xs font-bold text-muted-foreground">USD</span>
               </div>
               <p class="text-[11px] text-muted-foreground/90 mt-0.5">
-                A tasa {{ bcvVesPerUsd | number: '1.2-4' }} BsD/USD del {{ bcvRateDisplayDate }}.
-                El resumen actualizará este margen con la tasa vigente cada día.
+                A tasa {{ bcvVesPerUsd | number: '1.2-4' }} BsD/USD del
+                {{ bcvRateDisplayDate }}. El resumen actualizará este margen con
+                la tasa vigente cada día.
               </p>
             </div>
           }
@@ -183,19 +247,25 @@
 
         @if (hasSurplusPrompt) {
           <fieldset class="border border-border rounded-xl p-4 space-y-3">
-            <legend class="text-xs font-bold uppercase tracking-wider text-muted-foreground px-1">
+            <legend
+              class="text-xs font-bold uppercase tracking-wider text-muted-foreground px-1"
+            >
               Saldo sobrante
             </legend>
             <p class="text-sm text-muted-foreground">
-              ¿Deseas sumar <strong>${{ surplusUsd | number: '1.2-2' }}</strong> a tu presupuesto del mes entrante?
+              ¿Deseas sumar
+              <strong>${{ surplusUsd | number: '1.2-2' }}</strong> a tu
+              presupuesto del mes entrante?
             </p>
             <div class="grid grid-cols-2 gap-3">
               <button
                 type="button"
                 (click)="setApplySurplus(true)"
                 [ngClass]="{
-                  'bg-primary text-primary-foreground border-primary': applySurplus === true,
-                  'bg-card text-muted-foreground border-border': applySurplus !== true
+                  'bg-primary text-primary-foreground border-primary':
+                    applySurplus === true,
+                  'bg-card text-muted-foreground border-border':
+                    applySurplus !== true,
                 }"
                 class="py-2.5 rounded-lg border text-sm font-semibold transition-all"
               >
@@ -205,8 +275,10 @@
                 type="button"
                 (click)="setApplySurplus(false)"
                 [ngClass]="{
-                  'bg-primary text-primary-foreground border-primary': applySurplus === false,
-                  'bg-card text-muted-foreground border-border': applySurplus !== false
+                  'bg-primary text-primary-foreground border-primary':
+                    applySurplus === false,
+                  'bg-card text-muted-foreground border-border':
+                    applySurplus !== false,
                 }"
                 class="py-2.5 rounded-lg border text-sm font-semibold transition-all"
               >
@@ -227,8 +299,8 @@
 
           <div class="p-3 bg-muted/40 rounded-xl border border-border">
             <p class="text-xs text-muted-foreground mb-3">
-              Elige el día del mes cuando cobras/recibes ingresos.
-              Tu periodo de control empezará el día siguiente.
+              Elige el día del mes cuando cobras/recibes ingresos. Tu periodo de
+              control empezará el día siguiente.
             </p>
 
             <div class="flex items-center gap-3">
@@ -246,14 +318,15 @@
               <div class="text-xs text-muted-foreground space-y-1">
                 @if (cutoffDay === 1) {
                   <p>Periodo: del 2 al 1 del mes siguiente (modo calendario)</p>
-
                 } @else {
                   <p>
-                    Cobras el día {{ cutoffDay }}: el periodo cierra ese día (o el último día del mes si el mes es más corto).
+                    Cobras el día {{ cutoffDay }}: el periodo cierra ese día (o
+                    el último día del mes si el mes es más corto).
                   </p>
                   @if (cutoffDiffersFromEffectiveThisMonth) {
                     <p class="text-foreground/80">
-                      El día de corte efectivo este mes es {{ effectiveCutoffThisMonth }}.
+                      El día de corte efectivo este mes es
+                      {{ effectiveCutoffThisMonth }}.
                     </p>
                   }
                 }
@@ -266,7 +339,8 @@
         <div class="space-y-3">
           @if (preferencesOnly) {
             <p class="text-xs text-muted-foreground">
-              Puedes agregar o quitar categorías; al guardar se actualizan para tus próximos gastos.
+              Puedes agregar o quitar categorías; al guardar se actualizan para
+              tus próximos gastos.
             </p>
           }
           <label
@@ -286,15 +360,28 @@
                 <div
                   class="flex items-center justify-between px-3 py-2 bg-muted/50 border border-border rounded-lg group hover:border-secondary/40 transition-colors min-h-11"
                 >
-                  <span class="text-sm font-medium text-foreground truncate pr-2">{{ cat }}</span>
+                  <span
+                    class="text-sm font-medium text-foreground truncate pr-2"
+                    >{{ cat }}</span
+                  >
                   <button
                     type="button"
                     (click)="handleRemoveCategory(cat)"
                     [attr.aria-label]="'Eliminar categoría ' + cat"
                     class="text-muted-foreground hover:text-destructive p-2 -m-1 rounded transition-colors shrink-0"
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
-                      <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2.5"
+                      aria-hidden="true"
+                    >
+                      <path d="M18 6 6 18" />
+                      <path d="m6 6 12 12" />
                     </svg>
                   </button>
                 </div>
@@ -321,7 +408,9 @@
             </button>
           </div>
           @if (categoryDraftError) {
-            <p class="text-xs text-destructive" role="alert">{{ categoryDraftError }}</p>
+            <p class="text-xs text-destructive" role="alert">
+              {{ categoryDraftError }}
+            </p>
           }
         </div>
 
@@ -350,12 +439,16 @@
           @if (saving) {
             Guardando…
           } @else {
-            {{ preferencesOnly ? (fromExpenses ? 'Guardar cambios' : 'Guardar ingreso del mes') : 'Guardar y Continuar' }}
+            {{
+              preferencesOnly
+                ? fromExpenses
+                  ? 'Guardar cambios'
+                  : 'Guardar ingreso del mes'
+                : 'Guardar y Continuar'
+            }}
           }
         </button>
-
       </form>
     </div>
-
   </div>
 </div>

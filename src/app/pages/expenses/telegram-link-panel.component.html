@@ -37,9 +37,13 @@
   }
 
   @if (linkCode(); as code) {
-    <div class="rounded-lg border border-dashed border-primary/40 bg-card px-3 py-2 space-y-1">
+    <div
+      class="rounded-lg border border-dashed border-primary/40 bg-card px-3 py-2 space-y-1"
+    >
       <p class="text-[11px] text-muted-foreground">Código (10 min)</p>
-      <p class="text-lg font-mono font-bold tracking-widest text-foreground">{{ code.code }}</p>
+      <p class="text-lg font-mono font-bold tracking-widest text-foreground">
+        {{ code.code }}
+      </p>
       <p class="text-[11px] text-muted-foreground">
         En Telegram: <span class="font-mono">/vincular {{ code.code }}</span>
       </p>

@@ -59,10 +59,12 @@ export class AuthService {
    * Falla el observable si no hay sesión remota (el suscriptor usa error → login).
    */
   restoreActiveSession(): Observable<void> {
-    return this.http.get<AuthSessionResponse>(`${environment.apiUrl}/auth/me`).pipe(
-      tap((res) => this.persistUser(res.user)),
-      map(() => undefined),
-    );
+    return this.http
+      .get<AuthSessionResponse>(`${environment.apiUrl}/auth/me`)
+      .pipe(
+        tap((res) => this.persistUser(res.user)),
+        map(() => undefined),
+      );
   }
 
   registerRemote(
@@ -82,7 +84,10 @@ export class AuthService {
       );
   }
 
-  loginRemote(email: string, password: string): Observable<AuthSessionResponse> {
+  loginRemote(
+    email: string,
+    password: string,
+  ): Observable<AuthSessionResponse> {
     return this.http
       .post<AuthSessionResponse>(`${environment.apiUrl}/auth/login`, {
         email,
@@ -126,10 +131,9 @@ export class AuthService {
   /** Primera contraseña con sesión Google ya iniciada (cookie JWT). */
   setupPasswordRemote(password: string): Observable<AuthSessionResponse> {
     return this.http
-      .post<AuthSessionResponse>(
-        `${environment.apiUrl}/auth/password/setup`,
-        { password },
-      )
+      .post<AuthSessionResponse>(`${environment.apiUrl}/auth/password/setup`, {
+        password,
+      })
       .pipe(
         tap((res) => this.persistSession(res)),
         catchError((err) => throwError(() => err)),

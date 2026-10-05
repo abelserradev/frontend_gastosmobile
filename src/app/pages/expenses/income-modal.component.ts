@@ -163,7 +163,7 @@ export class IncomeModalComponent implements OnChanges {
     this.handleCancel();
   }
 
-  onIncomePanelKeydown(_event: KeyboardEvent): void {
+  onIncomePanelKeydown(_: KeyboardEvent): void {
     // Escape lo gestiona el <dialog>; handler para paridad de accesibilidad.
   }
 

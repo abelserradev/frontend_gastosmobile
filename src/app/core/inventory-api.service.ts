@@ -144,7 +144,7 @@ export class InventoryApiService {
 
   getSummary(profileId: string): Observable<InventorySummary> {
     return this.http.get<InventorySummary>(
-      `${this.base}/me/profiles/${profileId}/inventory/summary`
+      `${this.base}/me/profiles/${profileId}/inventory/summary`,
     );
   }
 
@@ -153,46 +153,46 @@ export class InventoryApiService {
   listItems(profileId: string, search?: string): Observable<InventoryItem[]> {
     const q = search ? `?search=${encodeURIComponent(search)}` : '';
     return this.http.get<InventoryItem[]>(
-      `${this.base}/me/profiles/${profileId}/inventory/items${q}`
+      `${this.base}/me/profiles/${profileId}/inventory/items${q}`,
     );
   }
 
   listLowStock(profileId: string): Observable<InventoryItem[]> {
     return this.http.get<InventoryItem[]>(
-      `${this.base}/me/profiles/${profileId}/inventory/items/low-stock`
+      `${this.base}/me/profiles/${profileId}/inventory/items/low-stock`,
     );
   }
 
   getItem(profileId: string, itemId: string): Observable<InventoryItem> {
     return this.http.get<InventoryItem>(
-      `${this.base}/me/profiles/${profileId}/inventory/items/${itemId}`
+      `${this.base}/me/profiles/${profileId}/inventory/items/${itemId}`,
     );
   }
 
   createItem(
     profileId: string,
-    body: CreateInventoryItemBody
+    body: CreateInventoryItemBody,
   ): Observable<InventoryItem> {
     return this.http.post<InventoryItem>(
       `${this.base}/me/profiles/${profileId}/inventory/items`,
-      body
+      body,
     );
   }
 
   updateItem(
     profileId: string,
     itemId: string,
-    body: UpdateInventoryItemBody
+    body: UpdateInventoryItemBody,
   ): Observable<InventoryItem> {
     return this.http.patch<InventoryItem>(
       `${this.base}/me/profiles/${profileId}/inventory/items/${itemId}`,
-      body
+      body,
     );
   }
 
   deleteItem(profileId: string, itemId: string): Observable<void> {
     return this.http.delete<void>(
-      `${this.base}/me/profiles/${profileId}/inventory/items/${itemId}`
+      `${this.base}/me/profiles/${profileId}/inventory/items/${itemId}`,
     );
   }
 
@@ -201,41 +201,41 @@ export class InventoryApiService {
   listMovements(
     profileId: string,
     itemId: string,
-    branchId?: string
+    branchId?: string,
   ): Observable<StockMovement[]> {
     const q = branchId ? `?branchId=${encodeURIComponent(branchId)}` : '';
     return this.http.get<StockMovement[]>(
-      `${this.base}/me/profiles/${profileId}/inventory/items/${itemId}/movements${q}`
+      `${this.base}/me/profiles/${profileId}/inventory/items/${itemId}/movements${q}`,
     );
   }
 
   createMovement(
     profileId: string,
-    body: CreateStockMovementBody
+    body: CreateStockMovementBody,
   ): Observable<StockMovement> {
     return this.http.post<StockMovement>(
       `${this.base}/me/profiles/${profileId}/inventory/movements`,
-      body
+      body,
     );
   }
 
   adjustStock(
     profileId: string,
-    body: AdjustStockBody
+    body: AdjustStockBody,
   ): Observable<StockMovement> {
     return this.http.post<StockMovement>(
       `${this.base}/me/profiles/${profileId}/inventory/movements/adjust`,
-      body
+      body,
     );
   }
 
   transferStock(
     profileId: string,
-    body: TransferStockBody
+    body: TransferStockBody,
   ): Observable<StockMovement[]> {
     return this.http.post<StockMovement[]>(
       `${this.base}/me/profiles/${profileId}/inventory/movements/transfer`,
-      body
+      body,
     );
   }
 
@@ -243,23 +243,23 @@ export class InventoryApiService {
 
   listBranches(profileId: string): Observable<InventoryBranch[]> {
     return this.http.get<InventoryBranch[]>(
-      `${this.base}/me/profiles/${profileId}/inventory/branches`
+      `${this.base}/me/profiles/${profileId}/inventory/branches`,
     );
   }
 
   createBranch(
     profileId: string,
-    body: CreateBranchBody
+    body: CreateBranchBody,
   ): Observable<InventoryBranch> {
     return this.http.post<InventoryBranch>(
       `${this.base}/me/profiles/${profileId}/inventory/branches`,
-      body
+      body,
     );
   }
 
   deleteBranch(profileId: string, branchId: string): Observable<void> {
     return this.http.delete<void>(
-      `${this.base}/me/profiles/${profileId}/inventory/branches/${branchId}`
+      `${this.base}/me/profiles/${profileId}/inventory/branches/${branchId}`,
     );
   }
 }
