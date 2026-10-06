@@ -13,14 +13,18 @@
       <h2 id="income-modal-title" class="text-2xl font-bold text-foreground">
         Ingreso nuevo
       </h2>
-      <span class="text-xs font-medium text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full border border-emerald-200">
+      <span
+        class="text-xs font-medium text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full border border-emerald-200"
+      >
         Suma al periodo
       </span>
     </div>
 
-    <p class="text-xs text-muted-foreground bg-muted/60 rounded-lg px-3 py-2 mb-4">
-      Este monto se suma a tu ingreso del periodo y aumenta el disponible. Si ya cargaste tu salario en
-      «Ingreso mensual», no lo repitas aquí.
+    <p
+      class="text-xs text-muted-foreground bg-muted/60 rounded-lg px-3 py-2 mb-4"
+    >
+      Este monto se suma a tu ingreso del periodo y aumenta el disponible. Si ya
+      cargaste tu salario en «Ingreso mensual», no lo repitas aquí.
     </p>
 
     <form (ngSubmit)="handleSubmit()" class="space-y-4">
@@ -28,7 +32,8 @@
         <label
           class="block text-sm font-medium text-foreground mb-1"
           for="income-title-input"
-        >Título *</label>
+          >Título *</label
+        >
         <input
           id="income-title-input"
           type="text"
@@ -44,7 +49,8 @@
         <label
           class="block text-sm font-medium text-foreground mb-1"
           for="income-description-input"
-        >Descripción</label>
+          >Descripción</label
+        >
         <textarea
           id="income-description-input"
           name="description"
@@ -59,7 +65,8 @@
         <label
           class="block text-sm font-medium text-foreground mb-1"
           for="income-source-select"
-        >Fuente *</label>
+          >Fuente *</label
+        >
         <select
           id="income-source-select"
           name="source"
@@ -78,7 +85,8 @@
         <label
           class="block text-sm font-medium text-foreground mb-1"
           for="income-received-date"
-        >Fecha del ingreso *</label>
+          >Fecha del ingreso *</label
+        >
         <input
           id="income-received-date"
           type="date"
@@ -103,7 +111,8 @@
           <label
             class="block text-sm font-medium text-foreground mb-1"
             for="income-amount-bs"
-          >Monto en Bs. *</label>
+            >Monto en Bs. *</label
+          >
           <input
             id="income-amount-bs"
             type="number"
@@ -140,12 +149,14 @@
           <label
             class="block text-sm font-medium text-foreground mb-1"
             for="income-amount-usd"
-          >Monto en USD *</label>
+            >Monto en USD *</label
+          >
           <div class="relative">
             <span
               class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
               aria-hidden="true"
-            >$</span>
+              >$</span
+            >
             <input
               id="income-amount-usd"
               type="number"

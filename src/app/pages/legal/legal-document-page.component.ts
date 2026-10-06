@@ -1,10 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import {
-  BRAND_APP_NAME,
-  BRAND_LOGO_SRC,
-} from '../../core/brand-assets';
+import { BRAND_APP_NAME, BRAND_LOGO_SRC } from '../../core/brand-assets';
 import { SeoMetaService } from '../../core/seo-meta.service';
 import { getLegalDocument } from './legal-content.es';
 import {

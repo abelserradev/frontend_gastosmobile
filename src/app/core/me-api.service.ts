@@ -225,7 +225,10 @@ export class MeApiService {
   }
 
   rolloverMonth(body: { applySurplus?: boolean }): Observable<MePreferences> {
-    return this.http.post<MePreferences>(`${this.base}/me/month-rollover`, body);
+    return this.http.post<MePreferences>(
+      `${this.base}/me/month-rollover`,
+      body,
+    );
   }
 
   replaceCategories(names: string[]): Observable<MeCategory[]> {
@@ -355,7 +358,10 @@ export class MeApiService {
     fd.append('categoryName', params.categoryName);
     if (params.paymentDate) fd.append('paymentDate', params.paymentDate);
     if (params.title) fd.append('title', params.title);
-    return this.http.post<MeExpense>(`${this.base}/me/expenses/with-receipt`, fd);
+    return this.http.post<MeExpense>(
+      `${this.base}/me/expenses/with-receipt`,
+      fd,
+    );
   }
 
   /**
@@ -371,7 +377,9 @@ export class MeApiService {
   /**
    * Tasa BCV con caché en localStorage: si el backend/DolarApi falla, usa la última tasa guardada.
    */
-  getBcvOfficialRateResilient(date?: string): Observable<BcvOfficialRateResponse> {
+  getBcvOfficialRateResilient(
+    date?: string,
+  ): Observable<BcvOfficialRateResponse> {
     const q = date ? `?date=${encodeURIComponent(date)}` : '';
     return this.http
       .get<{
@@ -524,9 +532,6 @@ export class MeApiService {
 
   /** v1.3 — feedback OCR; no debe bloquear UI (llamar con subscribe errores ignorados si aplica). */
   submitOcrFeedback(body: SubmitOcrFeedbackBody): Observable<{ id: string }> {
-    return this.http.post<{ id: string }>(
-      `${this.base}/me/ocr-feedback`,
-      body,
-    );
+    return this.http.post<{ id: string }>(`${this.base}/me/ocr-feedback`, body);
   }
 }

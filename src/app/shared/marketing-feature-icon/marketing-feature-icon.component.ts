@@ -2,11 +2,7 @@ import { Component, input } from '@angular/core';
 
 /** Iconos de beneficios públicos — mismo trazo que el resto de la app (sin emojis). */
 export type MarketingFeatureIconKind =
-  | 'exchange-rate'
-  | 'receipt-scan'
-  | 'inventory'
-  | 'budget-cycle'
-  | 'android';
+  'exchange-rate' | 'receipt-scan' | 'inventory' | 'budget-cycle' | 'android';
 
 @Component({
   selector: 'app-marketing-feature-icon',
@@ -31,7 +27,9 @@ export type MarketingFeatureIconKind =
           <path d="M17 8v12m0 0 4-4m-4 4-4-4" />
         }
         @case ('receipt-scan') {
-          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+          <path
+            d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+          />
           <path d="M14 2v6h6" />
           <path d="M8 13h2" />
           <path d="M8 17h6" />

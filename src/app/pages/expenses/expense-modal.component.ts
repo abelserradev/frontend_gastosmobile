@@ -14,7 +14,10 @@ import {
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import type { CategoryDraft, CurrencyCode } from '../../core/app-context.service';
+import type {
+  CategoryDraft,
+  CurrencyCode,
+} from '../../core/app-context.service';
 import { todayYmdCaracas } from '../../core/caracas-date';
 import { MeApiService } from '../../core/me-api.service';
 import type { ParseInvoiceResult } from '../../core/ocr-api.service';
@@ -30,7 +33,8 @@ export class ExpenseModalComponent implements OnChanges {
   private readonly meApi = inject(MeApiService);
   private readonly injector = inject(Injector);
 
-  readonly expenseDialog = viewChild<ElementRef<HTMLDialogElement>>('expenseDialog');
+  readonly expenseDialog =
+    viewChild<ElementRef<HTMLDialogElement>>('expenseDialog');
 
   readonly open = input.required<boolean>();
   readonly categories = input.required<CategoryDraft[]>();
@@ -202,7 +206,7 @@ export class ExpenseModalComponent implements OnChanges {
     this.handleCancel();
   }
 
-  onExpensePanelKeydown(_event: KeyboardEvent): void {
+  onExpensePanelKeydown(_: KeyboardEvent): void {
     // El <dialog> gestiona Escape; este handler es solo para paridad de accesibilidad.
   }
 

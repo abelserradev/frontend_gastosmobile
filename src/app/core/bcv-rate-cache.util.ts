@@ -34,7 +34,9 @@ export function readBcvRateCache(date?: string): BcvRateSnapshot | null {
   }
 }
 
-export function writeBcvRateCache(snapshot: Omit<BcvRateSnapshot, 'savedAt'>): void {
+export function writeBcvRateCache(
+  snapshot: Omit<BcvRateSnapshot, 'savedAt'>,
+): void {
   if (typeof globalThis.localStorage === 'undefined') {
     return;
   }
@@ -50,7 +52,9 @@ export function writeBcvRateCache(snapshot: Omit<BcvRateSnapshot, 'savedAt'>): v
 }
 
 /** Si no hay tasa del día pedido, devuelve la última conocida (backend caído). */
-export function readBcvRateCacheOrLatest(date?: string): BcvRateSnapshot | null {
+export function readBcvRateCacheOrLatest(
+  date?: string,
+): BcvRateSnapshot | null {
   const exact = readBcvRateCache(date);
   if (exact) {
     return exact;

@@ -19,10 +19,18 @@ import { AppContextService } from '../../core/app-context.service';
 import { navigateFromExpensesMenu } from '../../core/app-navigation.util';
 import { AuthService } from '../../core/auth.service';
 import { formatApiHttpError } from '../../core/http-error.util';
-import { buildExpensesCsv, type ExpenseCsvRow } from '../../core/csv-export.util';
+import {
+  buildExpensesCsv,
+  type ExpenseCsvRow,
+} from '../../core/csv-export.util';
 import { downloadCsvFile } from '../../core/file-download.util';
 import { writeBcvRateCache } from '../../core/bcv-rate-cache.util';
-import { MeApiService, type MeExpense, type MeIncome, type MeProfileMember } from '../../core/me-api.service';
+import {
+  MeApiService,
+  type MeExpense,
+  type MeIncome,
+  type MeProfileMember,
+} from '../../core/me-api.service';
 import {
   getStateWithAutoRollover,
   needsSetupScreen,
@@ -33,12 +41,21 @@ import { ExpenseCategoryEditModalComponent } from './expense-category-edit-modal
 import { ExpenseModalComponent } from './expense-modal.component';
 import { IncomeModalComponent } from './income-modal.component';
 import { ExpensePieChartComponent } from './expense-pie-chart.component';
-import { ExpenseTypeSelectorComponent, type ExpenseCreationMode } from './expense-type-selector.component';
-import { ImageUploadModalComponent, type ImageUploadMode } from './image-upload-modal.component';
+import {
+  ExpenseTypeSelectorComponent,
+  type ExpenseCreationMode,
+} from './expense-type-selector.component';
+import {
+  ImageUploadModalComponent,
+  type ImageUploadMode,
+} from './image-upload-modal.component';
 import { ReceiptViewerComponent } from './receipt-viewer.component';
 import { TelegramLinkPanelComponent } from './telegram-link-panel.component';
 import { HelpChatWidgetComponent } from '../../shared/help-chat/help-chat-widget.component';
-import { resolveExpenseCategoryIcon, type ExpenseCategoryIconKind } from './expense-category-icon.util';
+import {
+  resolveExpenseCategoryIcon,
+  type ExpenseCategoryIconKind,
+} from './expense-category-icon.util';
 import {
   buildLastSevenDaySpending,
   sparklinePolyline,
@@ -272,9 +289,7 @@ export class ExpensesPageComponent implements OnInit, OnDestroy {
   });
 
   readonly pieChartData = computed((): ChartData<'pie'> => {
-    const paid = this.ctx
-      .userData()
-      .expenses.filter((e) => e.isPaid);
+    const paid = this.ctx.userData().expenses.filter((e) => e.isPaid);
     const categoryMap = new Map<string, number>();
     paid.forEach((e) => {
       categoryMap.set(
@@ -285,9 +300,7 @@ export class ExpensesPageComponent implements OnInit, OnDestroy {
     const entries = Array.from(categoryMap.entries());
     const labels = entries.map(([name]) => name);
     const data = entries.map(([, v]) => v);
-    const backgroundColor = entries.map(
-      (_, i) => COLORS[i % COLORS.length],
-    );
+    const backgroundColor = entries.map((_, i) => COLORS[i % COLORS.length]);
     return {
       labels,
       datasets: [
@@ -414,8 +427,8 @@ export class ExpensesPageComponent implements OnInit, OnDestroy {
   /** Al menos un seleccionado sigue pendiente → habilita “Pagar”. */
   hasPendingPaySelection(): boolean {
     const expenses = this.ctx.expenses();
-    return [...this.selectedExpenses()].some(
-      (id) => expenses.some((e) => e.id === id && !e.isPaid),
+    return [...this.selectedExpenses()].some((id) =>
+      expenses.some((e) => e.id === id && !e.isPaid),
     );
   }
 
@@ -439,14 +452,14 @@ export class ExpensesPageComponent implements OnInit, OnDestroy {
         receivedDate: payload.receivedDate,
       })
       .subscribe({
-      next: (row) => {
-        this.ctx.setIncomes([toIncomeItem(row), ...this.ctx.incomes()]);
-        this.boardTab.set('incomes');
-      },
-      error: (err: unknown) => {
-        globalThis.alert(formatApiHttpError(err));
-      },
-    });
+        next: (row) => {
+          this.ctx.setIncomes([toIncomeItem(row), ...this.ctx.incomes()]);
+          this.boardTab.set('incomes');
+        },
+        error: (err: unknown) => {
+          globalThis.alert(formatApiHttpError(err));
+        },
+      });
   }
 
   isIncomeSelected(id: string): boolean {
@@ -475,7 +488,9 @@ export class ExpensesPageComponent implements OnInit, OnDestroy {
     const ids = [...sel];
     this.meApi.deleteIncomes(ids).subscribe({
       next: () => {
-        this.ctx.setIncomes(this.ctx.incomes().filter((i) => !ids.includes(i.id)));
+        this.ctx.setIncomes(
+          this.ctx.incomes().filter((i) => !ids.includes(i.id)),
+        );
         this.selectedIncomes.set(new Set());
       },
       error: (err: unknown) => {
@@ -531,7 +546,11 @@ export class ExpensesPageComponent implements OnInit, OnDestroy {
     this.ctx.setExpenses([toExpenseItem(expense), ...this.ctx.expenses()]);
   }
 
-  openCategoryEdit(expense: { id: string; title: string; category: string }): void {
+  openCategoryEdit(expense: {
+    id: string;
+    title: string;
+    category: string;
+  }): void {
     this.categoryEditTarget.set(expense);
     this.categoryEditOpen.set(true);
   }
@@ -543,7 +562,10 @@ export class ExpensesPageComponent implements OnInit, OnDestroy {
     }
   }
 
-  onCategoryEditSave(payload: { expenseId: string; categoryName: string }): void {
+  onCategoryEditSave(payload: {
+    expenseId: string;
+    categoryName: string;
+  }): void {
     this.meApi
       .updateExpenseFields(payload.expenseId, {
         categoryName: payload.categoryName,
@@ -626,7 +648,10 @@ export class ExpensesPageComponent implements OnInit, OnDestroy {
     ocrSnapshot: ParseInvoiceResult,
     receiptFlow: ImageUploadMode | null,
   ): void {
-    const kind = guessOcrDocumentKind(receiptFlow ?? undefined, ocrSnapshot.rawText);
+    const kind = guessOcrDocumentKind(
+      receiptFlow ?? undefined,
+      ocrSnapshot.rawText,
+    );
     const parseSnapshot = {
       ...ocrSnapshot,
       rawText: (ocrSnapshot.rawText ?? '').slice(0, 7900),
@@ -643,13 +668,12 @@ export class ExpensesPageComponent implements OnInit, OnDestroy {
           description: expenseRow.description,
           amountUsd: expenseRow.amount,
           ...(pay ? { paymentDate: pay.slice(0, 10) } : {}),
-          currencyCapture:
-            this.ctx.currency() === 'BS' ? 'BS' : 'USD',
+          currencyCapture: this.ctx.currency() === 'BS' ? 'BS' : 'USD',
           categoryName: expenseRow.category,
         },
         expenseId: expenseRow.id,
       })
-      .subscribe({ error: () => {} });
+      .subscribe({ error: () => undefined });
   }
 
   toggleExpensePaid(id: string): void {
@@ -736,7 +760,9 @@ export class ExpensesPageComponent implements OnInit, OnDestroy {
     }
     const payer = this.expenseProfiles().find((p) => p.id === pid);
     if (!payer) {
-      globalThis.alert('Perfil no válido; recarga la página e intenta de nuevo');
+      globalThis.alert(
+        'Perfil no válido; recarga la página e intenta de nuevo',
+      );
       return;
     }
     const mid = this.paidByMemberId().trim();
@@ -804,26 +830,24 @@ export class ExpensesPageComponent implements OnInit, OnDestroy {
       });
     }
     this.ctx.setExpenses(
-      this.ctx
-        .expenses()
-        .map((e) =>
-          e.id === id
-            ? {
-                ...e,
-                isPaid: row.isPaid,
-                category: row.category ?? e.category,
-                title: row.title ?? e.title,
-                amount: row.amount ?? e.amount,
-                referenceMonth: row.referenceMonth ?? e.referenceMonth,
-                paymentDate: row.paymentDate ?? e.paymentDate,
-                bcvRateApplied: row.bcvRateApplied ?? e.bcvRateApplied,
-                bcvRateDate: row.bcvRateDate ?? e.bcvRateDate,
-                paidByDisplayName: row.paidByDisplayName ?? e.paidByDisplayName,
-                paidAt: row.paidAt ?? e.paidAt,
-                paidByMemberId: row.paidByMemberId ?? e.paidByMemberId,
-              }
-            : e,
-        ),
+      this.ctx.expenses().map((e) =>
+        e.id === id
+          ? {
+              ...e,
+              isPaid: row.isPaid,
+              category: row.category ?? e.category,
+              title: row.title ?? e.title,
+              amount: row.amount ?? e.amount,
+              referenceMonth: row.referenceMonth ?? e.referenceMonth,
+              paymentDate: row.paymentDate ?? e.paymentDate,
+              bcvRateApplied: row.bcvRateApplied ?? e.bcvRateApplied,
+              bcvRateDate: row.bcvRateDate ?? e.bcvRateDate,
+              paidByDisplayName: row.paidByDisplayName ?? e.paidByDisplayName,
+              paidAt: row.paidAt ?? e.paidAt,
+              paidByMemberId: row.paidByMemberId ?? e.paidByMemberId,
+            }
+          : e,
+      ),
     );
   }
 
@@ -848,9 +872,7 @@ export class ExpensesPageComponent implements OnInit, OnDestroy {
       return;
     }
     if (
-      !globalThis.confirm(
-        `¿Estás seguro de eliminar ${sel.size} gasto(s)?`,
-      )
+      !globalThis.confirm(`¿Estás seguro de eliminar ${sel.size} gasto(s)?`)
     ) {
       return;
     }
@@ -876,7 +898,6 @@ export class ExpensesPageComponent implements OnInit, OnDestroy {
     });
   }
 
-
   goBack(): void {
     void this.router.navigate(['/profiles']);
   }
@@ -887,11 +908,15 @@ export class ExpensesPageComponent implements OnInit, OnDestroy {
   }
 
   goProfiles(): void {
-    navigateFromExpensesMenu(this.router, '/profiles', () => this.closeSidebar());
+    navigateFromExpensesMenu(this.router, '/profiles', () =>
+      this.closeSidebar(),
+    );
   }
 
   goInvitations(): void {
-    navigateFromExpensesMenu(this.router, '/invitations', () => this.closeSidebar());
+    navigateFromExpensesMenu(this.router, '/invitations', () =>
+      this.closeSidebar(),
+    );
   }
 
   private loadOfficialBcvQuote(): void {

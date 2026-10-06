@@ -19,14 +19,20 @@ export type ExpenseCreationMode = 'manual' | 'invoice' | 'payment' | 'income';
   standalone: true,
   encapsulation: ViewEncapsulation.None,
   templateUrl: './expense-type-selector.component.html',
-  styles: [`
-    dialog.type-selector-dialog::backdrop {
-      background-color: color-mix(in srgb, var(--foreground) 45%, transparent);
-    }
-    dialog.type-selector-dialog:not([open]) {
-      display: none;
-    }
-  `],
+  styles: [
+    `
+      dialog.type-selector-dialog::backdrop {
+        background-color: color-mix(
+          in srgb,
+          var(--foreground) 45%,
+          transparent
+        );
+      }
+      dialog.type-selector-dialog:not([open]) {
+        display: none;
+      }
+    `,
+  ],
 })
 export class ExpenseTypeSelectorComponent implements OnChanges {
   private readonly injector = inject(Injector);

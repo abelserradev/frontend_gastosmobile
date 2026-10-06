@@ -9,5 +9,6 @@ Chart.register(...registerables);
 
 initializeApp(environment.firebase);
 
-bootstrapApplication(AppComponent, appConfig)
-  .catch((err) => console.error(err));
+bootstrapApplication(AppComponent, appConfig).catch((err) =>
+  console.error(err),
+);

@@ -1,6 +1,11 @@
 import { Injectable, inject } from '@angular/core';
 import { Capacitor } from '@capacitor/core';
-import { GoogleAuthProvider, getAuth, signInWithPopup, signOut } from 'firebase/auth';
+import {
+  GoogleAuthProvider,
+  getAuth,
+  signInWithPopup,
+  signOut,
+} from 'firebase/auth';
 import { Observable, from, switchMap } from 'rxjs';
 import { NativeGoogleAuthService } from './native/native-google-auth.service';
 

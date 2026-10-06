@@ -8,9 +8,12 @@
         width="88"
         height="88"
       />
-      <h1 class="text-2xl font-bold text-foreground">Descargar {{ brandAppName }}</h1>
+      <h1 class="text-2xl font-bold text-foreground">
+        Descargar {{ brandAppName }}
+      </h1>
       <p class="text-sm text-muted-foreground mt-2 leading-relaxed">
-        App Android para control de gastos con tasa BCV, lectura de facturas e inventario para comercios.
+        App Android para control de gastos con tasa BCV, lectura de facturas e
+        inventario para comercios.
       </p>
     </div>
 
@@ -31,38 +34,60 @@
         Descargar APK para Android
       </a>
       <p class="text-xs text-muted-foreground mt-3 text-center">
-        Abre este enlace desde tu teléfono. Tras instalar, inicia sesión con la misma cuenta que en la web.
+        Abre este enlace desde tu teléfono. Tras instalar, inicia sesión con la
+        misma cuenta que en la web.
       </p>
       <p class="mt-4 text-center">
-        <a routerLink="/login" class="text-sm font-medium text-primary underline">Registrarme o entrar en la web</a>
+        <a
+          routerLink="/login"
+          class="text-sm font-medium text-primary underline"
+          >Registrarme o entrar en la web</a
+        >
       </p>
     </div>
 
     <ol class="space-y-3 text-sm text-foreground mb-8">
       <li class="flex gap-3">
-        <span class="shrink-0 w-6 h-6 rounded-full bg-[#FFD300] text-xs font-bold flex items-center justify-center text-[#333]">1</span>
+        <span
+          class="shrink-0 w-6 h-6 rounded-full bg-[#FFD300] text-xs font-bold flex items-center justify-center text-[#333]"
+          >1</span
+        >
         <span>Descarga el APK en Android.</span>
       </li>
       <li class="flex gap-3">
-        <span class="shrink-0 w-6 h-6 rounded-full bg-[#FFD300] text-xs font-bold flex items-center justify-center text-[#333]">2</span>
-        <span>Permite instalar desde fuentes conocidas si el sistema lo pide.</span>
+        <span
+          class="shrink-0 w-6 h-6 rounded-full bg-[#FFD300] text-xs font-bold flex items-center justify-center text-[#333]"
+          >2</span
+        >
+        <span
+          >Permite instalar desde fuentes conocidas si el sistema lo pide.</span
+        >
       </li>
       <li class="flex gap-3">
-        <span class="shrink-0 w-6 h-6 rounded-full bg-[#FFD300] text-xs font-bold flex items-center justify-center text-[#333]">3</span>
+        <span
+          class="shrink-0 w-6 h-6 rounded-full bg-[#FFD300] text-xs font-bold flex items-center justify-center text-[#333]"
+          >3</span
+        >
         <span>Inicia sesión con tu correo registrado.</span>
       </li>
     </ol>
 
     <p class="text-center text-xs text-muted-foreground">
       @for (link of legalLinks; track link.slug) {
-        <a [routerLink]="link.path" class="underline hover:text-foreground">{{ link.label }}</a>
+        <a [routerLink]="link.path" class="underline hover:text-foreground">{{
+          link.label
+        }}</a>
         @if (!$last) {
           <span aria-hidden="true"> · </span>
         }
       }
     </p>
     <p class="text-center mt-4">
-      <a routerLink="/" class="text-xs text-muted-foreground underline hover:text-foreground">Volver al inicio</a>
+      <a
+        routerLink="/"
+        class="text-xs text-muted-foreground underline hover:text-foreground"
+        >Volver al inicio</a
+      >
     </p>
   </div>
 </div>

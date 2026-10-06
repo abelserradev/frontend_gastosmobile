@@ -11,7 +11,9 @@
       Control de gastos con tasa BCV, OCR e inventario
     </h1>
     <p class="mt-4 text-muted-foreground text-sm sm:text-base leading-relaxed">
-      {{ brandAppName }} ayuda a familias y comercios a registrar gastos, ingresos y stock con periodos de presupuesto personalizados y exportación CSV.
+      {{ brandAppName }} ayuda a familias y comercios a registrar gastos,
+      ingresos y stock con periodos de presupuesto personalizados y exportación
+      CSV.
     </p>
     <div class="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
       <a
@@ -29,8 +31,13 @@
     </div>
   </header>
 
-  <section class="px-6 pb-10 max-w-lg mx-auto space-y-4" aria-label="Beneficios">
-    <article class="bg-card rounded-2xl p-5 shadow-sm border border-border/60 flex gap-4">
+  <section
+    class="px-6 pb-10 max-w-lg mx-auto space-y-4"
+    aria-label="Beneficios"
+  >
+    <article
+      class="bg-card rounded-2xl p-5 shadow-sm border border-border/60 flex gap-4"
+    >
       <div
         class="shrink-0 w-11 h-11 rounded-xl bg-[#FFD300]/25 text-[#5c4a00] dark:text-[#FFD300] flex items-center justify-center"
         aria-hidden="true"
@@ -40,11 +47,14 @@
       <div class="min-w-0">
         <h2 class="font-semibold text-foreground">Tasa BCV del día</h2>
         <p class="text-sm text-muted-foreground mt-1">
-          Consulta la referencia oficial y registra montos en bolívares y dólares en el mismo periodo.
+          Consulta la referencia oficial y registra montos en bolívares y
+          dólares en el mismo periodo.
         </p>
       </div>
     </article>
-    <article class="bg-card rounded-2xl p-5 shadow-sm border border-border/60 flex gap-4">
+    <article
+      class="bg-card rounded-2xl p-5 shadow-sm border border-border/60 flex gap-4"
+    >
       <div
         class="shrink-0 w-11 h-11 rounded-xl bg-[#FFD300]/25 text-[#5c4a00] dark:text-[#FFD300] flex items-center justify-center"
         aria-hidden="true"
@@ -54,11 +64,14 @@
       <div class="min-w-0">
         <h2 class="font-semibold text-foreground">Lectura de comprobantes</h2>
         <p class="text-sm text-muted-foreground mt-1">
-          Completa los gastos a partir de fotos de facturas; tú revisas antes de guardar.
+          Completa los gastos a partir de fotos de facturas; tú revisas antes de
+          guardar.
         </p>
       </div>
     </article>
-    <article class="bg-card rounded-2xl p-5 shadow-sm border border-border/60 flex gap-4">
+    <article
+      class="bg-card rounded-2xl p-5 shadow-sm border border-border/60 flex gap-4"
+    >
       <div
         class="shrink-0 w-11 h-11 rounded-xl bg-[#FFD300]/25 text-[#5c4a00] dark:text-[#FFD300] flex items-center justify-center"
         aria-hidden="true"
@@ -68,11 +81,14 @@
       <div class="min-w-0">
         <h2 class="font-semibold text-foreground">Inventario para comercios</h2>
         <p class="text-sm text-muted-foreground mt-1">
-          Productos, movimientos, sucursales y colaboradores en perfiles de comercio.
+          Productos, movimientos, sucursales y colaboradores en perfiles de
+          comercio.
         </p>
       </div>
     </article>
-    <article class="bg-card rounded-2xl p-5 shadow-sm border border-border/60 flex gap-4">
+    <article
+      class="bg-card rounded-2xl p-5 shadow-sm border border-border/60 flex gap-4"
+    >
       <div
         class="shrink-0 w-11 h-11 rounded-xl bg-[#FFD300]/25 text-[#5c4a00] dark:text-[#FFD300] flex items-center justify-center"
         aria-hidden="true"
@@ -80,7 +96,9 @@
         <app-marketing-feature-icon kind="budget-cycle" [size]="22" />
       </div>
       <div class="min-w-0">
-        <h2 class="font-semibold text-foreground">Periodo de corte a tu medida</h2>
+        <h2 class="font-semibold text-foreground">
+          Periodo de corte a tu medida
+        </h2>
         <p class="text-sm text-muted-foreground mt-1">
           Presupuesto alineado a tu ciclo de pago, no solo al mes calendario.
         </p>
@@ -88,9 +106,13 @@
     </article>
   </section>
 
-  <footer class="px-6 pb-10 text-center text-xs text-muted-foreground space-x-2">
+  <footer
+    class="px-6 pb-10 text-center text-xs text-muted-foreground space-x-2"
+  >
     @for (link of legalLinks; track link.slug) {
-      <a [routerLink]="link.path" class="underline hover:text-foreground">{{ link.label }}</a>
+      <a [routerLink]="link.path" class="underline hover:text-foreground">{{
+        link.label
+      }}</a>
       @if (!$last) {
         <span aria-hidden="true">·</span>
       }

@@ -1,0 +1,43 @@
+default_stages: [pre-commit]
+
+# Excluir artefactos generados, dependencias y archivos nativos de Android.
+exclude: >-
+  ^(
+    dist/|node_modules/|coverage/|\.pnpm-store/|android/
+  )
+
+repos:
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.24.2
+    hooks:
+      - id: gitleaks
+        name: gitleaks — detect secrets
+        stages: [pre-commit]
+
+  - repo: local
+    hooks:
+      - id: prettier
+        name: prettier — check TS/HTML/SCSS formatting
+        entry: pnpm exec prettier --check
+        language: system
+        files: \.(ts|js|mjs|json|scss|css|html)$
+        pass_filenames: true
+        stages: [pre-commit]
+
+      - id: eslint
+        name: eslint — lint staged TS files
+        entry: pnpm exec ng lint web --
+        language: system
+        files: \.ts$
+        pass_filenames: true
+        stages: [pre-commit]
+
+  - repo: local
+    hooks:
+      - id: pre-push-frontend
+        name: frontend lint + unit tests
+        entry: pnpm run lint:ci && pnpm exec ng test --no-watch --browsers=ChromeHeadlessNoSandbox
+        language: system
+        stages: [pre-push]
+        pass_filenames: false
+        always_run: true

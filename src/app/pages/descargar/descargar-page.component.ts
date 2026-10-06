@@ -1,9 +1,6 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import {
-  BRAND_APP_ICON_SRC,
-  BRAND_APP_NAME,
-} from '../../core/brand-assets';
+import { BRAND_APP_ICON_SRC, BRAND_APP_NAME } from '../../core/brand-assets';
 import { SeoMetaService } from '../../core/seo-meta.service';
 import { LEGAL_NAV_LINKS } from '../legal/legal.constants';
 

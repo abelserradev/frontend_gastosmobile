@@ -8,10 +8,10 @@ export type ExpenseCategoryIconKind =
   | 'shopping'
   | 'default';
 
-const CATEGORY_RULES: ReadonlyArray<{
+const CATEGORY_RULES: readonly {
   kind: ExpenseCategoryIconKind;
   tokens: readonly string[];
-}> = [
+}[] = [
   {
     kind: 'food',
     tokens: ['comida', 'restaurant', 'super', 'mercado', 'aliment'],

@@ -11,10 +11,7 @@ export const LEGAL_CONTACT_EMAIL = 'contact@buildforge.work';
 export const LEGAL_LAST_UPDATED = '28 de septiembre de 2026';
 
 export type LegalDocumentSlug =
-  | 'privacidad'
-  | 'terminos'
-  | 'cookies'
-  | 'aviso-legal';
+  'privacidad' | 'terminos' | 'cookies' | 'aviso-legal';
 
 export interface LegalNavEntry {
   slug: LegalDocumentSlug;

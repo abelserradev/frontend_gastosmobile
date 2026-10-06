@@ -1,5 +1,12 @@
 import { CommonModule } from '@angular/common';
-import { Component, effect, inject, input, output, signal } from '@angular/core';
+import {
+  Component,
+  effect,
+  inject,
+  input,
+  output,
+  signal,
+} from '@angular/core';
 import {
   InventoryApiService,
   type InventoryItem,
@@ -81,7 +88,9 @@ export class MovementsHistoryModalComponent {
         m.lineValue != null
           ? m.lineValue.toFixed(2)
           : (Math.abs(m.quantity) * m.unitPrice).toFixed(2);
-      parts.push(`$${m.unitPrice.toFixed(2)} × ${Math.abs(m.quantity)} = $${total}`);
+      parts.push(
+        `$${m.unitPrice.toFixed(2)} × ${Math.abs(m.quantity)} = $${total}`,
+      );
     }
     if (m.targetBranchName) parts.push(`→ ${m.targetBranchName}`);
     else if (m.branchName) parts.push(m.branchName);

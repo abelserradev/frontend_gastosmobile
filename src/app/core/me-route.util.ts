@@ -5,10 +5,7 @@ export function routePathForMeState(s: MeState): string {
   if (!s.preferences) {
     return '/setup';
   }
-  if (
-    s.needsMonthlyIncomeSetup &&
-    s.monthRenewal?.requiresSurplusPrompt
-  ) {
+  if (s.needsMonthlyIncomeSetup && s.monthRenewal?.requiresSurplusPrompt) {
     return '/setup';
   }
   const hasProfiles = s.profiles.length > 0;

@@ -20,8 +20,18 @@
         class="inline-flex items-center justify-center w-9 h-9 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors shrink-0"
         aria-label="Cerrar"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-          <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          aria-hidden="true"
+        >
+          <path d="M18 6 6 18" />
+          <path d="m6 6 12 12" />
         </svg>
       </button>
     </div>
@@ -31,7 +41,10 @@
 
     <form (ngSubmit)="handleSubmit()" class="space-y-4">
       <div>
-        <label class="block text-sm font-medium text-foreground mb-1" for="edit-expense-category">
+        <label
+          class="block text-sm font-medium text-foreground mb-1"
+          for="edit-expense-category"
+        >
           Categoría *
         </label>
         <select
@@ -47,12 +60,18 @@
         </select>
         <p class="text-xs text-muted-foreground mt-1">
           Categoría nueva:
-          <a routerLink="/setup" [queryParams]="{ from: 'expenses' }" class="text-primary font-medium underline">
+          <a
+            routerLink="/setup"
+            [queryParams]="{ from: 'expenses' }"
+            class="text-primary font-medium underline"
+          >
             Ingreso mensual
           </a>
         </p>
         @if (fieldError) {
-          <p class="mt-1.5 text-xs text-destructive" role="alert">{{ fieldError }}</p>
+          <p class="mt-1.5 text-xs text-destructive" role="alert">
+            {{ fieldError }}
+          </p>
         }
       </div>
 

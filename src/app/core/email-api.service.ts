@@ -13,9 +13,6 @@ export class EmailApiService {
   private readonly http = inject(HttpClient);
 
   sendResendTest(): Observable<{ ok: true }> {
-    return this.http.post<{ ok: true }>(
-      `${environment.apiUrl}/email/test`,
-      {},
-    );
+    return this.http.post<{ ok: true }>(`${environment.apiUrl}/email/test`, {});
   }
 }

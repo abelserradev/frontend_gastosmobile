@@ -1,11 +1,11 @@
 /** Serie de 7 días para el micro-gráfico del panel de gastos. */
 export function buildLastSevenDaySpending(
-  expenses: ReadonlyArray<{
+  expenses: readonly {
     amount: number;
     isPaid: boolean;
     paymentDate?: string | null;
     bcvRateDate?: string | null;
-  }>,
+  }[],
 ): number[] {
   const paid = expenses.filter((e) => e.isPaid);
   const buckets: number[] = [];

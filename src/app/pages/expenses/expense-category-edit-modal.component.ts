@@ -89,7 +89,8 @@ export class ExpenseCategoryEditModalComponent implements OnChanges, OnDestroy {
     }
     const known = this.categories().some((c) => c.name === name);
     if (!known) {
-      this.fieldError = 'Elige una categoría de tu lista (Ingreso mensual para crear nuevas)';
+      this.fieldError =
+        'Elige una categoría de tu lista (Ingreso mensual para crear nuevas)';
       return;
     }
     if (!id) {

@@ -62,7 +62,8 @@ export class ProfilesPageComponent implements OnInit {
   collaborators: ProfileCollaborator[] = [];
   inviteEmail = '';
 
-  @ViewChild('membersDialog') private membersDialog?: ElementRef<HTMLDialogElement>;
+  @ViewChild('membersDialog')
+  private membersDialog?: ElementRef<HTMLDialogElement>;
   @ViewChild('teamDialog') private teamDialog?: ElementRef<HTMLDialogElement>;
 
   get ownedProfiles(): UserProfile[] {
@@ -282,7 +283,9 @@ export class ProfilesPageComponent implements OnInit {
     }
     this.meApi.inviteCollaborator(this.teamProfileId, email).subscribe({
       next: (row) => {
-        const idx = this.collaborators.findIndex((c) => c.userId === row.userId);
+        const idx = this.collaborators.findIndex(
+          (c) => c.userId === row.userId,
+        );
         if (idx >= 0) {
           this.collaborators = this.collaborators.map((c, i) =>
             i === idx ? row : c,
@@ -300,7 +303,9 @@ export class ProfilesPageComponent implements OnInit {
     if (!this.teamProfileId) return;
     this.meApi.revokeCollaborator(this.teamProfileId, userId).subscribe({
       next: () => {
-        this.collaborators = this.collaborators.filter((c) => c.userId !== userId);
+        this.collaborators = this.collaborators.filter(
+          (c) => c.userId !== userId,
+        );
       },
       error: (err: unknown) => globalThis.alert(formatApiHttpError(err)),
     });

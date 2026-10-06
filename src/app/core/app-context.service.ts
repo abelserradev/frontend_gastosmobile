@@ -1,5 +1,9 @@
 import { computed, Injectable, signal } from '@angular/core';
-import type { ActivePeriod, BudgetCycle, MePreferences } from './me-api.service';
+import type {
+  ActivePeriod,
+  BudgetCycle,
+  MePreferences,
+} from './me-api.service';
 
 export type CurrencyCode = 'BS' | 'USD';
 
@@ -73,7 +77,10 @@ export class AppContextService {
   /** FEAT-001: Etiqueta legible del periodo (ej: "16 May - 15 Jun"). */
   readonly activePeriodLabel = computed(() => this.activePeriod()?.label ?? '');
   /** FEAT-001: Configuración del ciclo presupuestario. */
-  readonly budgetCycle = signal<BudgetCycle>({ mode: 'calendar_month', cutoffDay: 1 });
+  readonly budgetCycle = signal<BudgetCycle>({
+    mode: 'calendar_month',
+    cutoffDay: 1,
+  });
 
   readonly userData = computed(() => ({
     currency: this.currency(),
@@ -116,7 +123,9 @@ export class AppContextService {
       stale: pref.bcvQuoteIsStale,
     });
     // FEAT-001: Sincronizar configuración del ciclo presupuestario
-    this.budgetCycle.set(pref.budgetCycle ?? { mode: 'calendar_month', cutoffDay: 1 });
+    this.budgetCycle.set(
+      pref.budgetCycle ?? { mode: 'calendar_month', cutoffDay: 1 },
+    );
   }
 
   /**
@@ -155,9 +164,7 @@ export class AppContextService {
     this.profiles.update((list) => list.filter((p) => p.id !== id));
   }
 
-  addExpense(
-    draft: Omit<ExpenseItem, 'id' | 'isPaid'>,
-  ): void {
+  addExpense(draft: Omit<ExpenseItem, 'id' | 'isPaid'>): void {
     const item: ExpenseItem = {
       ...draft,
       id: globalThis.crypto.randomUUID(),

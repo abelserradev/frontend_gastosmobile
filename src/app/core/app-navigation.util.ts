@@ -9,7 +9,9 @@ export function cameFromExpenses(route: ActivatedRoute): boolean {
   return route.snapshot.queryParamMap.get('from') === FROM_EXPENSES;
 }
 
-export function subpageBackTarget(fromExpenses: boolean): '/expenses' | '/setup' {
+export function subpageBackTarget(
+  fromExpenses: boolean,
+): '/expenses' | '/setup' {
   return fromExpenses ? '/expenses' : '/setup';
 }
 

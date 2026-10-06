@@ -1,5 +1,12 @@
 import { CommonModule } from '@angular/common';
-import { Component, input, output, signal, computed, OnChanges } from '@angular/core';
+import {
+  Component,
+  input,
+  output,
+  signal,
+  computed,
+  OnChanges,
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import type {
   InventoryItem,
@@ -63,7 +70,8 @@ export class MovementFormModalComponent implements OnChanges {
   );
 
   readonly showExitCategory = computed(
-    () => this.movementType() === 'SALE' || this.movementType() === 'TRANSFER_OUT',
+    () =>
+      this.movementType() === 'SALE' || this.movementType() === 'TRANSFER_OUT',
   );
 
   readonly modalTitle = computed(() => {
@@ -124,7 +132,9 @@ export class MovementFormModalComponent implements OnChanges {
   }
 
   readonly previewLabel = computed(() =>
-    this.isNegativeMovement() ? 'Stock después de la salida:' : 'Stock después de la entrada:',
+    this.isNegativeMovement()
+      ? 'Stock después de la salida:'
+      : 'Stock después de la entrada:',
   );
 
   ngOnChanges(): void {
@@ -161,7 +171,10 @@ export class MovementFormModalComponent implements OnChanges {
     return Object.keys(errs).length === 0;
   }
 
-  private validateQuantity(data: MovementFormData, errs: Record<string, string>): void {
+  private validateQuantity(
+    data: MovementFormData,
+    errs: Record<string, string>,
+  ): void {
     if (!data.quantity || data.quantity <= 0) {
       errs['quantity'] = 'La cantidad debe ser mayor a 0';
       return;
@@ -173,7 +186,11 @@ export class MovementFormModalComponent implements OnChanges {
     }
 
     const item = this.item();
-    if (item && this.isNegativeMovement() && data.quantity > item.currentStock) {
+    if (
+      item &&
+      this.isNegativeMovement() &&
+      data.quantity > item.currentStock
+    ) {
       errs['quantity'] = `Stock insuficiente. Disponible: ${item.currentStock}`;
     }
   }
@@ -187,12 +204,19 @@ export class MovementFormModalComponent implements OnChanges {
     if (!this.targetBranchId()) {
       errs['targetBranchId'] = 'Selecciona la sucursal destino';
     }
-    if (this.sourceBranchId() && this.targetBranchId() && this.sourceBranchId() === this.targetBranchId()) {
+    if (
+      this.sourceBranchId() &&
+      this.targetBranchId() &&
+      this.sourceBranchId() === this.targetBranchId()
+    ) {
       errs['targetBranchId'] = 'Origen y destino deben ser distintos';
     }
   }
 
-  private validateUnitPrice(data: MovementFormData, errs: Record<string, string>): void {
+  private validateUnitPrice(
+    data: MovementFormData,
+    errs: Record<string, string>,
+  ): void {
     if (!this.showUnitPriceField()) return;
 
     const raw = this.asPriceText(data.unitPrice);
@@ -282,7 +306,10 @@ export class MovementFormModalComponent implements OnChanges {
   }
 
   decrementQuantity(): void {
-    this.formData.update((d) => ({ ...d, quantity: Math.max(1, d.quantity - 1) }));
+    this.formData.update((d) => ({
+      ...d,
+      quantity: Math.max(1, d.quantity - 1),
+    }));
   }
 
   /** type="number" en el template no garantiza string — evita .trim() directo. */

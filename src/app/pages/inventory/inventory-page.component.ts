@@ -80,17 +80,15 @@ export class InventoryPageComponent implements OnInit {
     return this.items().filter(
       (i) =>
         i.name.toLowerCase().includes(q) ||
-        (i.sku?.toLowerCase().includes(q) ?? false)
+        (i.sku?.toLowerCase().includes(q) ?? false),
     );
   });
 
   readonly lowStockItems = computed(() =>
-    this.items().filter((i) => i.isLowStock)
+    this.items().filter((i) => i.isLowStock),
   );
 
-  readonly canExportInventory = computed(
-    () => this.filteredItems().length > 0,
-  );
+  readonly canExportInventory = computed(() => this.filteredItems().length > 0);
 
   readonly selectedItem = signal<InventoryItem | null>(null);
   readonly itemMovementsOpen = signal<boolean>(false);
@@ -200,7 +198,11 @@ export class InventoryPageComponent implements OnInit {
     const pid = this.profileId();
     if (!pid) return;
 
-    if (!globalThis.confirm('¿Eliminar esta sucursal? Solo si no tiene stock ni movimientos.')) {
+    if (
+      !globalThis.confirm(
+        '¿Eliminar esta sucursal? Solo si no tiene stock ni movimientos.',
+      )
+    ) {
       return;
     }
 
@@ -339,7 +341,11 @@ export class InventoryPageComponent implements OnInit {
   }
 
   handleItemDelete(item: InventoryItem): void {
-    if (!globalThis.confirm(`¿Eliminar "${item.name}"?\n\nSolo se puede eliminar si no tiene movimientos ni stock.`)) {
+    if (
+      !globalThis.confirm(
+        `¿Eliminar "${item.name}"?\n\nSolo se puede eliminar si no tiene movimientos ni stock.`,
+      )
+    ) {
       return;
     }
 
