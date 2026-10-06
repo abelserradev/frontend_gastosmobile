@@ -566,12 +566,25 @@
               <div
                 class="glass-panel text-center py-12 px-4 rounded-2xl text-muted-foreground"
               >
-                <p class="font-medium text-foreground">
-                  No hay gastos registrados
-                </p>
-                <p class="text-sm mt-2">
-                  Agrega tu primer registro con el botón «Nuevo cuadro»
-                </p>
+                @if (totalExpenseCountAllMonths() > 0) {
+                  <p class="font-medium text-foreground">
+                    No hay gastos en este periodo
+                  </p>
+                  <p class="text-sm mt-2">
+                    Tienes {{ totalExpenseCountAllMonths() }} gasto(s) en meses
+                    anteriores.
+                    <a routerLink="/historial" class="text-primary underline"
+                      >Ver historial</a
+                    >
+                  </p>
+                } @else {
+                  <p class="font-medium text-foreground">
+                    No hay gastos registrados
+                  </p>
+                  <p class="text-sm mt-2">
+                    Agrega tu primer registro con el botón «Nuevo cuadro»
+                  </p>
+                }
               </div>
             } @else {
               @for (expense of expensesPageSlice(); track expense.id) {

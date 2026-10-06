@@ -175,6 +175,8 @@ export interface MeState {
   categories: MeCategory[];
   profiles: MeProfile[];
   expenses: MeExpense[];
+  /** Gastos en todos los meses (perfiles accesibles); 0 = no hay filas en BD. */
+  totalExpenseCountAllMonths?: number;
   incomeSources: MeIncomeSource[];
   incomes: MeIncome[];
   /** Primer día del mes/periodo en curso (Caracas), YYYY-MM-DD. */
