@@ -196,6 +196,7 @@ export class ExpensesPageComponent implements OnInit, OnDestroy {
   readonly receiptPreviewTick = signal(0);
   /** YYYY-MM-01 del mes de control activo (API, calendario Caracas). */
   readonly activeReferenceMonth = signal('');
+  readonly totalExpenseCountAllMonths = signal(0);
   /**
    * FEAT-001: Label del periodo activo.
    * Usa el label del backend si está disponible (ej: "16 May - 15 Jun"),
@@ -379,6 +380,7 @@ export class ExpensesPageComponent implements OnInit, OnDestroy {
           return;
         }
         this.activeReferenceMonth.set(s.activeReferenceMonth);
+        this.totalExpenseCountAllMonths.set(s.totalExpenseCountAllMonths ?? 0);
         // FEAT-001: Sincronizar periodo activo
         this.ctx.syncActivePeriod(s.activePeriod ?? null);
         if (s.preferences) {
