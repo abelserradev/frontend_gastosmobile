@@ -60,7 +60,7 @@
     "angular-eslint": "^20.0.0",
     "eslint": "^9.0.0",
     "@types/express": "^5.0.1",
-    "@types/jasmine": "~6.0.0",
+    "@types/jasmine": "~7.0.0",
     "@types/node": "^20.17.19",
     "jasmine-core": "~7.0.2",
     "karma": "~6.4.0",
