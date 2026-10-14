@@ -46,8 +46,8 @@ importers:
         specifier: ^8.5.2
         version: 8.5.2(@capacitor/core@8.5.2)(firebase@12.19.0)
       '@capacitor/android':
-        specifier: ^8.5.2
-        version: 8.5.2(@capacitor/core@8.5.2)
+        specifier: ^8.5.3
+        version: 8.5.3(@capacitor/core@8.5.2)
       '@capacitor/cli':
         specifier: ^8.5.2
         version: 8.5.2
@@ -1014,8 +1014,8 @@ packages:
       firebase:
         optional: true
 
-  '@capacitor/android@8.5.2':
-    resolution: {integrity: sha512-rtiaz78egCcS+vs29wkWCL3C+RhazKMSygXcjutwWP8NmO6r5UBxOvGf3Wjz5+ahobyQ723tn9gCePwRwcNDZQ==}
+  '@capacitor/android@8.5.3':
+    resolution: {integrity: sha512-ilH4gSSz3DrketMkzDVAvY9JsWJ//rCQnECLTdcFRO7xXDogwAbUvQAnIAbiqefwV/D1xfjEL4Gw1MJXEcaA9g==}
     peerDependencies:
       '@capacitor/core': ^8.5.0
 
@@ -6918,7 +6918,7 @@ snapshots:
     optionalDependencies:
       firebase: 12.19.0
 
-  '@capacitor/android@8.5.2(@capacitor/core@8.5.2)':
+  '@capacitor/android@8.5.3(@capacitor/core@8.5.2)':
     dependencies:
       '@capacitor/core': 8.5.2
 

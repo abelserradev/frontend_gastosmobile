@@ -35,7 +35,7 @@
     "@angular/router": "^20.3.33",
     "@angular/ssr": "^20.3.37",
     "@capacitor-firebase/authentication": "^8.5.2",
-    "@capacitor/android": "^8.5.2",
+    "@capacitor/android": "^8.5.3",
     "@capacitor/cli": "^8.5.2",
     "@capacitor/core": "^8.5.2",
     "@capacitor/share": "^8.0.3",
