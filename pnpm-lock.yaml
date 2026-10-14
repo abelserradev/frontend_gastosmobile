@@ -44,19 +44,19 @@ importers:
         version: 20.3.37(315e8ea17e6ec86543f89a162ee1241e)
       '@capacitor-firebase/authentication':
         specifier: ^8.5.2
-        version: 8.5.2(@capacitor/core@8.5.2)(firebase@12.19.0)
+        version: 8.5.2(@capacitor/core@8.5.3)(firebase@12.19.0)
       '@capacitor/android':
         specifier: ^8.5.2
-        version: 8.5.2(@capacitor/core@8.5.2)
+        version: 8.5.2(@capacitor/core@8.5.3)
       '@capacitor/cli':
         specifier: ^8.5.2
         version: 8.5.2
       '@capacitor/core':
-        specifier: ^8.5.2
-        version: 8.5.2
+        specifier: ^8.5.3
+        version: 8.5.3
       '@capacitor/share':
         specifier: ^8.0.3
-        version: 8.0.3(@capacitor/core@8.5.2)
+        version: 8.0.3(@capacitor/core@8.5.3)
       chart.js:
         specifier: ^4.4.7
         version: 4.5.1
@@ -1024,8 +1024,8 @@ packages:
     engines: {node: '>=22.0.0'}
     hasBin: true
 
-  '@capacitor/core@8.5.2':
-    resolution: {integrity: sha512-agnQbGdhGw/KZFuLf7H9SY2o+oE7upkr/WPQsYaokXP6f9chaE8iVmbKkfN6SVl4w3pmz7oZ3Ur1hbkmy1hx+w==}
+  '@capacitor/core@8.5.3':
+    resolution: {integrity: sha512-oBE1oGuYE4ZzYYrulC75OuHdSsD6zLUy7d5o1tFwDLG4govGoubY15cxpiI5l0+q87Lm5p0bhbehMdzJg4aFag==}
 
   '@capacitor/share@8.0.3':
     resolution: {integrity: sha512-gnvZBV1NPu2B8vd1UKncR56G15ueHd0aZLqgDov++t3SmTBG9Q0VrAZ1VnHn5stxlmglVaTb4RwopMgbpLzroA==}
@@ -6912,15 +6912,15 @@ snapshots:
       '@babel/helper-string-parser': 7.29.7
       '@babel/helper-validator-identifier': 7.29.7
 
-  '@capacitor-firebase/authentication@8.5.2(@capacitor/core@8.5.2)(firebase@12.19.0)':
+  '@capacitor-firebase/authentication@8.5.2(@capacitor/core@8.5.3)(firebase@12.19.0)':
     dependencies:
-      '@capacitor/core': 8.5.2
+      '@capacitor/core': 8.5.3
     optionalDependencies:
       firebase: 12.19.0
 
-  '@capacitor/android@8.5.2(@capacitor/core@8.5.2)':
+  '@capacitor/android@8.5.2(@capacitor/core@8.5.3)':
     dependencies:
-      '@capacitor/core': 8.5.2
+      '@capacitor/core': 8.5.3
 
   '@capacitor/cli@8.5.2':
     dependencies:
@@ -6945,13 +6945,13 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@capacitor/core@8.5.2':
+  '@capacitor/core@8.5.3':
     dependencies:
       tslib: 2.8.1
 
-  '@capacitor/share@8.0.3(@capacitor/core@8.5.2)':
+  '@capacitor/share@8.0.3(@capacitor/core@8.5.3)':
     dependencies:
-      '@capacitor/core': 8.5.2
+      '@capacitor/core': 8.5.3
 
   '@colors/colors@1.5.0': {}
 
