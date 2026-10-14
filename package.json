@@ -69,7 +69,7 @@
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.3.0",
     "postcss": "^8.5.28",
-    "prettier": "^3.0.0",
+    "prettier": "^3.9.10",
     "tailwindcss": "^4.1.11",
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.0.0"
