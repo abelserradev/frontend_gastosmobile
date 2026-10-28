@@ -28,6 +28,11 @@ updates:
         update-types: ["version-update:semver-major"]
       - dependency-name: "@angular-devkit/*"
         update-types: ["version-update:semver-major"]
+      # angular-eslint major sigue la major de Angular; en v20 no subir a 22.x
+      - dependency-name: "angular-eslint"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@angular-eslint/*"
+        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: github-actions
     directory: /
