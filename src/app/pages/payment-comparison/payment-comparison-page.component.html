@@ -1,0 +1,238 @@
+<div class="max-w-3xl mx-auto p-4 sm:p-6 space-y-6">
+  <header class="flex items-center justify-between gap-3">
+    <div>
+      <h1 class="text-2xl font-bold text-foreground">Comparar pago</h1>
+      <p class="text-sm text-muted-foreground">
+        Elige la forma más barata de pagar en USD real
+      </p>
+    </div>
+    <a
+      routerLink="/expenses"
+      class="text-sm font-medium text-primary hover:underline shrink-0"
+      >Volver a gastos</a
+    >
+  </header>
+
+  @if (banner()) {
+    <p
+      class="rounded-xl border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive"
+      role="alert"
+    >
+      {{ banner() }}
+    </p>
+  }
+
+  @if (!comparison()) {
+    <section class="glass-panel rounded-2xl p-4 space-y-4">
+      <h2 class="font-semibold text-lg">Nueva comparación</h2>
+      <fieldset class="space-y-2">
+        <legend class="text-sm text-muted-foreground">Métodos aceptados</legend>
+        <label class="flex items-center gap-2 text-sm">
+          <input type="checkbox" [(ngModel)]="metodoEfectivo" /> Efectivo USD
+        </label>
+        <label class="flex items-center gap-2 text-sm">
+          <input type="checkbox" [(ngModel)]="metodoElectronico" /> Electrónico
+          USD
+        </label>
+        <label class="flex items-center gap-2 text-sm">
+          <input type="checkbox" [(ngModel)]="metodoBs" /> Bolívares
+        </label>
+      </fieldset>
+
+      @if (metodoEfectivo || metodoElectronico) {
+        <label class="block text-sm">
+          <span class="text-muted-foreground">Precio USD</span>
+          <input
+            class="mt-1 w-full rounded-lg border border-border bg-card px-3 py-2"
+            [(ngModel)]="precioUsd"
+            inputmode="decimal"
+          />
+        </label>
+      }
+
+      @if (metodoBs) {
+        <div class="space-y-2 text-sm">
+          <span class="text-muted-foreground">Precio en Bs</span>
+          <select
+            class="w-full rounded-lg border border-border bg-card px-3 py-2"
+            [(ngModel)]="precioBsModo"
+          >
+            <option value="monto_bs">Monto en Bs</option>
+            <option value="usd_bcv">USD a tasa BCV</option>
+            <option value="usd_otra_tasa">USD a otra tasa</option>
+          </select>
+          @if (precioBsModo === 'monto_bs') {
+            <input
+              class="w-full rounded-lg border border-border bg-card px-3 py-2"
+              [(ngModel)]="precioBsMonto"
+              placeholder="Monto Bs"
+            />
+          } @else {
+            <input
+              class="w-full rounded-lg border border-border bg-card px-3 py-2"
+              [(ngModel)]="precioBsUsd"
+              placeholder="Monto USD"
+            />
+            @if (precioBsModo === 'usd_otra_tasa') {
+              <input
+                class="w-full rounded-lg border border-border bg-card px-3 py-2"
+                [(ngModel)]="precioBsTasa"
+                placeholder="Tasa del vendedor"
+              />
+            }
+          }
+        </div>
+      }
+
+      <div class="grid sm:grid-cols-2 gap-3">
+        <label class="block text-sm">
+          <span class="text-muted-foreground">Comisión electrónico %</span>
+          <input
+            class="mt-1 w-full rounded-lg border border-border bg-card px-3 py-2"
+            [(ngModel)]="comisionPct"
+          />
+        </label>
+        <label class="block text-sm">
+          <span class="text-muted-foreground">Tasa de venta (opcional)</span>
+          <input
+            class="mt-1 w-full rounded-lg border border-border bg-card px-3 py-2"
+            [(ngModel)]="tasaVenta"
+          />
+        </label>
+      </div>
+
+      <label class="block text-sm">
+        <span class="text-muted-foreground">Producto (opcional)</span>
+        <input
+          class="mt-1 w-full rounded-lg border border-border bg-card px-3 py-2"
+          [(ngModel)]="producto"
+        />
+      </label>
+
+      <button
+        type="button"
+        class="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-primary text-primary-foreground font-semibold disabled:opacity-50"
+        [disabled]="comparing()"
+        (click)="submitCompare()"
+      >
+        {{ comparing() ? 'Comparando…' : 'Comparar' }}
+      </button>
+    </section>
+
+    <section class="glass-panel rounded-2xl p-4">
+      <h2 class="font-semibold text-lg mb-3">Pendientes (&lt; 24 h)</h2>
+      @if (loadingPending()) {
+        <p class="text-sm text-muted-foreground">Cargando…</p>
+      } @else if (pending().length === 0) {
+        <p class="text-sm text-muted-foreground">No hay comparaciones pendientes</p>
+      } @else {
+        <ul class="space-y-2">
+          @for (row of pending(); track row.id) {
+            <li
+              class="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-border/50 p-3"
+            >
+              <div>
+                <p class="font-medium">
+                  {{ row.productName || 'Comparación' }}
+                </p>
+                <p class="text-xs text-muted-foreground">
+                  Vence {{ row.expiresAt | date: 'short' }}
+                </p>
+              </div>
+              <div class="flex gap-2">
+                <button
+                  type="button"
+                  class="px-3 py-1.5 rounded-lg bg-primary/15 text-primary text-sm font-medium"
+                  (click)="openResult(row.id)"
+                >
+                  Continuar
+                </button>
+                <button
+                  type="button"
+                  class="px-3 py-1.5 rounded-lg border border-border text-sm"
+                  (click)="discard(row.id)"
+                >
+                  Descartar
+                </button>
+              </div>
+            </li>
+          }
+        </ul>
+      }
+    </section>
+  } @else {
+    @if (loadingComparison()) {
+      <p class="text-muted-foreground">Cargando resultado…</p>
+    } @else if (comparison(); as row) {
+      <section class="glass-panel rounded-2xl p-4 space-y-4">
+        <div class="flex flex-wrap justify-between gap-2">
+          <div>
+            <h2 class="text-xl font-bold">
+              {{ row.productName || 'Resultado' }}
+            </h2>
+            <p class="text-xs text-muted-foreground">
+              Vence {{ row.expiresAt | date: 'short' }}
+            </p>
+          </div>
+          <button
+            type="button"
+            class="text-sm text-primary font-medium"
+            (click)="goNewComparison()"
+          >
+            Nueva comparación
+          </button>
+        </div>
+
+        <app-comparison-table
+          [detail]="detailFromRow(row)"
+          [highlightOptionId]="null"
+        />
+
+        @if (row.result.tasaEquilibrio) {
+          <p class="text-sm text-muted-foreground">
+            Tasa de equilibrio: {{ row.result.tasaEquilibrio }}
+          </p>
+        }
+        @if (row.result.recargoBsPct) {
+          <p class="text-sm text-muted-foreground">
+            Recargo pagar en Bs: {{ row.result.recargoBsPct }}%
+          </p>
+        }
+        @if (row.result.ahorroUsd && row.result.ahorroUsd !== '0') {
+          <p class="text-sm font-medium text-accent">
+            Ahorro vs peor opción: ${{ row.result.ahorroUsd }} USD
+          </p>
+        }
+
+        <div class="grid gap-2 sm:grid-cols-3">
+          @for (op of row.result.opciones; track op.id) {
+            <button
+              type="button"
+              class="rounded-xl border border-border p-3 text-left hover:border-primary transition-colors"
+              [class.ring-2]="op.esMejor"
+              [class.ring-primary]="op.esMejor"
+              (click)="pickOption(op)"
+            >
+              <p class="font-semibold">{{ optionLabel(op.id) }}</p>
+              <p class="text-lg tabular-nums">${{ op.costoRealUsd }}</p>
+              <p class="text-xs text-muted-foreground">Registrar gasto</p>
+            </button>
+          }
+        </div>
+      </section>
+    }
+  }
+</div>
+
+@if (selectedOption(); as op) {
+  <app-convert-expense-dialog
+    [open]="convertOpen()"
+    (openChange)="convertOpen.set($event)"
+    [option]="op"
+    [productName]="comparison()?.productName ?? null"
+    [categories]="categories()"
+    [profiles]="profiles()"
+    [submitting]="convertSubmitting()"
+    (confirm)="onConvert($event)"
+  />
+}
