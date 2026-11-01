@@ -1,0 +1,34 @@
+<dialog
+  #comparisonDetailDialog
+  class="comparison-detail-dialog fixed inset-0 z-50 m-0 w-full max-w-none h-full max-h-none bg-black/50 p-4 open:flex items-center justify-center border-0"
+  (close)="onNativeClose()"
+>
+  <div
+    class="glass-panel w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-2xl p-5 space-y-4"
+  >
+    <header class="flex justify-between gap-3 items-start">
+      <div>
+        <h2 class="text-xl font-bold">Comparación de pago</h2>
+        <p class="text-sm text-muted-foreground">{{ expenseTitle() }}</p>
+      </div>
+      <button
+        type="button"
+        class="text-sm text-muted-foreground hover:text-foreground"
+        (click)="openChange.emit(false)"
+      >
+        Cerrar
+      </button>
+    </header>
+
+    @if (loading()) {
+      <p class="text-sm text-muted-foreground">Cargando tabla…</p>
+    } @else if (loadError()) {
+      <p class="text-sm text-destructive">{{ loadError() }}</p>
+    } @else if (detail(); as d) {
+      <app-comparison-table [detail]="d" />
+      <p class="text-xs text-muted-foreground">
+        El monto del gasto no se puede editar: elimínalo y vuelve a comparar.
+      </p>
+    }
+  </div>
+</dialog>

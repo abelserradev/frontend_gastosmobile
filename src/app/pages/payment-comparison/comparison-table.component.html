@@ -1,0 +1,61 @@
+<div class="overflow-x-auto rounded-xl border border-border/60">
+  <table class="w-full text-sm comparison-table">
+    <thead>
+      <tr class="text-left text-muted-foreground border-b border-border/50">
+        <th class="p-2 font-semibold">Opción</th>
+        <th class="p-2 font-semibold">Cobrado</th>
+        <th class="p-2 font-semibold">Eq. BCV USD</th>
+        <th class="p-2 font-semibold">Comisión</th>
+        <th class="p-2 font-semibold">Costo real USD</th>
+        <th class="p-2 font-semibold">Costo real Bs</th>
+        <th class="p-2 font-semibold">Vs mejor</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (op of detail().opciones; track op.id) {
+        <tr
+          class="border-b border-border/30"
+          [class.is-chosen]="isHighlighted(op)"
+          [class.is-best]="isBest(op)"
+        >
+          <td class="p-2 font-medium">
+            {{ optionLabel(op.id) }}
+            @if (isBest(op)) {
+              <span class="ml-1 text-[10px] uppercase text-primary">Mejor</span>
+            }
+            @if (isHighlighted(op)) {
+              <span class="ml-1 text-[10px] uppercase text-accent"
+                >Elegida</span
+              >
+            }
+          </td>
+          <td class="p-2 tabular-nums">
+            {{ op.moneda === 'BS' ? 'Bs' : '$' }} {{ op.montoCobrado }}
+          </td>
+          <td class="p-2 tabular-nums">${{ op.equivalenteBcvUsd }}</td>
+          <td class="p-2 tabular-nums">
+            @if (op.comisionUsd) {
+              ${{ op.comisionUsd }}
+              @if (op.comisionPct) {
+                <span class="text-muted-foreground text-xs"
+                  >({{ op.comisionPct }}%)</span
+                >
+              }
+            } @else {
+              —
+            }
+          </td>
+          <td class="p-2 tabular-nums font-semibold">${{ op.costoRealUsd }}</td>
+          <td class="p-2 tabular-nums">Bs {{ op.costoRealBs }}</td>
+          <td class="p-2 tabular-nums">${{ op.diferenciaVsMejorUsd }}</td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>
+<p class="text-xs text-muted-foreground mt-2">
+  Tasas BCV {{ detail().tasas.oficial.valor }} · Paralelo
+  {{ detail().tasas.paralelo.valor }} · Venta
+  {{ detail().tasaVenta.valor }} · Calculado
+  {{ detail().computedAt | date: 'short' }}
+</p>

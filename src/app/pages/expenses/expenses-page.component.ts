@@ -60,6 +60,8 @@ import {
   buildLastSevenDaySpending,
   sparklinePolyline,
 } from './expense-sparkline.util';
+import { formatNominalSubtitle } from '../../core/payment-comparison-display.util';
+import { ExpenseComparisonDetailModalComponent } from './expense-comparison-detail-modal.component';
 
 const EXPENSES_PAGE_SIZE = 6;
 
@@ -85,6 +87,11 @@ function toExpenseItem(e: MeExpense) {
     paidAt: e.paidAt,
     paidByMemberId: e.paidByMemberId,
     hasReceipt: e.hasReceipt ?? false,
+    paymentMethod: e.paymentMethod ?? null,
+    nominalAmount: e.nominalAmount ?? null,
+    nominalCurrency: e.nominalCurrency ?? null,
+    valuationBasis: e.valuationBasis ?? 'BCV',
+    comparisonId: e.comparisonId ?? null,
   };
 }
 
@@ -118,6 +125,7 @@ function toIncomeItem(i: MeIncome) {
     ReceiptViewerComponent,
     TelegramLinkPanelComponent,
     HelpChatWidgetComponent,
+    ExpenseComparisonDetailModalComponent,
   ],
   templateUrl: './expenses-page.component.html',
   styleUrl: './expenses-page.component.scss',
@@ -169,6 +177,14 @@ export class ExpensesPageComponent implements OnInit, OnDestroy {
 
   // --- Visor de comprobantes ---
   readonly receiptViewerOpen = signal(false);
+  readonly comparisonDetailOpen = signal(false);
+  readonly comparisonDetailTarget = signal<{
+    id: string;
+    title: string;
+  } | null>(null);
+  readonly paymentComparisonEnabled = computed(() =>
+    this.ctx.paymentComparisonEnabled(),
+  );
   readonly receiptExpenseId = signal<string | null>(null);
 
   readonly categoryEditOpen = signal(false);
@@ -407,6 +423,9 @@ export class ExpensesPageComponent implements OnInit, OnDestroy {
           s.categories.map((c) => ({ id: c.id, name: c.name })),
         );
         this.ctx.setProfiles(s.profiles);
+        this.ctx.setPaymentComparisonEnabled(
+          s.features?.paymentComparison ?? false,
+        );
         this.ctx.setExpenses(s.expenses.map(toExpenseItem));
         this.ctx.setIncomeSources(s.incomeSources ?? []);
         this.ctx.setIncomes((s.incomes ?? []).map(toIncomeItem));
@@ -546,6 +565,34 @@ export class ExpensesPageComponent implements OnInit, OnDestroy {
   onExpenseSavedFromReceipt(expense: MeExpense): void {
     this.expensesPage.set(1);
     this.ctx.setExpenses([toExpenseItem(expense), ...this.ctx.expenses()]);
+  }
+
+  expenseNominalLine(expense: {
+    nominalAmount?: number | null;
+    nominalCurrency?: 'BS' | 'USD' | null;
+    paymentMethod?: 'CASH' | 'ELECTRONIC' | 'BS' | null;
+    valuationBasis?: 'BCV' | 'SELL_RATE';
+  }): string | null {
+    if (expense.valuationBasis !== 'SELL_RATE') {
+      return null;
+    }
+    return formatNominalSubtitle(expense);
+  }
+
+  openComparisonDetail(expense: { id: string; title: string }): void {
+    this.comparisonDetailTarget.set(expense);
+    this.comparisonDetailOpen.set(true);
+  }
+
+  onComparisonDetailOpenChange(open: boolean): void {
+    this.comparisonDetailOpen.set(open);
+    if (!open) {
+      this.comparisonDetailTarget.set(null);
+    }
+  }
+
+  goComparePayments(): void {
+    void this.router.navigate(['/comparar']);
   }
 
   openCategoryEdit(expense: {
@@ -847,6 +894,11 @@ export class ExpensesPageComponent implements OnInit, OnDestroy {
               paidByDisplayName: row.paidByDisplayName ?? e.paidByDisplayName,
               paidAt: row.paidAt ?? e.paidAt,
               paidByMemberId: row.paidByMemberId ?? e.paidByMemberId,
+              paymentMethod: row.paymentMethod ?? e.paymentMethod,
+              nominalAmount: row.nominalAmount ?? e.nominalAmount,
+              nominalCurrency: row.nominalCurrency ?? e.nominalCurrency,
+              valuationBasis: row.valuationBasis ?? e.valuationBasis,
+              comparisonId: row.comparisonId ?? e.comparisonId,
             }
           : e,
       ),
