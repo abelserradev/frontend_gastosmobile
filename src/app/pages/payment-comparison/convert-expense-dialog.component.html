@@ -1,0 +1,85 @@
+<dialog
+  #convertDialog
+  class="convert-dialog fixed inset-0 z-50 m-0 w-full max-w-none h-full max-h-none bg-black/50 p-4 open:flex items-center justify-center border-0"
+  (close)="onNativeClose()"
+>
+  <form
+    class="glass-panel w-full max-w-md rounded-2xl p-5 space-y-4"
+    (submit)="$event.preventDefault(); onSubmit()"
+  >
+    <h2 class="text-xl font-bold text-foreground">Registrar como gasto</h2>
+    <p class="text-sm text-muted-foreground">
+      Opción: <strong>{{ optionLabel() }}</strong> · costo real ${{
+        option().costoRealUsd
+      }}
+    </p>
+
+    <label class="block text-sm">
+      <span class="text-muted-foreground">Título</span>
+      <input
+        class="mt-1 w-full rounded-lg border border-border bg-card px-3 py-2"
+        [(ngModel)]="title"
+        name="title"
+        required
+      />
+    </label>
+
+    <label class="block text-sm">
+      <span class="text-muted-foreground">Categoría</span>
+      <select
+        class="mt-1 w-full rounded-lg border border-border bg-card px-3 py-2"
+        [(ngModel)]="categoryName"
+        name="category"
+      >
+        @for (c of categories(); track c.id) {
+          <option [value]="c.name">{{ c.name }}</option>
+        }
+      </select>
+    </label>
+
+    <label class="block text-sm">
+      <span class="text-muted-foreground">Perfil</span>
+      <select
+        class="mt-1 w-full rounded-lg border border-border bg-card px-3 py-2"
+        [(ngModel)]="profileId"
+        name="profile"
+      >
+        @for (p of profiles(); track p.id) {
+          <option [value]="p.id">{{ p.name }}</option>
+        }
+      </select>
+    </label>
+
+    <label class="block text-sm">
+      <span class="text-muted-foreground">Fecha de pago</span>
+      <input
+        type="date"
+        class="mt-1 w-full rounded-lg border border-border bg-card px-3 py-2"
+        [(ngModel)]="paymentDate"
+        name="paymentDate"
+      />
+    </label>
+
+    @if (fieldError()) {
+      <p class="text-sm text-destructive">{{ fieldError() }}</p>
+    }
+
+    <div class="flex gap-2 justify-end pt-2">
+      <button
+        type="button"
+        class="px-4 py-2 rounded-lg border border-border"
+        [disabled]="submitting()"
+        (click)="openChange.emit(false)"
+      >
+        Cancelar
+      </button>
+      <button
+        type="submit"
+        class="px-4 py-2 rounded-lg bg-primary text-primary-foreground font-semibold disabled:opacity-50"
+        [disabled]="submitting()"
+      >
+        {{ submitting() ? 'Guardando…' : 'Confirmar' }}
+      </button>
+    </div>
+  </form>
+</dialog>
