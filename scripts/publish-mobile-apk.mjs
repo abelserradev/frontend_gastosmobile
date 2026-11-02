@@ -37,7 +37,12 @@ function assertProductionApiKey() {
 }
 
 function run(cmd, args, cwd = root) {
-  const r = spawnSync(cmd, args, { cwd, stdio: 'inherit', shell: false });
+  // Windows: pnpm/gradlew need shell or .cmd resolution
+  const r = spawnSync(cmd, args, {
+    cwd,
+    stdio: 'inherit',
+    shell: process.platform === 'win32',
+  });
   if (r.status !== 0) {
     process.exit(r.status ?? 1);
   }
@@ -54,8 +59,13 @@ console.log('📱 Cap sync android…');
 run('pnpm', ['exec', 'cap', 'sync', 'android']);
 
 /** Gradle/AGP 8.14: JDK 17–21 para el daemon; JDK 25 rompe el build. Compilación → toolchain 21 en build.gradle. */
+function javaBin(dir) {
+  const name = process.platform === 'win32' ? 'java.exe' : 'java';
+  return join(dir, 'bin', name);
+}
+
 function javaMajor(dir) {
-  const probe = spawnSync(join(dir, 'bin', 'java'), ['-version'], {
+  const probe = spawnSync(javaBin(dir), ['-version'], {
     encoding: 'utf8',
   });
   const verLine = `${probe.stderr ?? ''}${probe.stdout ?? ''}`;
@@ -68,10 +78,12 @@ function resolveJavaHome() {
     '/usr/lib/jvm/java-21-openjdk-amd64',
     '/usr/lib/jvm/java-17-openjdk-amd64',
     `${homedir()}/Descargas/android-studio-quail1-linux/android-studio/jbr`,
+    'C:\\Program Files\\Microsoft\\jdk-21.0.13.21-hotspot',
+    'C:\\Program Files\\Android\\Android Studio\\jbr',
     process.env.JAVA_HOME,
   ].filter(Boolean);
   for (const dir of candidates) {
-    if (!existsSync(join(dir, 'bin', 'java'))) {
+    if (!existsSync(javaBin(dir))) {
       continue;
     }
     const major = javaMajor(dir);
@@ -97,10 +109,12 @@ if (process.env.JAVA_HOME !== javaHome) {
 }
 const gradleEnv = { ...process.env, JAVA_HOME: javaHome };
 function runGradle() {
-  const r = spawnSync('./gradlew', ['assembleDebug'], {
+  const gradlew =
+    process.platform === 'win32' ? 'gradlew.bat' : './gradlew';
+  const r = spawnSync(gradlew, ['assembleDebug'], {
     cwd: join(root, 'android'),
     stdio: 'inherit',
-    shell: false,
+    shell: process.platform === 'win32',
     env: gradleEnv,
   });
   if (r.status !== 0) {
