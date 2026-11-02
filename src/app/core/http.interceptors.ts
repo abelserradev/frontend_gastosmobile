@@ -25,7 +25,8 @@ function isPublicAuthUrl(url: string): boolean {
  */
 export const apiCredentialsInterceptor: HttpInterceptorFn = (req, next) => {
   const base = environment.apiUrl;
-  if (req.url.startsWith(base)) {
+  // En APK el origen es capacitor://; cookies HttpOnly no aplican — usamos Bearer (nativeAuthInterceptor).
+  if (req.url.startsWith(base) && !Capacitor.isNativePlatform()) {
     return next(req.clone({ withCredentials: true }));
   }
   return next(req);

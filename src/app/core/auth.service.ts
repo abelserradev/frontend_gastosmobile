@@ -8,6 +8,11 @@ import { NativeSessionTokenService } from './native/native-session-token.service
 
 const STORAGE_KEY = 'gastos_auth';
 
+/** Cookies solo en web; en Capacitor el JWT va en accessToken + Bearer. */
+function webCookieOptions(): { withCredentials: true } | undefined {
+  return Capacitor.isNativePlatform() ? undefined : { withCredentials: true };
+}
+
 /** Solo datos no sensibles para el UI; el JWT vive en cookie HttpOnly. */
 interface ClientAuthPayload {
   userId: string;
@@ -146,7 +151,7 @@ export class AuthService {
       .post<AuthSessionResponse>(
         `${environment.apiUrl}/auth/firebase`,
         { idToken },
-        { withCredentials: true },
+        webCookieOptions(),
       )
       .pipe(
         tap((res) => this.persistSession(res)),
@@ -162,7 +167,7 @@ export class AuthService {
       .post<{ ok: boolean }>(
         `${environment.apiUrl}/auth/logout`,
         {},
-        { withCredentials: true },
+        webCookieOptions(),
       )
       .pipe(
         tap(() => this.clearClientSession()),
