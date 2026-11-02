@@ -4,6 +4,8 @@ import { BRAND_APP_NAME, BRAND_LOGO_SRC } from '../../core/brand-assets';
 import { MarketingFeatureIconComponent } from '../../shared/marketing-feature-icon/marketing-feature-icon.component';
 import { SeoMetaService } from '../../core/seo-meta.service';
 import { LEGAL_NAV_LINKS } from '../legal/legal.constants';
+import { buildExchangeCalculatorUrl } from '../../core/exchange-links.util';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-landing-page',
@@ -17,6 +19,9 @@ export class LandingPageComponent implements OnInit {
   readonly brandAppName = BRAND_APP_NAME;
   readonly brandLogoSrc = BRAND_LOGO_SRC;
   readonly legalLinks = LEGAL_NAV_LINKS;
+  readonly exchangeCalculatorUrl = buildExchangeCalculatorUrl(
+    environment.exchangePublicUrl,
+  );
 
   ngOnInit(): void {
     const description =

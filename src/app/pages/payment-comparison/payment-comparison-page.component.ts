@@ -5,6 +5,8 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { AppContextService } from '../../core/app-context.service';
 import { formatApiHttpError } from '../../core/http-error.util';
+import { buildExchangeCalculatorUrl } from '../../core/exchange-links.util';
+import { environment } from '../../../environments/environment';
 import {
   PaymentComparisonApiService,
   type ComparisonOptionV1,
@@ -47,6 +49,9 @@ export class PaymentComparisonPageComponent implements OnInit {
   readonly convertSubmitting = signal(false);
   readonly selectedOption = signal<ComparisonOptionV1 | null>(null);
   readonly banner = signal<string | null>(null);
+  readonly exchangeCalculatorUrl = buildExchangeCalculatorUrl(
+    environment.exchangePublicUrl,
+  );
 
   metodoEfectivo = true;
   metodoElectronico = false;

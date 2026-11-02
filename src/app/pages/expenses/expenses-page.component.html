@@ -359,6 +359,40 @@
           </div>
         }
 
+        @if (paymentComparisonEnabled()) {
+          <section
+            class="glass-panel rounded-2xl px-4 py-3 mb-5 flex flex-wrap items-center justify-between gap-3"
+            data-testid="compare-payment-entry"
+          >
+            <div class="min-w-0">
+              <p class="text-sm font-semibold text-foreground">
+                ¿Bs, $ BCV o $ paralelo?
+              </p>
+              <p class="text-xs text-muted-foreground">
+                Compara antes de pagar y registra el gasto con la opción que
+                elijas.
+              </p>
+            </div>
+            <div class="flex items-center gap-3">
+              <a
+                [href]="exchangeCalculatorUrl"
+                target="_blank"
+                rel="noopener"
+                class="text-xs text-muted-foreground underline hover:text-foreground"
+              >
+                Calculadora pública
+              </a>
+              <button
+                type="button"
+                (click)="goComparePayments()"
+                class="px-4 py-2 text-sm font-bold rounded-xl bg-primary text-primary-foreground hover:opacity-90 transition-opacity shadow-sm"
+              >
+                Comparar pago
+              </button>
+            </div>
+          </section>
+        }
+
         <section class="glass-panel rounded-2xl p-5 mb-6">
           <div class="flex flex-wrap items-end justify-between gap-4">
             <div>

@@ -6,11 +6,21 @@
         Elige la forma más barata de pagar en USD real
       </p>
     </div>
-    <a
-      routerLink="/expenses"
-      class="text-sm font-medium text-primary hover:underline shrink-0"
-      >Volver a gastos</a
-    >
+    <div class="flex flex-col items-end gap-1 shrink-0">
+      <a
+        routerLink="/expenses"
+        class="text-sm font-medium text-primary hover:underline"
+        >Volver a gastos</a
+      >
+      <a
+        [href]="exchangeCalculatorUrl"
+        target="_blank"
+        rel="noopener"
+        class="text-xs text-muted-foreground hover:underline"
+        data-testid="exchange-calculator-link"
+        >Abrir calculadora Exchange</a
+      >
+    </div>
   </header>
 
   @if (banner()) {

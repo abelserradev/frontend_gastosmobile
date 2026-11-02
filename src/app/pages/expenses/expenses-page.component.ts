@@ -62,6 +62,8 @@ import {
 } from './expense-sparkline.util';
 import { formatNominalSubtitle } from '../../core/payment-comparison-display.util';
 import { ExpenseComparisonDetailModalComponent } from './expense-comparison-detail-modal.component';
+import { buildExchangeCalculatorUrl } from '../../core/exchange-links.util';
+import { environment } from '../../../environments/environment';
 
 const EXPENSES_PAGE_SIZE = 6;
 
@@ -184,6 +186,9 @@ export class ExpensesPageComponent implements OnInit, OnDestroy {
   } | null>(null);
   readonly paymentComparisonEnabled = computed(() =>
     this.ctx.paymentComparisonEnabled(),
+  );
+  readonly exchangeCalculatorUrl = buildExchangeCalculatorUrl(
+    environment.exchangePublicUrl,
   );
   readonly receiptExpenseId = signal<string | null>(null);
 
