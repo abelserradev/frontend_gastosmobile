@@ -4,13 +4,15 @@ import { catchError, map, of } from 'rxjs';
 import { AuthService } from './auth.service';
 import { MeApiService } from './me-api.service';
 import { routePathForMeState } from './me-route.util';
+import { resolveSafeNextPath } from './exchange-links.util';
 
 /** Rutas que exigen sesión y contraseña de aplicación (no solo Google pendiente). */
-export const requiresPasswordGuard: CanActivateFn = () => {
+export const requiresPasswordGuard: CanActivateFn = (_route, state) => {
   const auth = inject(AuthService);
   const router = inject(Router);
   if (!auth.hasSession()) {
-    return router.createUrlTree(['/login']);
+    const next = resolveSafeNextPath(state.url);
+    return router.createUrlTree(['/login'], next ? { queryParams: { next } } : {});
   }
   if (!auth.hasPassword()) {
     return router.createUrlTree(['/setup-password']);

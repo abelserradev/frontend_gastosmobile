@@ -1,11 +1,12 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Capacitor } from '@capacitor/core';
 import { AuthService } from '../../core/auth.service';
 import { FirebaseAuthService } from '../../core/firebase-auth.service';
 import { routePathForMeState } from '../../core/me-route.util';
+import { resolveSafeNextPath } from '../../core/exchange-links.util';
 import { getStateWithAutoRollover } from '../../core/month-renewal.util';
 import {
   formatApiHttpError,
@@ -25,6 +26,7 @@ import { SeoMetaService } from '../../core/seo-meta.service';
 })
 export class LoginPageComponent implements OnInit {
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
   private readonly auth = inject(AuthService);
   private readonly firebaseAuth = inject(FirebaseAuthService);
   private readonly meApi = inject(MeApiService);
@@ -87,7 +89,12 @@ export class LoginPageComponent implements OnInit {
     getStateWithAutoRollover(this.meApi).subscribe({
       next: (s: MeState) => {
         const path = routePathForMeState(s);
-        this.router.navigate([path]).catch(() => undefined);
+        // Onboarding wins: `next` only applies once the user would land on /expenses anyway.
+        const requestedPath = resolveSafeNextPath(
+          this.route.snapshot.queryParamMap.get('next'),
+        );
+        const target = path === '/expenses' && requestedPath ? requestedPath : path;
+        this.router.navigateByUrl(target).catch(() => undefined);
       },
       error: (err: unknown) => {
         globalThis.alert(formatApiHttpError(err));

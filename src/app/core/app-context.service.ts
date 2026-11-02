@@ -42,6 +42,11 @@ export interface ExpenseItem {
   paidAt?: string | null;
   paidByMemberId?: string | null;
   hasReceipt?: boolean;
+  paymentMethod?: 'CASH' | 'ELECTRONIC' | 'BS' | null;
+  nominalAmount?: number | null;
+  nominalCurrency?: 'BS' | 'USD' | null;
+  valuationBasis?: 'BCV' | 'SELL_RATE';
+  comparisonId?: string | null;
 }
 
 export interface IncomeItem {
@@ -71,6 +76,7 @@ export class AppContextService {
   readonly expenses = signal<ExpenseItem[]>([]);
   readonly incomeSources = signal<{ id: string; name: string }[]>([]);
   readonly incomes = signal<IncomeItem[]>([]);
+  readonly paymentComparisonEnabled = signal(false);
 
   /** FEAT-001: Periodo presupuestario activo calculado por el backend. */
   readonly activePeriod = signal<ActivePeriod | null>(null);
@@ -154,6 +160,10 @@ export class AppContextService {
 
   setIncomes(list: IncomeItem[]): void {
     this.incomes.set(list);
+  }
+
+  setPaymentComparisonEnabled(enabled: boolean): void {
+    this.paymentComparisonEnabled.set(enabled);
   }
 
   addProfile(profile: UserProfile): void {

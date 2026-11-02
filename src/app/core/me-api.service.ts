@@ -132,6 +132,15 @@ export interface MeExpense {
   paidByMemberId: string | null;
   /** true si el gasto tiene una imagen de comprobante/factura almacenada. */
   hasReceipt: boolean;
+  paymentMethod?: 'CASH' | 'ELECTRONIC' | 'BS' | null;
+  nominalAmount?: number | null;
+  nominalCurrency?: 'BS' | 'USD' | null;
+  commissionPct?: number | null;
+  commissionUsd?: number | null;
+  sellRate?: number | null;
+  bcvEquivalentUsd?: number | null;
+  valuationBasis?: 'BCV' | 'SELL_RATE';
+  comparisonId?: string | null;
 }
 
 export interface MeIncomeSource {
@@ -185,6 +194,9 @@ export interface MeState {
   activePeriod: ActivePeriod;
   needsMonthlyIncomeSetup: boolean;
   monthRenewal: MeMonthRenewal | null;
+  features?: {
+    paymentComparison: boolean;
+  };
 }
 
 export type OcrFeedbackSourceApi = 'IMAGE_UPLOAD_FLOW' | 'EDIT_EXPENSE';

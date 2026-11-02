@@ -16,6 +16,7 @@ import { InvitationsPageComponent } from './pages/invitations/invitations-page.c
 import { SplashPageComponent } from './pages/splash/splash-page.component';
 import { HomeEntryComponent } from './pages/home/home-entry.component';
 import { DescargarPageComponent } from './pages/descargar/descargar-page.component';
+import { PaymentComparisonPageComponent } from './pages/payment-comparison/payment-comparison-page.component';
 import { legalPublicRoutes } from './pages/legal/legal.routes';
 
 /**
@@ -50,6 +51,16 @@ export const routes: Routes = [
   {
     path: 'expenses',
     component: ExpensesPageComponent,
+    canActivate: [requiresPasswordGuard],
+  },
+  {
+    path: 'comparar/:id',
+    component: PaymentComparisonPageComponent,
+    canActivate: [requiresPasswordGuard],
+  },
+  {
+    path: 'comparar',
+    component: PaymentComparisonPageComponent,
     canActivate: [requiresPasswordGuard],
   },
   {

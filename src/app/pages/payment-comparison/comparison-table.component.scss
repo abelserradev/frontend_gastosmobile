@@ -1,0 +1,7 @@
+.comparison-table tr.is-chosen {
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+}
+
+.comparison-table tr.is-best:not(.is-chosen) {
+  background: color-mix(in srgb, var(--primary) 8%, transparent);
+}

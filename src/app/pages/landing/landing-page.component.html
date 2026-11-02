@@ -54,6 +54,41 @@
     </article>
     <article
       class="bg-card rounded-2xl p-5 shadow-sm border border-border/60 flex gap-4"
+      data-testid="landing-compare-payment"
+    >
+      <div
+        class="shrink-0 w-11 h-11 rounded-xl bg-[#FFD300]/25 text-[#5c4a00] dark:text-[#FFD300] flex items-center justify-center"
+        aria-hidden="true"
+      >
+        <app-marketing-feature-icon kind="exchange-rate" [size]="22" />
+      </div>
+      <div class="min-w-0">
+        <h2 class="font-semibold text-foreground">Comparar formas de pago</h2>
+        <p class="text-sm text-muted-foreground mt-1">
+          ¿Te conviene pagar en Bs, en $ a tasa BCV o en $ paralelo? Compara y
+          registra el gasto con la opción elegida.
+        </p>
+        <div class="flex flex-wrap gap-x-4 gap-y-1 mt-2 text-sm">
+          <a
+            routerLink="/login"
+            [queryParams]="{ next: '/comparar' }"
+            class="font-semibold text-foreground underline"
+          >
+            Comparar en Spend$ave
+          </a>
+          <a
+            [href]="exchangeCalculatorUrl"
+            target="_blank"
+            rel="noopener"
+            class="text-muted-foreground underline hover:text-foreground"
+          >
+            Calculadora sin cuenta
+          </a>
+        </div>
+      </div>
+    </article>
+    <article
+      class="bg-card rounded-2xl p-5 shadow-sm border border-border/60 flex gap-4"
     >
       <div
         class="shrink-0 w-11 h-11 rounded-xl bg-[#FFD300]/25 text-[#5c4a00] dark:text-[#FFD300] flex items-center justify-center"
