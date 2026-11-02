@@ -7,7 +7,7 @@
  * Luego: git add public/gastos-mobile.apk && commit && redeploy Coolify
  */
 import { spawnSync } from 'node:child_process';
-import { copyFileSync, existsSync, mkdirSync } from 'node:fs';
+import { copyFileSync, existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -18,6 +18,47 @@ const apkSource = join(
   'android/app/build/outputs/apk/debug/app-debug.apk',
 );
 const apkDest = join(root, 'public/gastos-mobile.apk');
+const googleServicesPath = join(root, 'android/app/google-services.json');
+
+function printDebugSha1Hint() {
+  const keystore =
+    process.platform === 'win32'
+      ? join(process.env.USERPROFILE ?? homedir(), '.android', 'debug.keystore')
+      : join(homedir(), '.android', 'debug.keystore');
+  console.error(
+    '\n   SHA-1 del keystore debug (regístralo en Firebase → app Android com.gastos.mobile):\n' +
+      `   keytool -list -v -keystore "${keystore}" -alias androiddebugkey -storepass android -keypass android\n`,
+  );
+}
+
+/** Google Sign-In nativo exige google-services.json (no va al repo). */
+function ensureGoogleServicesJson() {
+  const b64 = process.env.GOOGLE_SERVICES_JSON_BASE64?.trim();
+  if (b64 && !existsSync(googleServicesPath)) {
+    writeFileSync(googleServicesPath, Buffer.from(b64, 'base64'));
+    console.log('   google-services.json escrito desde GOOGLE_SERVICES_JSON_BASE64');
+  }
+  if (existsSync(googleServicesPath)) {
+    return;
+  }
+  console.error(
+    '❌ Falta android/app/google-services.json — sin esto Firebase no inicia en Android,\n' +
+      '   el plugin FirebaseAuthentication no carga y verás "plugin is not implemented on android".\n' +
+      '   1. Firebase Console → proyecto gastos-2b187 → añade app Android com.gastos.mobile\n' +
+      '   2. Registra el SHA-1 del keystore con el que firmas (debug abajo; release el de tu upload key)\n' +
+      '   3. Descarga google-services.json → android/app/google-services.json\n' +
+      '   4. Vuelve a ejecutar pnpm run mobile:publish-apk (Coolify/PR #188 solo despliega web + APK ya commiteada)\n' +
+      '   (CI: export GOOGLE_SERVICES_JSON_BASE64="<json en base64>")\n',
+  );
+  printDebugSha1Hint();
+  if (process.env.ALLOW_APK_WITHOUT_GOOGLE_SERVICES === '1') {
+    console.warn(
+      '⚠️  ALLOW_APK_WITHOUT_GOOGLE_SERVICES=1 — continuando sin Google nativo (solo email/contraseña).',
+    );
+    return;
+  }
+  process.exit(1);
+}
 
 /** La APK embebe el bundle prod; sin clave real el backend responde X-API-KEY inválida. */
 function assertProductionApiKey() {
@@ -50,10 +91,30 @@ function run(cmd, args, cwd = root) {
 
 console.log('🔑 API key producción…');
 assertProductionApiKey();
+ensureGoogleServicesJson();
 run('node', ['scripts/write-api-key.mjs']);
 
+/** La APK en public/ no debe embeberse en dist ni en la siguiente APK (inflaba ~120 MB). */
+function stashPublicApkForBuild() {
+  if (!existsSync(apkDest)) {
+    return null;
+  }
+  const stash = join(root, 'public/.gastos-mobile.apk.build-stash');
+  copyFileSync(apkDest, stash);
+  return stash;
+}
+
+function restorePublicApkAfterBuild(stashPath) {
+  if (!stashPath || !existsSync(stashPath)) {
+    return;
+  }
+  copyFileSync(stashPath, apkDest);
+}
+
 console.log('📦 Build Angular (production)…');
+const apkStash = stashPublicApkForBuild();
 run('pnpm', ['run', 'build', '--configuration=production']);
+restorePublicApkAfterBuild(apkStash);
 
 console.log('📱 Cap sync android…');
 run('pnpm', ['exec', 'cap', 'sync', 'android']);
