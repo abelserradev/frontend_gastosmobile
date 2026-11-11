@@ -78,7 +78,7 @@ importers:
     devDependencies:
       '@angular-devkit/build-angular':
         specifier: ^20.3.40
-        version: 20.3.41(4b1e17d9475c8756603e459aa01c7f73)
+        version: 20.3.41(896c5f669cdad025e50c2c0c8d5517f8)
       '@angular-eslint/builder':
         specifier: ^20.0.0
         version: 20.7.0(chokidar@4.0.3)(eslint@9.39.5(jiti@2.7.0))(typescript@5.9.3)
@@ -146,8 +146,8 @@ importers:
         specifier: ^3.9.10
         version: 3.9.10
       tailwindcss:
-        specifier: ^4.1.11
-        version: 4.3.3
+        specifier: ^4.3.5
+        version: 4.3.5
       typescript:
         specifier: ~5.9.3
         version: 5.9.3
@@ -5254,6 +5254,9 @@ packages:
   tailwindcss@4.3.3:
     resolution: {integrity: sha512-gOhV3P7ufE62QDGg1zVaTgCR+EtPv92k2nIhVcVKcLmxT1sUBsQGhnZj175j+MqRt4zLF7ic+sCYjfhxMxj7YQ==}
 
+  tailwindcss@4.3.5:
+    resolution: {integrity: sha512-FcQk9BuffmEHJP2G0XmB2SplU1aLTI7j07Kunk+U74Ny+XiWOtzXz9aujFZ/avntw1e2cOv/3PkgzflQ7gX2vQ==}
+
   tapable@2.3.3:
     resolution: {integrity: sha512-uxc/zpqFg6x7C8vOE7lh6Lbda8eEL9zmVm/PLeTPBRhh1xCgdWaQ+J1CUieGpIfm2HdtsUpRv+HshiasBMcc6A==}
     engines: {node: '>=6'}
@@ -5808,13 +5811,13 @@ snapshots:
     transitivePeerDependencies:
       - chokidar
 
-  '@angular-devkit/build-angular@20.3.41(4b1e17d9475c8756603e459aa01c7f73)':
+  '@angular-devkit/build-angular@20.3.41(896c5f669cdad025e50c2c0c8d5517f8)':
     dependencies:
       '@ampproject/remapping': 2.3.0
       '@angular-devkit/architect': 0.2003.41(chokidar@4.0.3)
       '@angular-devkit/build-webpack': 0.2003.41(chokidar@4.0.3)(webpack-dev-server@5.2.6(webpack@5.112.0(esbuild@0.28.1)(lightningcss@1.32.0)(postcss@8.5.23)))(webpack@5.112.0(esbuild@0.28.1)(lightningcss@1.32.0)(postcss@8.5.23))
       '@angular-devkit/core': 20.3.41(chokidar@4.0.3)
-      '@angular/build': 20.3.41(088252da21ac2573fe41ef235eb81364)
+      '@angular/build': 20.3.41(d1081f22dd92813afe31bff415033035)
       '@angular/compiler-cli': 20.3.34(@angular/compiler@20.3.34)(typescript@5.9.3)
       '@babel/core': 7.29.7
       '@babel/generator': 7.28.3
@@ -5873,7 +5876,7 @@ snapshots:
       '@angular/ssr': 20.3.41(161dcee165416078096af20369f20a56)
       esbuild: 0.28.1
       karma: 6.4.4
-      tailwindcss: 4.3.3
+      tailwindcss: 4.3.5
     transitivePeerDependencies:
       - '@angular/compiler'
       - '@minify-html/node'
@@ -6001,7 +6004,7 @@ snapshots:
       eslint: 9.39.5(jiti@2.7.0)
       typescript: 5.9.3
 
-  '@angular/build@20.3.41(088252da21ac2573fe41ef235eb81364)':
+  '@angular/build@20.3.41(d1081f22dd92813afe31bff415033035)':
     dependencies:
       '@ampproject/remapping': 2.3.0
       '@angular-devkit/architect': 0.2003.41(chokidar@4.0.3)
@@ -6042,7 +6045,7 @@ snapshots:
       less: 4.9.0
       lmdb: 3.4.2
       postcss: 8.5.23
-      tailwindcss: 4.3.3
+      tailwindcss: 4.3.5
     transitivePeerDependencies:
       - '@types/node'
       - chokidar
@@ -11421,6 +11424,8 @@ snapshots:
   supports-preserve-symlinks-flag@1.0.0: {}
 
   tailwindcss@4.3.3: {}
+
+  tailwindcss@4.3.5: {}
 
   tapable@2.3.3: {}
 
