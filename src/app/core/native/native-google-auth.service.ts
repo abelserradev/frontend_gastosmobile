@@ -17,7 +17,9 @@ export class NativeGoogleAuthService {
       );
     }
     // Credential Manager (default) devuelve [16] account reauth failed en varios Samsung/debug.
-    await FirebaseAuthentication.signInWithGoogle({ useCredentialManager: false });
+    await FirebaseAuthentication.signInWithGoogle({
+      useCredentialManager: false,
+    });
     // credential.idToken es OAuth de Google; Nest necesita el JWT de Firebase Auth.
     const { token } = await FirebaseAuthentication.getIdToken({
       forceRefresh: true,

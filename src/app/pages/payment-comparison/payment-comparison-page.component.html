@@ -134,7 +134,9 @@
       @if (loadingPending()) {
         <p class="text-sm text-muted-foreground">Cargando…</p>
       } @else if (pending().length === 0) {
-        <p class="text-sm text-muted-foreground">No hay comparaciones pendientes</p>
+        <p class="text-sm text-muted-foreground">
+          No hay comparaciones pendientes
+        </p>
       } @else {
         <ul class="space-y-2">
           @for (row of pending(); track row.id) {

@@ -6,9 +6,9 @@ import {
 describe('exchange-links.util', () => {
   describe('buildExchangeCalculatorUrl', () => {
     it('should point to /calcular and tag the origin', () => {
-      expect(buildExchangeCalculatorUrl('https://exchangerate.buildforge.work')).toBe(
-        'https://exchangerate.buildforge.work/calcular?from=gastos',
-      );
+      expect(
+        buildExchangeCalculatorUrl('https://exchangerate.buildforge.work'),
+      ).toBe('https://exchangerate.buildforge.work/calcular?from=gastos');
     });
 
     it('should not duplicate the slash when the base ends with one', () => {
@@ -21,7 +21,9 @@ describe('exchange-links.util', () => {
   describe('resolveSafeNextPath', () => {
     it('should accept internal paths', () => {
       expect(resolveSafeNextPath('/comparar')).toBe('/comparar');
-      expect(resolveSafeNextPath('/comparar/abc-123')).toBe('/comparar/abc-123');
+      expect(resolveSafeNextPath('/comparar/abc-123')).toBe(
+        '/comparar/abc-123',
+      );
     });
 
     it('should reject anything that can leave the app', () => {

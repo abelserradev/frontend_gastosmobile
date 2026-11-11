@@ -12,7 +12,10 @@ export const requiresPasswordGuard: CanActivateFn = (_route, state) => {
   const router = inject(Router);
   if (!auth.hasSession()) {
     const next = resolveSafeNextPath(state.url);
-    return router.createUrlTree(['/login'], next ? { queryParams: { next } } : {});
+    return router.createUrlTree(
+      ['/login'],
+      next ? { queryParams: { next } } : {},
+    );
   }
   if (!auth.hasPassword()) {
     return router.createUrlTree(['/setup-password']);
