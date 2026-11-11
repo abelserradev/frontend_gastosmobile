@@ -30,8 +30,9 @@ export class ExpenseComparisonDetailModalComponent implements OnChanges {
   private readonly comparisonsApi = inject(PaymentComparisonApiService);
   private readonly injector = inject(Injector);
 
-  readonly dialog =
-    viewChild<ElementRef<HTMLDialogElement>>('comparisonDetailDialog');
+  readonly dialog = viewChild<ElementRef<HTMLDialogElement>>(
+    'comparisonDetailDialog',
+  );
 
   readonly open = input.required<boolean>();
   readonly expenseId = input<string | null>(null);
