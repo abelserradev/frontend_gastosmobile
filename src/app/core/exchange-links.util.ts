@@ -9,7 +9,9 @@ export function buildExchangeCalculatorUrl(exchangePublicUrl: string): string {
 }
 
 /** `?next=` arrives from external links (Exchange web), so it is untrusted input. */
-export function resolveSafeNextPath(raw: string | null | undefined): string | null {
+export function resolveSafeNextPath(
+  raw: string | null | undefined,
+): string | null {
   if (!raw || !SAFE_NEXT_PATH.test(raw)) {
     return null;
   }

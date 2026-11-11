@@ -93,7 +93,8 @@ export class LoginPageComponent implements OnInit {
         const requestedPath = resolveSafeNextPath(
           this.route.snapshot.queryParamMap.get('next'),
         );
-        const target = path === '/expenses' && requestedPath ? requestedPath : path;
+        const target =
+          path === '/expenses' && requestedPath ? requestedPath : path;
         this.router.navigateByUrl(target).catch(() => undefined);
       },
       error: (err: unknown) => {

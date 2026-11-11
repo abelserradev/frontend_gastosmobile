@@ -132,9 +132,7 @@ export class PaymentComparisonApiService {
     );
   }
 
-  getExpenseComparison(
-    expenseId: string,
-  ): Observable<ExpenseComparisonDetail> {
+  getExpenseComparison(expenseId: string): Observable<ExpenseComparisonDetail> {
     return this.http.get<ExpenseComparisonDetail>(
       `${this.base}/me/expenses/${expenseId}/comparison`,
     );

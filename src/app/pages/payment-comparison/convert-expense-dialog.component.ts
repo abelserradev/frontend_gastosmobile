@@ -13,7 +13,10 @@ import {
   viewChild,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import type { CategoryDraft, UserProfile } from '../../core/app-context.service';
+import type {
+  CategoryDraft,
+  UserProfile,
+} from '../../core/app-context.service';
 import { todayYmdCaracas } from '../../core/caracas-date';
 import type { ComparisonOptionV1 } from '../../core/payment-comparison-api.service';
 import { labelOptionId } from '../../core/payment-comparison-display.util';
