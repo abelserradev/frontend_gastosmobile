@@ -22,7 +22,7 @@ ENV SECRET_API_KEY=${SECRET_API_KEY}
 
 RUN pnpm run build
 
-FROM nginx:1.27-alpine
+FROM nginx:1.30.7-alpine
 
 COPY nginx.default.conf /etc/nginx/conf.d/default.conf
 COPY --from=build /app/dist/web/browser /usr/share/nginx/html
