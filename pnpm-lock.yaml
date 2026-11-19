@@ -44,19 +44,19 @@ importers:
         version: 20.3.43(9cee555216cdc24d9825631f60a36b12)
       '@capacitor-firebase/authentication':
         specifier: ^8.6.0
-        version: 8.6.0(@capacitor/core@8.6.0)(firebase@12.19.0)
+        version: 8.6.0(@capacitor/core@8.6.2)(firebase@12.19.0)
       '@capacitor/android':
         specifier: ^8.5.3
-        version: 8.6.0(@capacitor/core@8.6.0)
+        version: 8.6.0(@capacitor/core@8.6.2)
       '@capacitor/cli':
         specifier: ^8.5.3
         version: 8.6.0
       '@capacitor/core':
-        specifier: ^8.5.3
-        version: 8.6.0
+        specifier: ^8.6.2
+        version: 8.6.2
       '@capacitor/share':
         specifier: ^8.0.3
-        version: 8.0.3(@capacitor/core@8.6.0)
+        version: 8.0.3(@capacitor/core@8.6.2)
       chart.js:
         specifier: ^4.6.1
         version: 4.6.1
@@ -1040,8 +1040,8 @@ packages:
     engines: {node: '>=22.0.0'}
     hasBin: true
 
-  '@capacitor/core@8.6.0':
-    resolution: {integrity: sha512-9F2zzuGYTJu+wqmQSEmqnFBfGrhC/njjMCfmxbvg9mq8xJT4wNh5pxbMFZxvW/yDhYJWPEBFQxeqzfo1gKrvxg==}
+  '@capacitor/core@8.6.2':
+    resolution: {integrity: sha512-UEb9crRuqEAe2Iu2eGOEuQ8rLQxpwg7ZZIpl17UJoytEpnV1e4oXXW0K7yYS2NsCOGmJjyLeKjNlgG7tkAoX8g==}
 
   '@capacitor/share@8.0.3':
     resolution: {integrity: sha512-gnvZBV1NPu2B8vd1UKncR56G15ueHd0aZLqgDov++t3SmTBG9Q0VrAZ1VnHn5stxlmglVaTb4RwopMgbpLzroA==}
@@ -4779,6 +4779,7 @@ packages:
   postcss-selector-parser@7.2.1:
     resolution: {integrity: sha512-GwxlMgTTXwIom+ebC7an3k6RaJDwklRQQnfiXsLPGicu8FYV/k/+1/9YY2OU2+r938H2t4X0TDxoif+HP2rjzQ==}
     engines: {node: '>=4'}
+    deprecated: Double-escapes CSS Modules class names (#362). Use 7.2.1.
 
   postcss-value-parser@4.2.0:
     resolution: {integrity: sha512-1NNCs6uurfkVbeXG4S8JFT9t19m45ICnif8zWLd5oPSZ50QnwMfK+H3jv408d4jw/7Bttv5axS5IiHoLaVNHeQ==}
@@ -6950,15 +6951,15 @@ snapshots:
       '@babel/helper-string-parser': 7.29.14
       '@babel/helper-validator-identifier': 7.29.7
 
-  '@capacitor-firebase/authentication@8.6.0(@capacitor/core@8.6.0)(firebase@12.19.0)':
+  '@capacitor-firebase/authentication@8.6.0(@capacitor/core@8.6.2)(firebase@12.19.0)':
     dependencies:
-      '@capacitor/core': 8.6.0
+      '@capacitor/core': 8.6.2
     optionalDependencies:
       firebase: 12.19.0
 
-  '@capacitor/android@8.6.0(@capacitor/core@8.6.0)':
+  '@capacitor/android@8.6.0(@capacitor/core@8.6.2)':
     dependencies:
-      '@capacitor/core': 8.6.0
+      '@capacitor/core': 8.6.2
 
   '@capacitor/cli@8.6.0':
     dependencies:
@@ -6983,13 +6984,13 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@capacitor/core@8.6.0':
+  '@capacitor/core@8.6.2':
     dependencies:
       tslib: 2.9.1
 
-  '@capacitor/share@8.0.3(@capacitor/core@8.6.0)':
+  '@capacitor/share@8.0.3(@capacitor/core@8.6.2)':
     dependencies:
-      '@capacitor/core': 8.6.0
+      '@capacitor/core': 8.6.2
 
   '@colors/colors@1.5.0': {}
 
